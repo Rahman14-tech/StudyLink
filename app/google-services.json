@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1044951070196",
+    "project_id": "studylink-b71ef",
+    "storage_bucket": "studylink-b71ef.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1044951070196:android:8b87e820974476f39475a1",
+        "android_client_info": {
+          "package_name": "com.example.studylink"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPkkiJes4KWwrd6GDCfgPULOOz0CsRQWM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

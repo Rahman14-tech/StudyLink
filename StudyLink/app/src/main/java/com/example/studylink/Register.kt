@@ -70,6 +70,9 @@ fun RegisterScreen(navController: NavHostController){
     var email by remember {
         mutableStateOf(TextFieldValue(""))
     }
+    var FullName by remember {
+        mutableStateOf(TextFieldValue(""))
+    }
     var password by remember {
         mutableStateOf(TextFieldValue(""))
     }
@@ -87,12 +90,26 @@ fun RegisterScreen(navController: NavHostController){
                     Text(text = "Link", fontSize = 40.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.textBrush(brush2))
                 }
                 Card(modifier = Modifier
-                    .fillMaxHeight(0.8f)
+                    .fillMaxHeight(0.85f)
                     .fillMaxWidth(0.8f), shape = RoundedCornerShape(10.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
                     Column(modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 5.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(text = "Sign Up", fontWeight = FontWeight.ExtraBold, fontSize = 30.sp, textAlign = TextAlign.Center)
+                    }
+                    Text(text = "Full Name", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 25.dp, top = 10.dp))
+                    Column(modifier = Modifier.fillMaxWidth(),horizontalAlignment = Alignment.CenterHorizontally) {
+                        OutlinedTextField(
+                            value = FullName,
+                            onValueChange = {
+                                FullName = it
+                            },
+                            label = { Text(text = "Full Name") },
+                            modifier = Modifier
+                                .fillMaxWidth(0.85f)
+                                .height(65.dp),
+                            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+                        )
                     }
                     Text(text = "Email", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 25.dp, top = 10.dp))
                     Column(modifier = Modifier.fillMaxWidth(),horizontalAlignment = Alignment.CenterHorizontally) {

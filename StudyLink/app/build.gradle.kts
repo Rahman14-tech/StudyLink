@@ -76,4 +76,5 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation ("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-auth-ktx")
+    implementation ("com.alexstyl.swipeablecard:swipeablecard:0.1.0")
 }

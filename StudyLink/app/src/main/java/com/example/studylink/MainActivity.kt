@@ -16,14 +16,33 @@ import androidx.navigation.compose.rememberNavController
 import com.example.studylink.ui.theme.StudyLinkTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 
 lateinit var auth: FirebaseAuth
+lateinit var db: FirebaseFirestore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        var tempAccess = false
         auth = Firebase.auth
+        db = FirebaseFirestore.getInstance()
+        db.collection("Users").get().addOnSuccessListener { queryDocumentSnapshots ->
+            if(!queryDocumentSnapshots.isEmpty){
+                val list = queryDocumentSnapshots.documents
+                for(datum in list){
+                    val c: ProfileFirestore? = datum.toObject(ProfileFirestore::class.java)
+                    if (c != null){
+                        Realusers.add(c)
+                    }
+                }
+                println("ANJAY2 $Realusers")
+                tempAccess = true
+            }
+        }
+
+        
         setContent {
             StudyLinkTheme {
                 val navController = rememberNavController()

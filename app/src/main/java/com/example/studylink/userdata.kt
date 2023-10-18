@@ -7,6 +7,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 
 val currScreen = mutableStateOf(TextFieldValue(""))
 data class ProfileFirestore(
+    val email: String = "",
     val fullName: String = "",
     val imageURL: String = "",
     val strongAt: MutableList<String> = mutableListOf(),

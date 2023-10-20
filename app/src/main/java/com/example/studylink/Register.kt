@@ -1,6 +1,10 @@
 package com.example.studylink
 
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -60,10 +64,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil.annotation.ExperimentalCoilApi
+import com.google.android.gms.tasks.Task
 
 
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
 @Composable
 fun RegisterScreen(navController: NavHostController){
     val Context = LocalContext.current
@@ -79,6 +84,11 @@ fun RegisterScreen(navController: NavHostController){
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     val brush1 = Brush.horizontalGradient(listOf(Color(0xFF2C8DFF), Color(0xFF006DEC)))
     val brush2 = Brush.horizontalGradient(listOf(Color(0xFFF5ED37), Color(0xFFCCC51B)))
+    var photoUri: Uri? by remember { mutableStateOf(null) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        photoUri = uri
+    }
+
     Box(modifier = Modifier
         .fillMaxSize()
         .paint(painterResource(id = R.drawable.background), contentScale = ContentScale.FillBounds)){
@@ -90,7 +100,7 @@ fun RegisterScreen(navController: NavHostController){
                     Text(text = "Link", fontSize = 40.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.textBrush(brush2))
                 }
                 Card(modifier = Modifier
-                    .fillMaxHeight(0.85f)
+                    .fillMaxHeight(0.9f)
                     .fillMaxWidth(0.8f), shape = RoundedCornerShape(10.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
                     Column(modifier = Modifier
                         .fillMaxWidth()
@@ -154,13 +164,38 @@ fun RegisterScreen(navController: NavHostController){
                             colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
                         )
                     }
+                    Column(modifier = Modifier.fillMaxWidth().padding(top = 5.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Button(
+                            onClick = {
+                                launcher.launch(
+                                    PickVisualMediaRequest(
+                                        mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                                Toast.makeText(Context, "Image Successfully Choosen", Toast.LENGTH_SHORT)
+                            }
+                        ) {
+                            Text("Select your Photo")
+                        }
+                    }
                     Column(modifier = Modifier.fillMaxWidth(),horizontalAlignment = Alignment.CenterHorizontally) {
                         Button(
                             onClick = {
                                 println(email.text)
                                 auth.createUserWithEmailAndPassword(email.text, password.text).addOnCompleteListener { task ->
                                     if(task.isSuccessful){
-                                        Toast.makeText(Context, "YEAHH BUDDYY", Toast.LENGTH_LONG).show()
+                                        val tempMut = mutableListOf<String>()
+                                        photoUri?.let {
+                                            val resAnjay = StorageUtil.uploadToStorage(
+                                                uri = it,
+                                                context = Context,
+                                                type = "image",
+                                                email = email.text,
+                                                fullName = FullName.text,
+                                                cont = Context
+                                            )
+                                        }
+
                                     }else{
                                         Toast.makeText(Context, "Registration Failed", Toast.LENGTH_LONG).show()
                                     }

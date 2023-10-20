@@ -182,24 +182,34 @@ fun RegisterScreen(navController: NavHostController){
                         Button(
                             onClick = {
                                 println(email.text)
-                                auth.createUserWithEmailAndPassword(email.text, password.text).addOnCompleteListener { task ->
-                                    if(task.isSuccessful){
-                                        val tempMut = mutableListOf<String>()
-                                        photoUri?.let {
-                                            val resAnjay = StorageUtil.uploadToStorage(
-                                                uri = it,
-                                                context = Context,
-                                                type = "image",
-                                                email = email.text,
-                                                fullName = FullName.text,
-                                                cont = Context
-                                            )
-                                        }
+                                if(email.text.isNotEmpty() && password.text.isNotEmpty()){
+                                    auth.createUserWithEmailAndPassword(email.text, password.text).addOnCompleteListener { task ->
+                                        if(task.isSuccessful){
+                                            val tempMut = mutableListOf<String>()
+                                            if(photoUri != null) {
+                                                photoUri?.let {
+                                                    StorageUtil.uploadToStorage(
+                                                        uri = it,
+                                                        context = Context,
+                                                        type = "image",
+                                                        email = email.text,
+                                                        fullName = FullName.text,
+                                                        cont = Context,
+                                                        pass = password.text,
+                                                    )
+                                                }
+                                            }else{
+                                                Toast.makeText(Context, "Photo is not being choose", Toast.LENGTH_LONG).show()
+                                            }
 
-                                    }else{
-                                        Toast.makeText(Context, "Registration Failed", Toast.LENGTH_LONG).show()
+                                        }else{
+                                            Toast.makeText(Context, "Registration Failed", Toast.LENGTH_LONG).show()
+                                        }
                                     }
+                                }else{
+                                    Toast.makeText(Context, "All forms must be filled!", Toast.LENGTH_LONG).show()
                                 }
+
                             },
                             shape = RoundedCornerShape(20),
                             modifier = Modifier

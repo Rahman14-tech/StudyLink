@@ -14,7 +14,7 @@ class StorageUtil{
 
     companion object {
 
-        fun uploadToStorage(uri: Uri, context: Context, type: String, email: String, fullName: String, cont: Context): String {
+        fun uploadToStorage(uri: Uri, context: Context, type: String, email: String, fullName: String, cont: Context, pass: String) {
             var anjay = ""
             val storage = Firebase.storage
 
@@ -43,26 +43,27 @@ class StorageUtil{
                         Toast.LENGTH_SHORT
                     ).show()
                 }.addOnSuccessListener { taskSnapshot ->
-                    spaceRef.downloadUrl.addOnSuccessListener {
-                        db.collection("Users").add(hashMapOf(
-                            "email" to email,
-                            "fullName" to fullName,
-                            "imageURl" to it.toString(),
-                            "strongAt" to mutableListOf<String>(),
-                            "wantStudy" to mutableListOf<String>(),
-                        )).addOnSuccessListener {
-                            Toast.makeText(cont, "Registration Success", Toast.LENGTH_LONG).show()
-                            tempUrl.value = TextFieldValue("")
-                        }.addOnFailureListener{
-                            Toast.makeText(cont, "Registration Failed", Toast.LENGTH_LONG).show()
-                            tempUrl.value = TextFieldValue("")
+                    if(email.isNotEmpty() && fullName.isNotEmpty() && pass.isNotEmpty()) {
+                        spaceRef.downloadUrl.addOnSuccessListener {
+                            db.collection("Users").add(hashMapOf(
+                                "email" to email,
+                                "fullName" to fullName,
+                                "imageURl" to it.toString(),
+                                "strongAt" to mutableListOf<String>(),
+                                "wantStudy" to mutableListOf<String>(),
+                            )).addOnSuccessListener {
+                                Toast.makeText(cont, "Registration Success", Toast.LENGTH_LONG).show()
+                                tempUrl.value = TextFieldValue("")
+                            }.addOnFailureListener{
+                                Toast.makeText(cont, "Registration Failed", Toast.LENGTH_LONG).show()
+                                tempUrl.value = TextFieldValue("")
+                            }
                         }
+                    }else{
+                        Toast.makeText(cont, "All forms must be filled first", Toast.LENGTH_LONG).show()
                     }
                 }
             }
-
-
-            return anjay
         }
 
     }

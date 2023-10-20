@@ -39,6 +39,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 
+object UserProfile {
+    const val route = "user_profile"
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +60,9 @@ fun BottomBar(navController: NavHostController){
                 }
                 composable(Dashboard.route){
                     DashboardScreen(navController = navController)
+                }
+                composable(UserProfile.route){
+                    ProfileScreen(navController = navController)
                 }
             }
         }
@@ -79,7 +86,7 @@ fun BottomContent(navController: NavHostController){
                 NavigationBarItem(selected = false , onClick = { /*TODO*/ }, icon = { Icon(imageVector = Icons.Outlined.Chat, contentDescription = "", tint = Color.Black, modifier = Modifier.size(30.dp)) })
                 NavigationBarItem(selected = true , onClick = { /*TODO*/ }, icon = { Icon(imageVector = Icons.Outlined.Home, contentDescription = "", tint = Color.Black, modifier = Modifier.size(30.dp)) })
                 NavigationBarItem(selected = false , onClick = { /*TODO*/ }, icon = { Icon(imageVector = Icons.Outlined.Group, contentDescription = "", tint = Color.Black, modifier = Modifier.size(30.dp)) })
-                NavigationBarItem(selected = false , onClick = { /*TODO*/ }, icon = { Icon(imageVector = Icons.Outlined.Settings, contentDescription = "", tint = Color.Black, modifier = Modifier.size(30.dp)) })
+                NavigationBarItem(selected = false , onClick = { navController.navigate(UserProfile.route)   }, icon = { Icon(imageVector = Icons.Outlined.Settings, contentDescription = "", tint = Color.Black, modifier = Modifier.size(30.dp)) })
 
             }
         }

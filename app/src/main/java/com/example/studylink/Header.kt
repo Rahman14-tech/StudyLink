@@ -31,35 +31,52 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun Header () {
-    val brush1 = Brush.horizontalGradient(listOf(Color(0xFF2C8DFF), Color(0xFF006DEC)))
-    val brush2 = Brush.horizontalGradient(listOf(Color(0xFFF5ED37), Color(0xFFCCC51B)))
-    Card(modifier = Modifier.fillMaxWidth().background(color = Color.White), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)) {
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 0.1.dp)
-            .background(color = Color.White)
-            ) {
-            Row(modifier = Modifier
-                .fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
-                Row {
+fun Header (headerId: String) {
+    when (headerId) {
+         "dashboard" -> {
+            val brush1 = Brush.horizontalGradient(listOf(Color(0xFF2C8DFF), Color(0xFF006DEC)))
+            val brush2 = Brush.horizontalGradient(listOf(Color(0xFFF5ED37), Color(0xFFCCC51B)))
+            Card(modifier = Modifier.fillMaxWidth().background(color = Color.White), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)) {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 0.1.dp)
+                    .background(color = Color.White)
+                ) {
+                    Row(modifier = Modifier
+                        .fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
+                        Row {
 
-                }
-                Row(modifier = Modifier.padding(10.dp)) {
-                    Text(text = "Study", modifier = Modifier.textBrush(brush1), fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
-                    Text(text = "Link", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.textBrush(brush2))
-                }
-                Row () {
-                    IconButton(
-                        onClick = {
-//                        Toast.makeText(contextForToast, "Click!", Toast.LENGTH_SHORT).show()
                         }
-                    ) {
-                        Icon(imageVector = Icons.Outlined.Tune, contentDescription = "", tint = Color.Black, modifier = Modifier.size(38.dp).padding(end = 20.dp, top = 10.dp))
-                    }
+                        Row(modifier = Modifier.padding(10.dp)) {
+                            Text(text = "Study", modifier = Modifier.textBrush(brush1), fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
+                            Text(text = "Link", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.textBrush(brush2))
+                        }
+                        Row () {
+                            IconButton(
+                                onClick = {
+//                        Toast.makeText(contextForToast, "Click!", Toast.LENGTH_SHORT).show()
+                                }
+                            ) {
+                                Icon(imageVector = Icons.Outlined.Tune, contentDescription = "", tint = Color.Black, modifier = Modifier.size(38.dp).padding(end = 20.dp, top = 10.dp))
+                            }
 
+                        }
+                    }
                 }
             }
         }
+        "profile" -> {
+
+        }
+        "chat" -> {
+
+        }
+        "groupchat" -> {
+
+        }
+        "qna" -> {
+
+        }
     }
+
 }

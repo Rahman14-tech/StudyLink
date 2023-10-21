@@ -73,7 +73,7 @@ fun DashboardScreen (navController: NavHostController) {
         Column(modifier = Modifier
             .fillMaxSize()
             .background(color = Color.White), ) {
-            Header()
+            Header("dashboard")
             Column(modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 15.dp)) {

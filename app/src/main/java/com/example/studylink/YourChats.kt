@@ -81,16 +81,8 @@ fun YourChatScreen(navController: NavHostController){
         Header("YourChatScreen")
         LazyColumn(){
             item{
-                YourChatsCard()
-                YourChatsCard()
-                YourChatsCard()
-                YourChatsCard()
-                YourChatsCard()
-                YourChatsCard()
-                YourChatsCard()
-                YourChatsCard()
-                YourChatsCard()
 
+                YourChatsCard()
             }
         }
 

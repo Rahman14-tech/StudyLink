@@ -47,7 +47,7 @@ fun BottomBar(navController: NavHostController){
         Box(modifier = Modifier
             .padding(it)
             .fillMaxWidth()){
-            NavHost(navController = navController, startDestination = Login.route){
+            NavHost(navController = navController, startDestination = Dashboard.route){
                 composable(Login.route){
                     LoginScreen(navController = navController)
                 }
@@ -56,6 +56,9 @@ fun BottomBar(navController: NavHostController){
                 }
                 composable(Dashboard.route){
                     DashboardScreen(navController = navController)
+                }
+                composable(YourChats.route){
+                    YourChatScreen(navController = navController)
                 }
             }
         }
@@ -73,7 +76,9 @@ fun BottomContent(navController: NavHostController){
 
     }
     AnimatedVisibility(visible = bottomBarState.value) {
-        Card( modifier = Modifier.fillMaxHeight(0.07f).background(color = Color.White), elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)) {
+        Card( modifier = Modifier
+            .fillMaxHeight(0.07f)
+            .background(color = Color.White), elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)) {
             NavigationBar() {
                 NavigationBarItem(selected = false , onClick = { /*TODO*/ }, icon = { Icon(imageVector = Icons.Outlined.QuestionAnswer, contentDescription = "", tint = Color.Black, modifier = Modifier.size(30.dp)) })
                 NavigationBarItem(selected = false , onClick = { /*TODO*/ }, icon = { Icon(imageVector = Icons.Outlined.Chat, contentDescription = "", tint = Color.Black, modifier = Modifier.size(30.dp)) })

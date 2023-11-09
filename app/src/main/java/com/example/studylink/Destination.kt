@@ -23,3 +23,10 @@ object Dashboard: Destinations{
     override val icon: Int = R.drawable.home
     override val title: String = "Dashboard"
 }
+
+object YourChats: Destinations{
+    override val route: String = "YourChats"
+    override val icon: Int = R.drawable.home
+    override val title: String = "YourChat"
+}
+

@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 
+
 val currUser = mutableStateOf(TextFieldValue(""))
 val tempUrl = mutableStateOf(TextFieldValue(""))
 data class ProfileFirestore(
@@ -14,6 +15,13 @@ data class ProfileFirestore(
     val strongAt: MutableList<String> = mutableListOf(),
     val wantStudy: MutableList<String> = mutableListOf()
 )
+
+data class YourChatsType(
+    val FkUsers: MutableList<String> = mutableListOf(),
+    var id: String = "",
+)
 val Realusers = mutableStateListOf<ProfileFirestore>(
 
 )
+
+var Filteredusers = mutableStateListOf<ProfileFirestore>()

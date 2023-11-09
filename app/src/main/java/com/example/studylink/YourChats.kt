@@ -18,6 +18,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,9 +33,29 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.google.firebase.firestore.ktx.toObject
+
+val tempTheChat = mutableStateListOf<YourChatsType>()
+
+@Composable
+fun GetChatData(){
+    db.collection("Chats").get().addOnSuccessListener { queryDocumentSnapshots ->
+        if(!queryDocumentSnapshots.isEmpty){
+            val list = queryDocumentSnapshots.documents
+            for(datum in list){
+                var c: YourChatsType? = datum.toObject(YourChatsType::class.java)
+                c?.id = datum.id
+                if( c != null){
+                    println("Coba snapshot $c")
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun YourChatsCard(){
+    GetChatData()
     Card(modifier = Modifier
         .fillMaxWidth()
         .background(color = Color.White)
@@ -81,7 +104,6 @@ fun YourChatScreen(navController: NavHostController){
         Header("YourChatScreen")
         LazyColumn(){
             item{
-
                 YourChatsCard()
             }
         }

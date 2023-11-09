@@ -35,6 +35,7 @@ class MainActivity : ComponentActivity() {
                     val c: ProfileFirestore? = datum.toObject(ProfileFirestore::class.java)
                     if (c != null){
                         Realusers.add(c)
+                        Filteredusers.add(c)
                     }
                 }
                 println("ANJAY2 $Realusers")

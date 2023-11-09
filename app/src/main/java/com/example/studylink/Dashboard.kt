@@ -60,10 +60,10 @@ import kotlin.math.log
 @OptIn(ExperimentalSwipeableCardApi::class)
 @Composable
 fun DashboardScreen (navController: NavHostController) {
-    val states = Realusers.reversed().map { it to rememberSwipeableCardState() }
+    val states =  Filteredusers.filter { it.email != currUser.value.text }.reversed().map { it to rememberSwipeableCardState() }
     var nameindex by remember { mutableStateOf(0) }
     val context = LocalContext.current
-    if(Realusers.size == 0){
+    if(Filteredusers.size == 0){
         Column(modifier = Modifier
             .fillMaxSize()
             .background(color = Color.White), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {

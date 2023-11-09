@@ -94,21 +94,11 @@ fun dashboard(){
                             .size(38.dp)
                             .padding(end = 20.dp, top = 10.dp))
                     }
-                    Row(modifier = Modifier.padding(10.dp)) {
-                        Text(text = "Study", modifier = Modifier.textBrush(brush1), fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
-                        Text(text = "Link", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.textBrush(brush2))
-                    }
-                    Row () {
-                        IconButton(
-                            onClick = {
-//                        Toast.makeText(contextForToast, "Click!", Toast.LENGTH_SHORT).show()
-                            }
-                        ) {
-                            Icon(imageVector = Icons.Outlined.Tune, contentDescription = "", tint = Color.Black, modifier = Modifier.size(38.dp).padding(end = 20.dp, top = 10.dp))
-                        }
-
-                    }
                 }
+            }
+            Row(modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp), horizontalArrangement = Arrangement.SpaceAround) {
+                Text(text = "Personal", fontSize = 15.sp, fontWeight = FontWeight.Medium)
+                Text(text = "Group", fontSize = 15.sp, fontWeight = FontWeight.Medium)
             }
         }
     }

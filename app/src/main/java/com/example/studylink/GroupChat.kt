@@ -46,16 +46,16 @@ fun GroupChatCard(name: String, subject: String, modifier: Modifier = Modifier )
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFFFC600)),
 
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.default_image_group),
-                    contentDescription = "GroupChat",
-                    modifier = Modifier
-                        .padding(top = 6.dp)
-                        .align(Alignment.CenterHorizontally)
-                        .size(80.dp)
-
-
-                )
+//                Image(
+//                    painter = painterResource(id = R.drawable.default_image_group),
+//                    contentDescription = "GroupChat",
+//                    modifier = Modifier
+//                        .padding(top = 6.dp)
+//                        .align(Alignment.CenterHorizontally)
+//                        .size(80.dp)
+//
+//
+//                )
             }
             Column (
                 verticalArrangement = Arrangement.Top,

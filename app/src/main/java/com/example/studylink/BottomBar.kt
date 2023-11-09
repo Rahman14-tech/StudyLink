@@ -47,7 +47,7 @@ fun BottomBar(navController: NavHostController){
         Box(modifier = Modifier
             .padding(it)
             .fillMaxWidth()){
-            NavHost(navController = navController, startDestination = Dashboard.route){
+            NavHost(navController = navController, startDestination = YourChats.route){
                 composable(Login.route){
                     LoginScreen(navController = navController)
                 }

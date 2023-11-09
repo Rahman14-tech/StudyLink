@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -22,13 +24,19 @@ import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.compose.runtime.remember
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,9 +71,14 @@ fun ProfileScreen(navController: NavHostController) {
                     .background(Color.LightGray)) {
 
                     Row(modifier = Modifier.padding(top = 20.dp, start = 20.dp)) {
+                        val painter = rememberAsyncImagePainter(model = userProfile.imageURL)
                         Image(
-                            painter = painterResource(id = R.drawable.facecom),
-                            contentDescription = "Temp Image"
+                            painter = painter,
+                            contentDescription = "User Image",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape)
                         )
                         Column {
                             Row() {
@@ -100,6 +113,13 @@ fun ProfileScreen(navController: NavHostController) {
                             Text(text = userProfile.email, fontSize = 20.sp)
                         }
                         Text(text = "\nEmail", fontSize = 20.sp)
+                        Divider(color = Color.Black, thickness = 1.dp)
+                        Spacer(modifier = Modifier.height(15.dp))
+
+                        Row {
+                            Text(text = "I'm strong at ${userProfile.strongAt}, and I want to study ${userProfile.wantStudy}", fontSize = 20.sp)
+                        }
+                        Text(text = "\nBio", fontSize = 20.sp)
                         Divider(color = Color.Black, thickness = 1.dp)
                     }
                 }

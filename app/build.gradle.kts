@@ -78,4 +78,8 @@ dependencies {
     implementation ("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation ("com.alexstyl.swipeablecard:swipeablecard:0.1.0")
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
+    implementation ("com.github.bumptech.glide:okhttp3-integration:4.12.0")
+
 }

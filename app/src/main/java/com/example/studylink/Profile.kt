@@ -2,12 +2,17 @@ package com.example.studylink
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -38,11 +43,11 @@ fun ProfileScreen(navController: NavHostController) {
         topBar = {
             TopAppBar(
                 colors = topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.inverseSurface,
                 ),
                 title = {
-                    Text("Your Profile")
+                    Text("Your Profile", fontWeight = FontWeight.Bold)
                 }
             )
         }
@@ -53,18 +58,68 @@ fun ProfileScreen(navController: NavHostController) {
                 .padding(contentPadding) // Add padding to the entire profile content
         ) {
             if (userProfile != null) {
-                Row(modifier = Modifier.padding(top = 20.dp, start = 20.dp)) {
-                    Image(painter = painterResource(id = R.drawable.facecom), contentDescription = "Temp Image")
-                    Column {
-                        Row() {
-                            Text(text = userProfile.fullName, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.LightGray)) {
+
+                    Row(modifier = Modifier.padding(top = 20.dp, start = 20.dp)) {
+                        Image(
+                            painter = painterResource(id = R.drawable.facecom),
+                            contentDescription = "Temp Image"
+                        )
+                        Column {
+                            Row() {
+                                Text(
+                                    text = userProfile.fullName,
+                                    fontSize = 30.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Text(text = "Online", fontSize = 20.sp)
                         }
-                        Text(text = "Online", fontSize = 20.sp)
                     }
                 }
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                Row(modifier = Modifier.padding(top = 10.dp, start = 10.dp)) {
+                    Text(text = "Account", fontSize = 21.sp, fontWeight = FontWeight.Bold)
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Row {
+                    Column {
+                        Row() {
+                            Text(text = userProfile.fullName, fontSize = 20.sp)
+                        }
+                        Text(text = "\nName", fontSize = 20.sp)
+                        Divider(color = Color.Black, thickness = 1.dp)
+                        Spacer(modifier = Modifier.height(15.dp))
+
+                        Row {
+                            Text(text = userProfile.email, fontSize = 20.sp)
+                        }
+                        Text(text = "\nEmail", fontSize = 20.sp)
+                        Divider(color = Color.Black, thickness = 1.dp)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Box (modifier = Modifier.fillMaxWidth() .height(10.dp)
+                    .background(Color.LightGray)) {
+
+                }
+
+                Row(modifier = Modifier.padding(top = 10.dp, start = 10.dp)) {
+                    Text(text = "Settings", fontSize = 21.sp, fontWeight = FontWeight.Bold)
+                }
+
             } else {
                 Text(text = "User not found")
             }
         }
     }
 }
+
+

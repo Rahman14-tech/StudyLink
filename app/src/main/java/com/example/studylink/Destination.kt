@@ -20,13 +20,26 @@ object Register: Destinations{
 
 object Dashboard: Destinations{
     override val route: String = "Dashboard"
-    override val icon: Int = R.drawable.home
-    override val title: String = "Dashboard"
+    override val icon: Int = R.drawable.searchfriend
+    override val title: String = "Find Friend"
 }
 
 object YourChats: Destinations{
-    override val route: String = "YourChats"
-    override val icon: Int = R.drawable.home
-    override val title: String = "YourChat"
+    override val route: String = "Chats"
+    override val icon: Int = R.drawable.chaticon
+    override val title: String = "Chats"
+}
+
+object QNA: Destinations{
+    override val route: String = "Forum"
+    override val icon: Int = R.drawable.qna
+    override val title: String = "Forum"
+}
+
+object Setting: Destinations{
+    override val route: String = "Setting"
+    override val icon: Int = R.drawable.anprofile
+    override val title: String = "Setting"
+
 }
 

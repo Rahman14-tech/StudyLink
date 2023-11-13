@@ -3,12 +3,14 @@ package com.example.studylink
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Class
@@ -25,13 +27,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -60,6 +66,9 @@ fun BottomBar(navController: NavHostController){
                 composable(YourChats.route){
                     YourChatScreen(navController = navController)
                 }
+                composable(QNA.route){
+                    Forum(navController = navController)
+                }
             }
         }
     }
@@ -75,17 +84,46 @@ fun BottomContent(navController: NavHostController){
         else -> bottomBarState.value = true
 
     }
+    var destinationList = listOf(QNA,Dashboard, YourChats)
     AnimatedVisibility(visible = bottomBarState.value) {
         Card( modifier = Modifier
-            .fillMaxHeight(0.07f)
+            .fillMaxHeight(0.1f)
             .background(color = Color.White), elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)) {
-            NavigationBar() {
-                NavigationBarItem(selected = false , onClick = { /*TODO*/ }, icon = { Icon(imageVector = Icons.Outlined.QuestionAnswer, contentDescription = "", tint = Color.Black, modifier = Modifier.size(30.dp)) })
-                NavigationBarItem(selected = false , onClick = { /*TODO*/ }, icon = { Icon(imageVector = Icons.Outlined.Chat, contentDescription = "", tint = Color.Black, modifier = Modifier.size(30.dp)) })
-                NavigationBarItem(selected = true , onClick = { /*TODO*/ }, icon = { Icon(imageVector = Icons.Outlined.Home, contentDescription = "", tint = Color.Black, modifier = Modifier.size(30.dp)) })
-                NavigationBarItem(selected = false , onClick = { /*TODO*/ }, icon = { Icon(imageVector = Icons.Outlined.Group, contentDescription = "", tint = Color.Black, modifier = Modifier.size(30.dp)) })
-                NavigationBarItem(selected = false , onClick = { /*TODO*/ }, icon = { Icon(imageVector = Icons.Outlined.Settings, contentDescription = "", tint = Color.Black, modifier = Modifier.size(30.dp)) })
-
+            NavigationBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(25.dp)
+                    .clip(RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp))) {
+                destinationList.forEachIndexed{index, destination ->
+                    NavigationBarItem(label = {
+                        if(navBackStackEntry?.destination?.route == destination.route){
+                            Text(
+                                text = destination.title, color = Color.Black
+                            )
+                        }else{
+                            Text(
+                                text = destination.title, color = Color.Gray
+                            )
+                        }
+                        },selected = navBackStackEntry?.destination?.route == destination.route , onClick = {
+                        navController.navigate(destination.route){popUpTo(destination.route) {
+                        inclusive = true
+                    }} }, icon = { if(navBackStackEntry?.destination?.route == destination.route){
+                        Icon(painter = painterResource(id = destination.icon), contentDescription = "",
+                            tint = Color.Unspecified
+                            , modifier = Modifier.fillMaxSize(0.33f)) }else{
+                        Icon(painter = painterResource(id = destination.icon), contentDescription = "",
+                            tint = Color.Gray
+                            , modifier = Modifier.fillMaxSize(0.33f))
+                        }
+                    })
+                }
+                NavigationBarItem(selected = navBackStackEntry?.destination?.route == "Setting" , onClick = {
+                    navController.navigate(Setting.route){popUpTo(Setting.route) {
+                    inclusive = true
+                }} }, icon = { Icon(painter = painterResource(
+                    id = Setting.icon
+                ), contentDescription = "", tint = Color.Unspecified, modifier = Modifier.fillMaxSize(0.55f)) })
             }
         }
 

@@ -67,7 +67,7 @@ fun DashboardScreen (navController: NavHostController) {
         Column(modifier = Modifier
             .fillMaxSize()
             .background(color = Color.White), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Loading...", fontSize = 40.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp))
+            Text(text = "Loading...", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp))
         }
     }else{
         Column(modifier = Modifier
@@ -92,7 +92,6 @@ fun DashboardScreen (navController: NavHostController) {
                         }
                     }
                 }
-
             }
         }
     }
@@ -104,7 +103,7 @@ fun UserCard (modifier: Modifier, prof: ProfileFirestore, nameindex: Int){
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Card (modifier = Modifier
                 .fillMaxHeight(0.9f)
-                .fillMaxWidth(0.85f), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)){
+                .fillMaxWidth(0.9f), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)){
                 Column() {
                     Image(painter = rememberAsyncImagePainter(prof.imageURL), contentDescription = prof.fullName, modifier = Modifier
                         .fillMaxHeight(0.6f)
@@ -114,14 +113,16 @@ fun UserCard (modifier: Modifier, prof: ProfileFirestore, nameindex: Int){
                 Column(modifier = Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(), verticalArrangement = Arrangement.Bottom) {
-                    Text(text = Realusers[nameindex].fullName, color = Color.Black, fontSize = 25.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 25.dp, bottom = 20.dp))
+                    Text(text = Realusers[nameindex].fullName, color = Color.Black, fontSize = 25.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 25.dp, bottom = 20.dp, top = 5.dp))
                     Row(modifier = Modifier.padding( bottom = 15.dp)) {
                         Text(text = "+", color = Color.Black, fontSize = 20.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(start = 25.dp))
                         Realusers[nameindex].strongAt.map {
                             Text(text = "$it", color = Color.Black, fontSize = 20.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(start = 5.dp))
                         }
                     }
-                    Row(modifier = Modifier.fillMaxWidth().padding(bottom = 40.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 40.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                         Row() {
                             Text(
                                 text = "-",

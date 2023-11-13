@@ -48,7 +48,7 @@ class StorageUtil{
                             db.collection("Users").add(hashMapOf(
                                 "email" to email,
                                 "fullName" to fullName,
-                                "imageURl" to it.toString(),
+                                "imageURL" to it.toString(),
                                 "strongAt" to mutableListOf<String>(),
                                 "wantStudy" to mutableListOf<String>(),
                             )).addOnSuccessListener {

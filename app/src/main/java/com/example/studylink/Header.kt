@@ -51,7 +51,7 @@ fun Header (headerId: String) {
 
         }
         "chat" -> {
-
+            chatheader()
         }
         "groupchat" -> {
 
@@ -62,11 +62,40 @@ fun Header (headerId: String) {
     }
 
 }
+@Composable
+fun chatheader(){
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .background(color = Color.White), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)) {
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 0.1.dp)
+            .background(color = Color.White)
+        ) {
+            Row(modifier = Modifier
+                .fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(modifier = Modifier.padding(10.dp)) {
+                    Text(text = "Your Chats", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
+                }
+                Row (modifier = Modifier.padding(end = 5.dp, top = 5.dp)) {
+                    IconButton(
+                        onClick = {
+//                        Toast.makeText(contextForToast, "Click!", Toast.LENGTH_SHORT).show()
+                        }
+                    ) {
+                        Icon(imageVector = Icons.Outlined.Search, contentDescription = "", tint = Color.Black, modifier = Modifier
+                            .size(30.dp))
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun dashboard(){
     val brush1 = Brush.horizontalGradient(listOf(Color(0xFF2C8DFF), Color(0xFF006DEC)))
-    val brush2 = Brush.horizontalGradient(listOf(Color(0xFFF5ED37), Color(0xFFCCC51B)))
+    val brush2 = Brush.horizontalGradient(listOf(Color(0xFFFFC600), Color(0xFFF8C105)))
     Card(modifier = Modifier
         .fillMaxWidth()
         .background(color = Color.White), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)) {
@@ -84,19 +113,20 @@ fun dashboard(){
                     Text(text = "Study", modifier = Modifier.textBrush(brush1), fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
                     Text(text = "Link", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.textBrush(brush2))
                 }
-                Row () {
+                Row (modifier = Modifier.padding(end = 15.dp, top = 7.dp)) {
                     IconButton(
                         onClick = {
 //                        Toast.makeText(contextForToast, "Click!", Toast.LENGTH_SHORT).show()
                         }
                     ) {
-                        Icon(imageVector = Icons.Outlined.Tune, contentDescription = "", tint = Color.Black, modifier = Modifier
-                            .size(38.dp)
-                            .padding(end = 20.dp, top = 10.dp))
+                        Icon(painter = painterResource(id = R.drawable.filticon), contentDescription = "", tint = Color.Black, modifier = Modifier
+                            .size(30.dp))
                     }
                 }
             }
-            Row(modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp), horizontalArrangement = Arrangement.SpaceAround) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 10.dp), horizontalArrangement = Arrangement.SpaceAround) {
                 Text(text = "Personal", fontSize = 15.sp, fontWeight = FontWeight.Medium)
                 Text(text = "Group", fontSize = 15.sp, fontWeight = FontWeight.Medium)
             }

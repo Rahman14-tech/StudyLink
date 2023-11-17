@@ -407,7 +407,7 @@ fun SearchBar(modifier: Modifier = Modifier) {
 @Preview(widthDp = 393)
 @Composable
 private fun groupCardPv() {
-    groupcards(people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"), scope = listOf("Math", "Science"), personcount = 7)
+    groupcard(people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"), scope = listOf("Math", "Science"), personcount = 7)
 }
 
 @Preview(widthDp = 393)
@@ -431,15 +431,15 @@ fun testViewGroup() {
     ) {
         Splash()
         SearchBar()
-        groupcards(people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"), scope = listOf("Math", "Science"), personcount = 7)
-        groupcards(people = listOf("Jamal Hussein", "John Doe", "Jane Smith"), scope = listOf("Science", "Astrology", "Economy"), personcount = 5)
-        groupcards(people = listOf("Joanne Canonball", "Jane Smith"), scope = listOf("Science", "Astrology"), personcount = 2)
-        groupcards(people = listOf("Alan Becker", "Jane Smith", "Jane Smith"), scope = listOf("Science", "Geology", "Law"), personcount = 8)
-        groupcards(people = listOf("Jamal Hussein", "John Doe", "Jane Smith"), scope = listOf("Computer Science", "Physics"), personcount = 6)
-        groupcards(people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"), scope = listOf("Math", "Science"), personcount = 7)
-        groupcards(people = listOf("Jamal Hussein", "John Doe", "Jane Smith"), scope = listOf("Science", "Astrology", "Economy"), personcount = 5)
-        groupcards(people = listOf("Joanne Canonball", "Jane Smith"), scope = listOf("Science", "Astrology"), personcount = 2)
-        groupcards(people = listOf("Alan Becker", "Jane Smith", "Jane Smith"), scope = listOf("Science", "Geology", "Law"), personcount = 8)
-        groupcards(people = listOf("Jamal Hussein", "John Doe", "Jane Smith"), scope = listOf("Computer Science", "Physics"), personcount = 6)
+        groupcard(people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"), scope = listOf("Math", "Science"), personcount = 7)
+        groupcard(people = listOf("Jamal Hussein", "John Doe", "Jane Smith"), scope = listOf("Science", "Astrology", "Economy"), personcount = 5)
+        groupcard(people = listOf("Joanne Canonball", "Jane Smith"), scope = listOf("Science", "Astrology"), personcount = 2)
+        groupcard(people = listOf("Alan Becker", "Jane Smith", "Jane Smith"), scope = listOf("Science", "Geology", "Law"), personcount = 8)
+        groupcard(people = listOf("Jamal Hussein", "John Doe", "Jane Smith"), scope = listOf("Computer Science", "Physics"), personcount = 6)
+        groupcard(people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"), scope = listOf("Math", "Science"), personcount = 7)
+        groupcard(people = listOf("Jamal Hussein", "John Doe", "Jane Smith"), scope = listOf("Science", "Astrology", "Economy"), personcount = 5)
+        groupcard(people = listOf("Joanne Canonball", "Jane Smith"), scope = listOf("Science", "Astrology"), personcount = 2)
+        groupcard(people = listOf("Alan Becker", "Jane Smith", "Jane Smith"), scope = listOf("Science", "Geology", "Law"), personcount = 8)
+        groupcard(people = listOf("Jamal Hussein", "John Doe", "Jane Smith"), scope = listOf("Computer Science", "Physics"), personcount = 6)
     }
 }

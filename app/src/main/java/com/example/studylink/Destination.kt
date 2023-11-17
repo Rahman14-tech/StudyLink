@@ -40,6 +40,13 @@ object Setting: Destinations{
     override val route: String = "Setting"
     override val icon: Int = R.drawable.anprofile
     override val title: String = "Setting"
+}
+
+object TheChatS: Destinations{
+    override val route: String = "ChatSystem"
+    override val icon: Int = R.drawable.chaticon
+    override val title: String = "Current Chat"
+    const val ChatId = "ChatId"
 
 }
 

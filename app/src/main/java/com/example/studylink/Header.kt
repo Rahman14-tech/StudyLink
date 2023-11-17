@@ -50,7 +50,7 @@ fun Header (headerId: String) {
         "profile" -> {
 
         }
-        "chat" -> {
+        "YourChatScreen" -> {
             chatheader()
         }
         "groupchat" -> {

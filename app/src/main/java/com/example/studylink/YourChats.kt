@@ -1,5 +1,7 @@
 package com.example.studylink
 
+import android.content.ContentValues
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,9 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,44 +38,41 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.firestore.ktx.toObject
-
-val tempTheChat = mutableStateListOf<YourChatsType>()
 
 
 fun GetChatData(){
-    db.collection("Chats").get().addOnSuccessListener { queryDocumentSnapshots ->
-        if(!queryDocumentSnapshots.isEmpty){
-            val list = queryDocumentSnapshots.documents
+    db.collection("Chats").addSnapshotListener{snapshot, e ->
+        if (e != null) {
+            Log.w(ContentValues.TAG, "Listen failed.", e)
+            return@addSnapshotListener
+        }
+        if(snapshot != null && !snapshot.isEmpty){
+            val list = snapshot.documents
             for(datum in list){
-                var c: YourChatsType? = datum.toObject(YourChatsType::class.java)
-                if(c?.FkUsers?.contains(currUser.value.text) == true){
-                    c?.id = datum.id
-                    if( c != null){
-                        tempTheChat.add(c)
-                    }
+                val c: YourChatsType? = datum.toObject(YourChatsType::class.java)
+                c?.id = datum.id
+                if(c!= null){
+                    tempTheChat.add(c)
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun YourChatsCard(){
-    GetChatData()
-    chatheader()
-    if(tempTheChat.isEmpty()){
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.White), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Image(painter = painterResource(id = R.drawable.nochats), contentDescription = "Loading or Empty Chats")
-            Text(text = "You haven't start any chat yet or refresh it", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp), textAlign = TextAlign.Center)
-        }
-    }else{
+fun YourChatsCardPersonal(datum: YourChatsType, navController: NavHostController){
+        println("OHARANG2 ${datum.id}")
+        val tempPartnerEmail = datum.FkUsers.first{ it != currUser.value.email}
+        val tempPartnerProfile = Realusers.first { it.email == tempPartnerEmail }
         Card(modifier = Modifier
             .fillMaxWidth()
             .background(color = Color.White)
-            .height(80.dp), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)) {
+            .height(80.dp), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp), onClick = {
+            println("OHARANG ${datum.id}")
+            navController?.navigate(TheChatS.route+"/${datum.id}")}) {
             Column(modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 0.1.dp)
@@ -85,7 +86,7 @@ fun YourChatsCard(){
                             .height(60.dp)
                             .width(50.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFC600))) {
                             Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                                Image(painter = painterResource(id = R.drawable.inorin), contentScale = ContentScale.Crop, contentDescription = "Gambar Wong", modifier = Modifier
+                                Image(painter = rememberAsyncImagePainter(tempPartnerProfile.imageURL), contentScale = ContentScale.Crop, contentDescription = "Gambar Wong", modifier = Modifier
                                     .size(60.dp)
                                     .clip(
                                         CircleShape
@@ -93,10 +94,9 @@ fun YourChatsCard(){
                             }
                         }
                         Row {
-                            Image(painter = painterResource(id = R.drawable.wong), contentDescription = "Gambar Wong", modifier = Modifier.size(30.dp))
                             Column {
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text(text = "Minase Inori ", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                                    Text(text = "${tempPartnerProfile.fullName}", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
                                     Text(text = "15:36", fontWeight = FontWeight.Normal,fontSize = 15.sp,)
                                 }
                                 Text(text = "This method should be the easiest, so the way is",
@@ -108,19 +108,29 @@ fun YourChatsCard(){
                 }
             }
         }
-    }
-
 }
 
 @Composable
 fun YourChatScreen(navController: NavHostController){
+    LaunchedEffect(Unit){
+        tempTheChat.removeAll(tempTheChat)
+        GetChatData()
+    }
     Column {
         Header("YourChatScreen")
-        LazyColumn(){
-            item{
-                YourChatsCard()
+        if(tempTheChat.isEmpty()){
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.White), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(painter = painterResource(id = R.drawable.nochats), contentDescription = "Loading or Empty Chats")
+                Text(text = "You haven't start any chat yet or refresh it", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp), textAlign = TextAlign.Center)
+            }
+        }else{
+            LazyColumn(){
+                    itemsIndexed(tempTheChat){_, datum ->
+                        YourChatsCardPersonal(datum, navController)
+                }
             }
         }
-
     }
 }

@@ -85,14 +85,6 @@ fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostContr
                             .requiredHeight(height = 18.dp)
                     )
                 }
-//                Image(
-//                    painter = painterResource(id = R.drawable.backbutton),
-//                    contentDescription = "Back Button",
-//                    modifier = Modifier
-//                        .align(alignment = Alignment.CenterVertically)
-//                        .requiredWidth(width = 10.dp)
-//                        .requiredHeight(height = 18.dp)
-//                )
                 Spacer(modifier = Modifier.width(25.dp))
                 Box(
                     modifier = Modifier
@@ -258,7 +250,6 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId: String) {
     }
 }
 
-
 @SuppressLint("NewApi")
 @Composable
 fun RealTimeClock(): String {
@@ -286,7 +277,7 @@ fun LeftChat(modifier: Modifier = Modifier, message : String) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 5.dp, top = 5.dp, bottom = 5.dp),
+                .padding(start = 8.dp, top = 5.dp, bottom = 5.dp),
             horizontalArrangement = Arrangement.Start,
         ) {
             Card(
@@ -346,7 +337,7 @@ fun RightChat(modifier: Modifier = Modifier, message : String) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(end = 5.dp, top = 5.dp, bottom = 5.dp),
+                .padding(end = 8.dp, top = 5.dp, bottom = 5.dp),
             horizontalArrangement = Arrangement.End,
         ) {
             Text(

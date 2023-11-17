@@ -117,7 +117,7 @@ fun BottomContent(navController: NavHostController){
                         inclusive = true
                     }} }, icon = { if(navBackStackEntry?.destination?.route == destination.route){
                         Icon(painter = painterResource(id = destination.icon), contentDescription = "",
-                            tint = Color.Unspecified
+                            tint = Color.Black
                             , modifier = Modifier.fillMaxSize(0.33f)) }else{
                         Icon(painter = painterResource(id = destination.icon), contentDescription = "",
                             tint = Color.Gray

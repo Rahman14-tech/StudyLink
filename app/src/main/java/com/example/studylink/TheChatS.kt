@@ -1,13 +1,21 @@
 package com.example.studylink
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -16,20 +24,116 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
+import java.text.SimpleDateFormat
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Date
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun SendMessage(TheMessage: String, ChatId: String){
+    val sdf = SimpleDateFormat("dd/M/yyyy HH:mm:ss")
+    val currentDate = sdf.format(Date())
+    db.collection("Chats").document(ChatId).collection("ChatData").add(hashMapOf(
+        "Content" to TheMessage,
+        "TheUser" to currUser.value.email,
+        "TimeSent" to currentDate
+    ))
+}
 
 @Composable
-fun TopNavbar(modifier: Modifier = Modifier, navController: NavController) {
+fun CustomTextField(
+    modifier: Modifier = Modifier,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
+    placeholderText: String = "Placeholder",
+    useClear: Boolean = true,
+    imeAction: ImeAction = ImeAction.Default,
+    singleLine: Boolean = true,
+    maxLine: Int = 1,
+    fontSize: TextUnit = 15.sp,
+    value: MutableState<String>,
+    onValueChange: (String) -> Unit
+) {
+    BasicTextField(
+        modifier = modifier
+            .background(Color(0x00ffffff)),
+        value = value.value,
+        onValueChange = {
+            value.value = it
+            onValueChange(it)
+        },
+        singleLine = singleLine,
+        maxLines = maxLine,
+        textStyle = LocalTextStyle.current.copy(
+            color = Color.Black,
+            fontSize = fontSize
+        ),
+        keyboardOptions = KeyboardOptions(
+            imeAction = imeAction
+        ),
+        decorationBox = { innerTextField ->
+            Row(
+                Modifier.padding(start = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (leadingIcon != null) {
+                    leadingIcon()
+                    Spacer(modifier = Modifier.width(5.dp))
+                }
+                Box(
+                    Modifier.weight(1f)
+                ) {
+                    if (value.value.isEmpty()) {
+                        Text(
+                            placeholderText,
+                            style = LocalTextStyle.current.copy(
+                                color = Color(0xff767676),
+                                fontSize = fontSize
+                            )
+                        )
+                    }
+                    innerTextField()
+                }
+                if (trailingIcon != null) trailingIcon()
+                if (useClear && !value.value.isEmpty()) {
+                    IconButton(
+                        onClick = {
+                            value.value = ""
+                            onValueChange("")
+                        }
+                    ) {
+                        Icon(
+                            Icons.Rounded.Cancel,
+                            null,
+                            tint = Color.DarkGray.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostController, ChatId: String) {
+    val temnpChatPartner = tempTheChat.first{ it.id == ChatId}
+    val tempPartnerEmail = temnpChatPartner.FkUsers.first{ it != currUser.value.email}
+    val tempPartnerData = Realusers.first { it.email ==  tempPartnerEmail}
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -44,7 +148,9 @@ fun TopNavbar(modifier: Modifier = Modifier, navController: NavController) {
         ) {
             Row {
                 TextButton(
-                    onClick = { navController.navigate("YourChats") },
+                    onClick = { navController.navigate(Dashboard.route){popUpTo(YourChats.route) {
+                        inclusive = true
+                    }} },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                     modifier = modifier
                         .size(20.dp)
@@ -59,14 +165,6 @@ fun TopNavbar(modifier: Modifier = Modifier, navController: NavController) {
                             .requiredHeight(height = 18.dp)
                     )
                 }
-//                Image(
-//                    painter = painterResource(id = R.drawable.backbutton),
-//                    contentDescription = "Back Button",
-//                    modifier = Modifier
-//                        .align(alignment = Alignment.CenterVertically)
-//                        .requiredWidth(width = 10.dp)
-//                        .requiredHeight(height = 18.dp)
-//                )
                 Spacer(modifier = Modifier.width(25.dp))
                 Box(
                     modifier = Modifier
@@ -79,14 +177,11 @@ fun TopNavbar(modifier: Modifier = Modifier, navController: NavController) {
                             .clip(shape = CircleShape)
                             .background(color = Color(0xffffc600))
                     )
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_profile_foreground),
-                        contentDescription = "image",
-                        modifier = Modifier
-                            .align(alignment = Alignment.Center)
-                            .clip(shape = CircleShape)
-                            .requiredSize(size = 42.dp)
-                    )
+                    Image(painter = rememberAsyncImagePainter(tempPartnerData.imageURL), contentScale = ContentScale.Crop, contentDescription = "Gambar Wong", modifier = Modifier
+                        .size(42.dp)
+                        .clip(
+                            CircleShape
+                        ))
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(
@@ -96,7 +191,7 @@ fun TopNavbar(modifier: Modifier = Modifier, navController: NavController) {
                         .requiredHeight(height = 40.dp)
                 ) {
                     Text(
-                        text = "James Canonball",
+                        text = tempPartnerData.fullName,
                         color = Color(0xff202020),
                         style = TextStyle(
                             fontSize = 18.sp)
@@ -126,9 +221,10 @@ fun TopNavbar(modifier: Modifier = Modifier, navController: NavController) {
 //    TopNavbar(Modifier)
 //}
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MessageInput(modifier: Modifier = Modifier) {
+fun MessageInput(modifier: Modifier = Modifier, ChatId: String) {
     var inputText = rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
     val displayMetrics = context.resources.displayMetrics
@@ -208,6 +304,7 @@ fun MessageInput(modifier: Modifier = Modifier) {
         }
         TextButton(
             onClick = {
+                SendMessage(TheMessage = inputText.value, ChatId = ChatId)
                 inputText.value = ""
             },
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
@@ -231,12 +328,6 @@ fun MessageInput(modifier: Modifier = Modifier) {
             }
         }
     }
-}
-
-@Preview(widthDp = 393)
-@Composable
-private fun MessageInputPreview() {
-    MessageInput(Modifier)
 }
 
 @SuppressLint("NewApi")
@@ -266,7 +357,7 @@ fun LeftChat(modifier: Modifier = Modifier, message : String) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 5.dp, top = 5.dp, bottom = 5.dp),
+                .padding(start = 8.dp, top = 5.dp, bottom = 5.dp),
             horizontalArrangement = Arrangement.Start,
         ) {
             Card(
@@ -326,7 +417,7 @@ fun RightChat(modifier: Modifier = Modifier, message : String) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(end = 5.dp, top = 5.dp, bottom = 5.dp),
+                .padding(end = 8.dp, top = 5.dp, bottom = 5.dp),
             horizontalArrangement = Arrangement.End,
         ) {
             Text(
@@ -368,71 +459,30 @@ fun RightChat(modifier: Modifier = Modifier, message : String) {
     }
 }
 
-@Preview()
-@Composable
-private fun Group3Preview() {
-    val context = LocalContext.current
-    val displayMetrics = context.resources.displayMetrics
-
-    val screenHeightInDp = with(LocalDensity.current) {
-        displayMetrics.heightPixels.dp / density
-    }
-
-    val maxHeightChatDisplay = (screenHeightInDp - 68.dp)
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                color = Color(0xfff1f1f1)
-            )
-    ) {
-        Box(
-            modifier = Modifier
-                .wrapContentSize()
-                .fillMaxWidth()
-                .padding(top = 2.dp)
-        ) {
-            TopNavbar(navController = rememberNavController())
+fun GetTheChats(ChatId: String){
+    db.collection("Chats").document(ChatId).collection("ChatData").addSnapshotListener{snapshot, e ->
+        if (e != null) {
+            Log.w(ContentValues.TAG, "Listen failed.", e)
+            return@addSnapshotListener
         }
-        Box(
-            modifier = Modifier
-                .heightIn(max = maxHeightChatDisplay)
-                .weight(1f)
-        ) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-            ) {
-                LeftChat(Modifier, "How are you?")
-                RightChat(Modifier, "I'm fine, thank you, and you?")
-                LeftChat(Modifier, "I'm fine too, thank you!")
-                RightChat(Modifier, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.")
-                LeftChat(message = "a")
-                LeftChat(message = "Lorem Ipsum")
-                RightChat(message = "hahahoibafobfabiofbbaobfibaosifoiaboibfbaiobfobaofbaofbaefaibfoiabofibaoifboaibfbaebfioabfoabfibaiofbiob")
-                LeftChat(Modifier, "How are you?")
-                RightChat(Modifier, "I'm fine, thank you, and you?")
-                LeftChat(Modifier, "I'm fine too, thank you!")
-                RightChat(Modifier, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.")
-                LeftChat(message = "a")
-                LeftChat(message = "Lorem Ipsum")
-                RightChat(message = "hahahoibafobfabiofbbaobfibaosifoiaboibfbaiobfobaofbaofbaefaibfoiabofibaoifboaibfbaebfioabfoabfibaiofbiob")
+        if(snapshot != null && !snapshot.isEmpty){
+            ChatData.clear()
+            val list = snapshot.documents
+            for(datum in list){
+                val c: ChatDataType? = datum.toObject(ChatDataType::class.java)
+                if(c!= null){
+                    ChatData.add(c)
+                    println("Testing Anjay $c")
+                }
             }
-        }
-        Box(
-            modifier = Modifier
-                .wrapContentSize()
-                .fillMaxWidth()
-                .padding(top = 2.dp)
-        ) {
-            MessageInput(Modifier)
+            ChatData.sortBy { it.TimeSent }
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Testing(navController: NavController) {
+fun ChatSystem(navController: NavHostController, ChatId: String) {
     val context = LocalContext.current
     val displayMetrics = context.resources.displayMetrics
 
@@ -441,6 +491,11 @@ fun Testing(navController: NavController) {
     }
 
     val maxHeightChatDisplay = (screenHeightInDp - 68.dp)
+
+    LaunchedEffect(Unit){
+        ChatData.clear()
+        GetTheChats(ChatId)
+    }
 
     Column(
         modifier = Modifier
@@ -455,7 +510,7 @@ fun Testing(navController: NavController) {
                 .fillMaxWidth()
                 .padding(top = 2.dp)
         ) {
-            TopNavbar(navController = navController)
+            TopNavbarPersonal(navController = navController, ChatId = ChatId)
         }
         Box(
             modifier = Modifier
@@ -464,22 +519,15 @@ fun Testing(navController: NavController) {
         ) {
             Column(
                 modifier = Modifier
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(rememberScrollState(initial = 14))
             ) {
-                LeftChat(Modifier, "How are you?")
-                RightChat(Modifier, "I'm fine, thank you, and you?")
-                LeftChat(Modifier, "I'm fine too, thank you!")
-                RightChat(Modifier, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.")
-                LeftChat(message = "a")
-                LeftChat(message = "Lorem Ipsum")
-                RightChat(message = "hahahoibafobfabiofbbaobfibaosifoiaboibfbaiobfobaofbaofbaefaibfoiabofibaoifboaibfbaebfioabfoabfibaiofbiob")
-                LeftChat(Modifier, "How are you?")
-                RightChat(Modifier, "I'm fine, thank you, and you?")
-                LeftChat(Modifier, "I'm fine too, thank you!")
-                RightChat(Modifier, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.")
-                LeftChat(message = "a")
-                LeftChat(message = "Lorem Ipsum")
-                RightChat(message = "hahahoibafobfabiofbbaobfibaosifoiaboibfbaiobfobaofbaofbaefaibfoiabofibaoifboaibfbaebfioabfoabfibaiofbiob")
+                ChatData.forEach {
+                    if(it.TheUser != currUser.value.email){
+                        LeftChat(Modifier, it.Content)
+                    }else{
+                        RightChat(Modifier, it.Content)
+                    }
+                }
             }
         }
         Box(
@@ -488,7 +536,7 @@ fun Testing(navController: NavController) {
                 .fillMaxWidth()
                 .padding(top = 2.dp)
         ) {
-            MessageInput()
+            MessageInput(ChatId = ChatId)
         }
     }
 }

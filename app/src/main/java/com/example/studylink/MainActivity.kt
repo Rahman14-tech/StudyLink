@@ -1,5 +1,6 @@
 package com.example.studylink
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -28,9 +29,28 @@ class MainActivity : ComponentActivity() {
         var tempAccess = false
         auth = Firebase.auth
         db = FirebaseFirestore.getInstance()
-        db.collection("Users").get().addOnSuccessListener { queryDocumentSnapshots ->
-            if(!queryDocumentSnapshots.isEmpty){
-                val list = queryDocumentSnapshots.documents
+//        db.collection("Users").get().addOnSuccessListener { queryDocumentSnapshots ->
+//            if(!queryDocumentSnapshots.isEmpty){
+//                val list = queryDocumentSnapshots.documents
+//                for(datum in list){
+//                    val c: ProfileFirestore? = datum.toObject(ProfileFirestore::class.java)
+//                    if (c != null){
+//                        Realusers.add(c)
+//                        Filteredusers.add(c)
+//                    }
+//                }
+//                println("ANJAY2 $Realusers")
+//                tempAccess = true
+//            }
+//        }
+        db.collection("Users").addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                Log.w(TAG, "Listen failed.", e)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && !snapshot.isEmpty) {
+                val list = snapshot.documents
                 for(datum in list){
                     val c: ProfileFirestore? = datum.toObject(ProfileFirestore::class.java)
                     if (c != null){
@@ -38,8 +58,9 @@ class MainActivity : ComponentActivity() {
                         Filteredusers.add(c)
                     }
                 }
-                println("ANJAY2 $Realusers")
-                tempAccess = true
+                Log.d(TAG, "Current data: $Filteredusers")
+            } else {
+                Log.d(TAG, "Current data: null")
             }
         }
 

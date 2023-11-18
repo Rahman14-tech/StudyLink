@@ -50,7 +50,7 @@ fun Header (headerId: String) {
         "profile" -> {
 
         }
-        "chat" -> {
+        "YourChatScreen" -> {
             chatheader()
         }
         "groupchat" -> {
@@ -104,24 +104,32 @@ fun dashboard(){
             .padding(vertical = 0.1.dp)
             .background(color = Color.White)
         ) {
-            Row(modifier = Modifier
-                .fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
-                Row {
-
-                }
-                Row(modifier = Modifier.padding(10.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .align(alignment = Alignment.Center)
+                ) {
                     Text(text = "Study", modifier = Modifier.textBrush(brush1), fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
                     Text(text = "Link", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.textBrush(brush2))
                 }
-                Row (modifier = Modifier.padding(end = 15.dp, top = 7.dp)) {
-                    IconButton(
-                        onClick = {
+                IconButton(
+                    onClick = {
 //                        Toast.makeText(contextForToast, "Click!", Toast.LENGTH_SHORT).show()
-                        }
-                    ) {
-                        Icon(painter = painterResource(id = R.drawable.filticon), contentDescription = "", tint = Color.Black, modifier = Modifier
-                            .size(30.dp))
-                    }
+                    },
+                    modifier = Modifier
+                        .padding(end = 15.dp, top = 7.dp)
+                        .align(alignment = Alignment.CenterEnd)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.filtericon),
+                        contentDescription = "",
+                        tint = Color.Black,
+                        modifier = Modifier
+                            .size(25.dp)
+                    )
                 }
             }
             Row(modifier = Modifier

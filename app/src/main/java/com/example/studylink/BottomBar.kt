@@ -41,9 +41,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +55,7 @@ fun BottomBar(navController: NavHostController){
         Box(modifier = Modifier
             .padding(it)
             .fillMaxWidth()){
-            NavHost(navController = navController, startDestination = YourChats.route){
+            NavHost(navController = navController, startDestination = Login.route){
                 composable(Login.route){
                     LoginScreen(navController = navController)
                 }
@@ -69,6 +71,10 @@ fun BottomBar(navController: NavHostController){
                 composable(QNA.route){
                     Forum(navController = navController)
                 }
+                composable(TheChatS.route+"/{${TheChatS.ChatId}}", arguments = listOf(navArgument(TheChatS.ChatId){type = NavType.StringType})){ currIt ->
+                    val id = requireNotNull(currIt.arguments?.getString(TheChatS.ChatId))
+                    ChatSystem(navController = navController,id)
+                }
             }
         }
     }
@@ -81,6 +87,7 @@ fun BottomContent(navController: NavHostController){
     when (navBackStackEntry?.destination?.route) {
         "Login"->bottomBarState.value = false
         "Register"->bottomBarState.value = false
+        TheChatS.route+"/{${TheChatS.ChatId}}"-> bottomBarState.value = false
         else -> bottomBarState.value = true
 
     }
@@ -110,7 +117,7 @@ fun BottomContent(navController: NavHostController){
                         inclusive = true
                     }} }, icon = { if(navBackStackEntry?.destination?.route == destination.route){
                         Icon(painter = painterResource(id = destination.icon), contentDescription = "",
-                            tint = Color.Unspecified
+                            tint = Color.Black
                             , modifier = Modifier.fillMaxSize(0.33f)) }else{
                         Icon(painter = painterResource(id = destination.icon), contentDescription = "",
                             tint = Color.Gray

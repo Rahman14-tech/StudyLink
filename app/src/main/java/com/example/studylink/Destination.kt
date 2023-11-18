@@ -20,7 +20,7 @@ object Register: Destinations{
 
 object Dashboard: Destinations{
     override val route: String = "Dashboard"
-    override val icon: Int = R.drawable.searchfriend
+    override val icon: Int = R.drawable.searchfriendicon
     override val title: String = "Find Friend"
 }
 
@@ -32,7 +32,7 @@ object YourChats: Destinations{
 
 object QNA: Destinations{
     override val route: String = "Forum"
-    override val icon: Int = R.drawable.qna
+    override val icon: Int = R.drawable.forumicon
     override val title: String = "Forum"
 }
 
@@ -40,6 +40,13 @@ object Setting: Destinations{
     override val route: String = "Setting"
     override val icon: Int = R.drawable.anprofile
     override val title: String = "Setting"
+}
+
+object TheChatS: Destinations{
+    override val route: String = "ChatSystem"
+    override val icon: Int = R.drawable.chaticon
+    override val title: String = "Current Chat"
+    const val ChatId = "ChatId"
 
 }
 

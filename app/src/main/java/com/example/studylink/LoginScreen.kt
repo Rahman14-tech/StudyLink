@@ -141,7 +141,8 @@ fun LoginScreen(navController: NavHostController){
                                 auth.signInWithEmailAndPassword(email.text, password.text).addOnCompleteListener { task ->
                                     if(task.isSuccessful){
                                         Toast.makeText(Context, "Login Successful", Toast.LENGTH_LONG)
-                                        currUser.value = email
+                                        currUser.value = Realusers.first { it.email == email.text }
+                                        removeCurrUser()
                                         navController.navigate(Dashboard.route)
                                     }else{
                                         Toast.makeText(Context, "Credential Invalid", Toast.LENGTH_LONG).show()

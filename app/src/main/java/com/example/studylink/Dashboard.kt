@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,21 +56,29 @@ import com.alexstyl.swipeablecard.ExperimentalSwipeableCardApi
 import com.alexstyl.swipeablecard.rememberSwipeableCardState
 import com.alexstyl.swipeablecard.swipableCard
 import com.google.android.gms.tasks.Tasks
+import kotlinx.coroutines.withTimeout
 import okhttp3.internal.wait
+import java.util.Timer
+import java.util.TimerTask
+import java.util.logging.Handler
 import kotlin.math.log
 @OptIn(ExperimentalSwipeableCardApi::class)
 @Composable
 fun DashboardScreen (navController: NavHostController) {
-    val states =  Filteredusers.filter { it.email != currUser.value.text }.reversed().map { it to rememberSwipeableCardState() }
+    val states =  Filteredusers.reversed().map { it to rememberSwipeableCardState() }
     var nameindex by remember { mutableStateOf(0) }
+    var finfilt by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    if(Filteredusers.size == 0){
+    if(Filteredusers.isEmpty()){
         Column(modifier = Modifier
             .fillMaxSize()
             .background(color = Color.White), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "Loading...", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp))
         }
     }else{
+        for (filtereduser in Filteredusers) {
+            println("Siapa aja tuh $filtereduser")
+        }
         Column(modifier = Modifier
             .fillMaxSize()
             .background(color = Color.White), ) {
@@ -113,10 +122,10 @@ fun UserCard (modifier: Modifier, prof: ProfileFirestore, nameindex: Int){
                 Column(modifier = Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(), verticalArrangement = Arrangement.Bottom) {
-                    Text(text = Realusers[nameindex].fullName, color = Color.Black, fontSize = 25.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 25.dp, bottom = 20.dp, top = 5.dp))
+                    Text(text = Filteredusers[nameindex].fullName, color = Color.Black, fontSize = 25.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 25.dp, bottom = 20.dp, top = 5.dp))
                     Row(modifier = Modifier.padding( bottom = 15.dp)) {
                         Text(text = "+", color = Color.Black, fontSize = 20.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(start = 25.dp))
-                        Realusers[nameindex].strongAt.map {
+                        Filteredusers[nameindex].strongAt.map {
                             Text(text = "$it", color = Color.Black, fontSize = 20.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(start = 5.dp))
                         }
                     }
@@ -131,7 +140,7 @@ fun UserCard (modifier: Modifier, prof: ProfileFirestore, nameindex: Int){
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier.padding(start = 25.dp)
                             )
-                            Realusers[nameindex].wantStudy.map {
+                            Filteredusers[nameindex].wantStudy.map {
                                 Text(
                                     text = "$it",
                                     color = Color.Black,

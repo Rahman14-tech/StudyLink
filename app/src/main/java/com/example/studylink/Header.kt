@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -96,9 +97,11 @@ fun chatheader(){
 fun dashboard(){
     val brush1 = Brush.horizontalGradient(listOf(Color(0xFF2C8DFF), Color(0xFF006DEC)))
     val brush2 = Brush.horizontalGradient(listOf(Color(0xFFFFC600), Color(0xFFF8C105)))
-    Card(modifier = Modifier
+    Box(
+        modifier = Modifier
         .fillMaxWidth()
-        .background(color = Color.White), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)) {
+        .background(color = Color.White)
+    ) {
         Column(modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 0.1.dp)
@@ -107,6 +110,8 @@ fun dashboard(){
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(bottom = 5.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -132,11 +137,14 @@ fun dashboard(){
                     )
                 }
             }
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 10.dp), horizontalArrangement = Arrangement.SpaceAround) {
-                Text(text = "Personal", fontSize = 15.sp, fontWeight = FontWeight.Medium)
-                Text(text = "Group", fontSize = 15.sp, fontWeight = FontWeight.Medium)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 7.dp),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                Text(text = "Personal", fontSize = 17.sp, fontWeight = FontWeight.Medium)
+                Text(text = "Group", fontSize = 17.sp, fontWeight = FontWeight.Medium)
             }
         }
     }

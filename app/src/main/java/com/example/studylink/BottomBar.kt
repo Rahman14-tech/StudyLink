@@ -1,5 +1,7 @@
 package com.example.studylink
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -48,6 +50,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomBar(navController: NavHostController){
@@ -55,7 +58,7 @@ fun BottomBar(navController: NavHostController){
         Box(modifier = Modifier
             .padding(it)
             .fillMaxWidth()){
-            NavHost(navController = navController, startDestination = Login.route){
+            NavHost(navController = navController, startDestination = Dashboard.route){
                 composable(Login.route){
                     LoginScreen(navController = navController)
                 }

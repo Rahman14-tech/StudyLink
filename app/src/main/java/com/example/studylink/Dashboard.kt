@@ -201,25 +201,25 @@ fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, nameindex: 
                             }
                         }
                     }
-                    TextButton(
-                        onClick = {  },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                    Card(
                         modifier = Modifier
                             .requiredSize(size = 55.dp)
                             .offset(x = (-30).dp, y = (-40).dp)
                             .align(alignment = Alignment.BottomEnd)
+                            .clip(shape = CircleShape),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xfff7f7f7))
                     ) {
-                        Box(
+                        TextButton(
+                            onClick = {  },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                             modifier = Modifier
-                                .requiredSize(size = 55.dp)
-                                .clip(shape = CircleShape)
-                                .background(Color(0xfff7f7f7))
+                                .fillMaxSize()
                         ) {
                             Image(
                                 painter = painterResource(R.drawable.staricon),
                                 contentDescription = null,
                                 modifier = Modifier
-                                    .align(alignment = Alignment.Center)
                                     .requiredSize(size = 35.dp)
                             )
                         }

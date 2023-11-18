@@ -56,7 +56,7 @@ fun SendMessage(TheMessage: String, ChatId: String){
 }
 
 @Composable
-private fun CustomTextField(
+fun CustomTextField(
     modifier: Modifier = Modifier,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,

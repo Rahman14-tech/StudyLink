@@ -1,5 +1,6 @@
 package com.example.studylink
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +51,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -307,68 +309,10 @@ fun Splash(modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-private fun CustomTextField(
-    modifier: Modifier = Modifier,
-    leadingIcon: (@Composable () -> Unit)? = null,
-    trailingIcon: (@Composable () -> Unit)? = null,
-    placeholderText: String = "Placeholder"
-) {
-    var inputText = rememberSaveable { mutableStateOf("") }
-    BasicTextField(
-        modifier = modifier
-            .background(Color(0xffededed)),
-        value = inputText.value,
-        onValueChange = {
-            inputText.value = it
-        },
-        singleLine = true,
-        textStyle = LocalTextStyle.current.copy(
-            color = Color.Black,
-            fontSize = 15.sp
-        ),
-        decorationBox = { innerTextField ->
-            Row(
-                Modifier.padding(start = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (leadingIcon != null) leadingIcon()
-                Spacer(modifier = Modifier.width(5.dp))
-                Box(
-                    Modifier.weight(1f)
-                ) {
-                    if (inputText.value.isEmpty()) {
-                        Text(
-                            placeholderText,
-                            style = LocalTextStyle.current.copy(
-                                color = Color(0xff767676),
-                                fontSize = 15.sp
-                            )
-                        )
-                    }
-                    innerTextField()
-                }
-                if (trailingIcon != null) trailingIcon()
-                if (!inputText.value.isEmpty()) {
-                    IconButton(
-                        onClick = {
-                            inputText.value = ""
-                        }
-                    ) {
-                        Icon(
-                            Icons.Rounded.Cancel,
-                            null,
-                            tint = Color.DarkGray.copy(alpha = 0.8f)
-                        )
-                    }
-                }
-            }
-        }
-    )
-}
-
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun SearchBar(modifier: Modifier = Modifier) {
+    var inputText = rememberSaveable { mutableStateOf("") }
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -382,6 +326,10 @@ fun SearchBar(modifier: Modifier = Modifier) {
                 .padding(start = 10.dp, end = 10.dp)
         ) {
             CustomTextField(
+                value = mutableStateOf(inputText.value),
+                onValueChange = {
+                    inputText.value = it
+                },
                 leadingIcon = {
                     Icon(
                         Icons.Filled.Search,
@@ -398,7 +346,9 @@ fun SearchBar(modifier: Modifier = Modifier) {
                     .clip(shape = RoundedCornerShape(16.dp))
                     .height(30.dp)
                     .fillMaxWidth(),
-                placeholderText = "Search Group"
+                placeholderText = "Search Group",
+                useClear = true,
+                imeAction = ImeAction.Search
             )
         }
     }

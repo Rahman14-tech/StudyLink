@@ -28,6 +28,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemColors
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,7 +60,7 @@ fun BottomBar(navController: NavHostController){
         Box(modifier = Modifier
             .padding(it)
             .fillMaxWidth()){
-            NavHost(navController = navController, startDestination = Login.route){
+            NavHost(navController = navController, startDestination = Dashboard.route){
                 composable(Login.route){
                     LoginScreen(navController = navController)
                 }
@@ -104,44 +106,69 @@ fun BottomContent(navController: NavHostController){
     }
     var destinationList = listOf(QNA,Dashboard, YourChats)
     AnimatedVisibility(visible = bottomBarState.value) {
-        Card( modifier = Modifier
-            .fillMaxHeight(0.1f)
-            .background(color = Color.White), elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)) {
+        Card(
+            modifier = Modifier
+                .fillMaxHeight(0.1f),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
             NavigationBar(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .shadow(25.dp)
-                    .clip(RoundedCornerShape(15.dp, 15.dp, 0.dp, 0.dp))) {
-                destinationList.forEachIndexed{index, destination ->
-                    NavigationBarItem(label = {
-                        if(navBackStackEntry?.destination?.route == destination.route){
-                            Text(
-                                text = destination.title, color = Color.Black
-                            )
-                        }else{
-                            Text(
-                                text = destination.title, color = Color.Gray
-                            )
+                    .fillMaxWidth(),
+                containerColor = Color.White
+            ) {
+                destinationList.forEachIndexed{ index, destination ->
+                    NavigationBarItem(
+                        label = {
+                            if(navBackStackEntry?.destination?.route == destination.route){
+                                Text(
+                                    text = destination.title, color = Color.Black
+                                )
+                            } else {
+                                Text(
+                                    text = destination.title, color = Color.Gray
+                                )
+                            }
+                        },
+                        selected = navBackStackEntry?.destination?.route == destination.route,
+                        onClick = {
+                            navController.navigate(destination.route) {
+                                popUpTo(destination.route) { inclusive = true }
+                            }
+                        },
+                        icon = {
+                            if(navBackStackEntry?.destination?.route == destination.route) {
+                                Icon(
+                                    painter = painterResource(id = destination.icon),
+                                    contentDescription = "",
+                                    tint = Color.Black,
+                                    modifier = Modifier.fillMaxSize(0.33f)
+                                )
+                            } else {
+                                Icon(painter = painterResource(id = destination.icon),
+                                    contentDescription = "",
+                                    tint = Color.Gray,
+                                    modifier = Modifier.fillMaxSize(0.33f)
+                                )
+                            }
                         }
-                        },selected = navBackStackEntry?.destination?.route == destination.route , onClick = {
-                        navController.navigate(destination.route){popUpTo(destination.route) {
-                        inclusive = true
-                    }} }, icon = { if(navBackStackEntry?.destination?.route == destination.route){
-                        Icon(painter = painterResource(id = destination.icon), contentDescription = "",
-                            tint = Color.Unspecified
-                            , modifier = Modifier.fillMaxSize(0.33f)) }else{
-                        Icon(painter = painterResource(id = destination.icon), contentDescription = "",
-                            tint = Color.Gray
-                            , modifier = Modifier.fillMaxSize(0.33f))
-                        }
-                    })
+                    )
                 }
-                NavigationBarItem(selected = navBackStackEntry?.destination?.route == "Setting" , onClick = {
-                    navController.navigate(Setting.route){popUpTo(Setting.route) {
-                    inclusive = true
-                }} }, icon = { Icon(painter = painterResource(
-                    id = Setting.icon
-                ), contentDescription = "", tint = Color.Unspecified, modifier = Modifier.fillMaxSize(0.55f)) })
+                NavigationBarItem(
+                    selected = navBackStackEntry?.destination?.route == "Setting" ,
+                    onClick = {
+                        navController.navigate(Setting.route) {
+                            popUpTo(Setting.route) {inclusive = true }
+                        }
+                    },
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = Setting.icon),
+                            contentDescription = "",
+                            tint = Color.Unspecified,
+                            modifier = Modifier.fillMaxSize(0.55f)
+                        )
+                    }
+                )
             }
         }
 

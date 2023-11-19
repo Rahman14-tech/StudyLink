@@ -78,4 +78,6 @@ dependencies {
     implementation ("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation ("com.alexstyl.swipeablecard:swipeablecard:0.1.0")
+    implementation ("com.google.android.exoplayer:exoplayer:2.18.7")
+    implementation ("com.google.mlkit:smart-reply:17.0.2")
 }

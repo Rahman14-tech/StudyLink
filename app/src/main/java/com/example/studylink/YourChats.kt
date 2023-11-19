@@ -65,43 +65,45 @@ fun GetChatData(){
 @Composable
 fun YourChatsCardPersonal(datum: YourChatsType, navController: NavHostController){
         println("OHARANG2 ${datum.id}")
-        val tempPartnerEmail = datum.FkUsers.first{ it != currUser.value.email}
-        val tempPartnerProfile = Realusers.first { it.email == tempPartnerEmail }
-        Card(modifier = Modifier
-            .fillMaxWidth()
-            .background(color = Color.White)
-            .height(80.dp), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp), onClick = {
-            println("OHARANG ${datum.id}")
-            navController?.navigate(TheChatS.route+"/${datum.id}")}) {
-            Column(modifier = Modifier
+        val tempPartnerEmail = datum.FkUsers.firstOrNull{ it != currUser.value.email}
+        val tempPartnerProfile = Realusers.firstOrNull { it.email == tempPartnerEmail }
+        if(tempPartnerEmail != null){
+            Card(modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 0.1.dp)
                 .background(color = Color.White)
-            ) {
-                Row(modifier = Modifier
-                    .padding(vertical = 5.dp)
-                    .fillMaxWidth()) {
-                    Row(modifier = Modifier.padding(10.dp)) {
-                        Card(shape = CircleShape, modifier = Modifier
-                            .height(60.dp)
-                            .width(50.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFC600))) {
-                            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                                Image(painter = rememberAsyncImagePainter(tempPartnerProfile.imageURL), contentScale = ContentScale.Crop, contentDescription = "Gambar Wong", modifier = Modifier
-                                    .size(60.dp)
-                                    .clip(
-                                        CircleShape
-                                    ))
-                            }
-                        }
-                        Row {
-                            Column {
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text(text = "${tempPartnerProfile.fullName}", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                                    Text(text = "15:36", fontWeight = FontWeight.Normal,fontSize = 15.sp,)
+                .height(80.dp), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp), onClick = {
+                println("OHARANG ${datum.id}")
+                navController?.navigate(TheChatS.route+"/${datum.id}")}) {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 0.1.dp)
+                    .background(color = Color.White)
+                ) {
+                    Row(modifier = Modifier
+                        .padding(vertical = 5.dp)
+                        .fillMaxWidth()) {
+                        Row(modifier = Modifier.padding(10.dp)) {
+                            Card(shape = CircleShape, modifier = Modifier
+                                .height(60.dp)
+                                .width(50.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFC600))) {
+                                Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Image(painter = rememberAsyncImagePainter(tempPartnerProfile!!.imageURL), contentScale = ContentScale.Crop, contentDescription = "Gambar Wong", modifier = Modifier
+                                        .size(60.dp)
+                                        .clip(
+                                            CircleShape
+                                        ))
                                 }
-                                Text(text = "This method should be the easiest, so the way is",
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,fontSize = 15.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 5.dp))
+                            }
+                            Row {
+                                Column {
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                        Text(text = "${tempPartnerProfile!!.fullName}", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                                        Text(text = "15:36", fontWeight = FontWeight.Normal,fontSize = 15.sp,)
+                                    }
+                                    Text(text = "This method should be the easiest, so the way is",
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,fontSize = 15.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 5.dp))
+                                }
                             }
                         }
                     }
@@ -118,7 +120,9 @@ fun YourChatScreen(navController: NavHostController){
     }
     Column {
         Header("YourChatScreen")
-        if(tempTheChat.isEmpty()){
+        val tempChat = tempTheChat.filter { it.FkUsers.contains(currUser.value.email) }
+        println("TEMPSS $tempChat")
+        if(tempTheChat.isEmpty() || tempChat.isEmpty()){
             Column(modifier = Modifier
                 .fillMaxSize()
                 .background(color = Color.White), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {

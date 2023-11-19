@@ -50,3 +50,11 @@ object TheChatS: Destinations{
 
 }
 
+object MediaViewer:Destinations{
+    override val route: String = "MediaViewer"
+    override val icon: Int = R.drawable.chaticon
+    override val title: String = "MediaViewer"
+    const val ChatId = "ChatId"
+    const val MediaUri = "MediaUri"
+}
+

@@ -1,5 +1,7 @@
 package com.example.studylink
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -48,6 +50,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomBar(navController: NavHostController){
@@ -75,6 +78,13 @@ fun BottomBar(navController: NavHostController){
                     val id = requireNotNull(currIt.arguments?.getString(TheChatS.ChatId))
                     ChatSystem(navController = navController,id)
                 }
+                composable(MediaViewer.route+"/{${MediaViewer.ChatId}}"+"/{${MediaViewer.MediaUri}}", arguments = listOf(
+                    navArgument(MediaViewer.ChatId){type = NavType.StringType}, navArgument(MediaViewer.MediaUri){type = NavType.StringType}
+                )){currIt ->
+                    val id = requireNotNull(currIt.arguments?.getString(MediaViewer.ChatId))
+                    val mediaUri = requireNotNull(currIt.arguments?.getString(MediaViewer.MediaUri))
+                    MediaViewer(navController = navController, Id = id, MediaUri = mediaUri)
+                }
             }
         }
     }
@@ -88,6 +98,7 @@ fun BottomContent(navController: NavHostController){
         "Login"->bottomBarState.value = false
         "Register"->bottomBarState.value = false
         TheChatS.route+"/{${TheChatS.ChatId}}"-> bottomBarState.value = false
+        MediaViewer.route+"/{${MediaViewer.ChatId}}"+"/{${MediaViewer.MediaUri}}" -> false
         else -> bottomBarState.value = true
 
     }

@@ -1,9 +1,18 @@
 package com.example.studylink
 
+import VideoPlayerScreen
+import android.R.attr.path
 import android.annotation.SuppressLint
+import android.content.ContentResolver
 import android.content.ContentValues
+import android.content.Context
+import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,18 +34,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import java.net.URLConnection
 import java.text.SimpleDateFormat
 import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
+import android.webkit.MimeTypeMap
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun SendMessage(TheMessage: String, ChatId: String){
@@ -45,15 +53,19 @@ fun SendMessage(TheMessage: String, ChatId: String){
     db.collection("Chats").document(ChatId).collection("ChatData").add(hashMapOf(
         "Content" to TheMessage,
         "TheUser" to currUser.value.email,
-        "TimeSent" to currentDate
+        "TimeSent" to currentDate,
+        "MediaType" to "",
+        "ContentMedia" to "",
     ))
 }
+
 
 @Composable
 fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostController, ChatId: String) {
     val temnpChatPartner = tempTheChat.first{ it.id == ChatId}
     val tempPartnerEmail = temnpChatPartner.FkUsers.first{ it != currUser.value.email}
     val tempPartnerData = Realusers.first { it.email ==  tempPartnerEmail}
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -152,7 +164,7 @@ fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostContr
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MessageInput(modifier: Modifier = Modifier, ChatId: String) {
+fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) {
     var inputText = rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
     val displayMetrics = context.resources.displayMetrics
@@ -181,7 +193,11 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId: String) {
         ) {
             Row {
                 TextButton(
-                    onClick = { },
+                    onClick = { launchers.launch(
+                        PickVisualMediaRequest(
+                            mediaType = ActivityResultContracts.PickVisualMedia.ImageAndVideo
+                        )
+                    ) },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                     modifier = modifier
                         .requiredSize(size = 50.dp)
@@ -232,8 +248,10 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId: String) {
         }
         TextButton(
             onClick = {
-                SendMessage(TheMessage = inputText.value, ChatId = ChatId)
-                inputText.value = ""
+                if(inputText.value != ""){
+                    SendMessage(TheMessage = inputText.value, ChatId = ChatId)
+                    inputText.value = ""
+                }
             },
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             modifier = modifier
@@ -269,7 +287,7 @@ fun RealTimeClock(): String {
 }
 
 @Composable
-fun LeftChat(modifier: Modifier = Modifier, message : String) {
+fun LeftChat(modifier: Modifier = Modifier, message : String,timeSent: String) {
     var context = LocalContext.current
     var displayMetrics = context.resources.displayMetrics
 
@@ -278,6 +296,9 @@ fun LeftChat(modifier: Modifier = Modifier, message : String) {
     }
 
     var eightyPercentOfScreenWidth = (screenWidthInDp * 0.8f)
+    var splittedtime = timeSent.split(" ").toTypedArray()
+    var thehour = splittedtime[1]
+    var hournmin = thehour.subSequence(0,5)
 
     Box(
         modifier = modifier
@@ -317,7 +338,7 @@ fun LeftChat(modifier: Modifier = Modifier, message : String) {
                     .background(color = Color.White)
             )
             Text(
-                text = "11:33",
+                text = hournmin.toString(),
                 color = Color.DarkGray,
                 style = TextStyle(fontSize = 12.sp),
                 modifier = Modifier
@@ -328,16 +349,79 @@ fun LeftChat(modifier: Modifier = Modifier, message : String) {
     }
 }
 
+
 @Composable
-fun RightChat(modifier: Modifier = Modifier, message : String) {
+fun MediaLeftChat(ChatId:String, navController: NavHostController,modifier: Modifier = Modifier, MediaContent : String,MediaType:String,timeSent: String) {
     var context = LocalContext.current
     var displayMetrics = context.resources.displayMetrics
 
     var screenWidthInDp = with(LocalDensity.current) {
         displayMetrics.widthPixels.dp / density
     }
-
     var eightyPercentOfScreenWidth = (screenWidthInDp * 0.8f)
+    var splittedtime = timeSent.split(" ").toTypedArray()
+    var thehour = splittedtime[1]
+    var hournmin = thehour.subSequence(0,5)
+        Box(
+            modifier = modifier
+                .fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = 5.dp, top = 5.dp, bottom = 5.dp),
+                horizontalArrangement = Arrangement.Start,
+            ) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    content = {
+                        if (MediaType == "Video") {
+                            VideoPlayerScreen(ChatId = ChatId, navController = navController,MediaContent)
+                        } else if (MediaType == "Image") {
+                            Image(
+                                painter = rememberAsyncImagePainter(MediaContent),
+                                contentDescription = "The Image", modifier = Modifier.size(250.dp)
+                            )
+                        }
+                    },
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .clip(
+                            shape = RoundedCornerShape(
+                                topStart = 0.dp,
+                                topEnd = 8.dp,
+                                bottomStart = 8.dp,
+                                bottomEnd = 8.dp
+                            )
+                        )
+                        .background(color = Color.White)
+                )
+                Text(
+                    text = hournmin.toString(),
+                    color = Color.DarkGray,
+                    style = TextStyle(fontSize = 12.sp),
+                    modifier = Modifier
+                        .align(Alignment.Bottom)
+                        .padding(start = 4.dp, bottom = 4.dp)
+                )
+            }
+        }
+}
+
+@Composable
+fun RightChat(modifier: Modifier = Modifier, message : String,timeSent: String) {
+    var context = LocalContext.current
+    var displayMetrics = context.resources.displayMetrics
+
+    var screenWidthInDp = with(LocalDensity.current) {
+        displayMetrics.widthPixels.dp / density
+    }
+    var eightyPercentOfScreenWidth = (screenWidthInDp * 0.8f)
+    var splittedtime = timeSent.split(" ").toTypedArray()
+    var thehour = splittedtime[1]
+    var hournmin = thehour.subSequence(0,5)
 
     Box(
         modifier = modifier
@@ -350,7 +434,7 @@ fun RightChat(modifier: Modifier = Modifier, message : String) {
             horizontalArrangement = Arrangement.End,
         ) {
             Text(
-                text = "11:23",
+                text = hournmin.toString(),
                 color = Color.DarkGray,
                 style = TextStyle(fontSize = 12.sp),
                 modifier = Modifier
@@ -388,6 +472,64 @@ fun RightChat(modifier: Modifier = Modifier, message : String) {
     }
 }
 
+
+@Composable
+fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Modifier = Modifier, MediaContent : String,MediaType:String,timeSent: String) {
+    var context = LocalContext.current
+    var displayMetrics = context.resources.displayMetrics
+
+    var screenWidthInDp = with(LocalDensity.current) {
+        displayMetrics.widthPixels.dp / density
+    }
+    var eightyPercentOfScreenWidth = (screenWidthInDp * 0.8f)
+    var splittedtime = timeSent.split(" ").toTypedArray()
+    var thehour = splittedtime[1]
+    var hournmin = thehour.subSequence(0,5)
+        Box(
+            modifier = modifier
+                .fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 5.dp, top = 5.dp, bottom = 5.dp),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                Text(
+                    text = hournmin.toString(),
+                    color = Color.DarkGray,
+                    style = TextStyle(fontSize = 12.sp),
+                    modifier = Modifier
+                        .align(Alignment.Bottom)
+                        .padding(end = 4.dp, bottom = 4.dp)
+                )
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xff0066e4)
+                    ),
+                    content = {
+                        if(MediaType == "Video"){
+                            VideoPlayerScreen(ChatId = ChatId, navController = navController,mediaUrl = MediaContent)
+                        }else if(MediaType == "Image"){
+                            Image(painter = rememberAsyncImagePainter(MediaContent), contentDescription = "The Image", modifier = Modifier.size(250.dp).fillMaxHeight())
+                        }
+                    },
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .clip(
+                            shape = RoundedCornerShape(
+                                topStart = 8.dp,
+                                topEnd = 0.dp,
+                                bottomStart = 8.dp,
+                                bottomEnd = 8.dp
+                            )
+                        )
+                        .background(color = Color(0xff0066e4))
+                )
+            }
+        }
+}
+
 fun GetTheChats(ChatId: String){
     db.collection("Chats").document(ChatId).collection("ChatData").addSnapshotListener{snapshot, e ->
         if (e != null) {
@@ -409,6 +551,12 @@ fun GetTheChats(ChatId: String){
     }
 }
 
+@Composable
+fun MLConversation(){
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ChatSystem(navController: NavHostController, ChatId: String) {
@@ -420,52 +568,103 @@ fun ChatSystem(navController: NavHostController, ChatId: String) {
     }
 
     val maxHeightChatDisplay = (screenHeightInDp - 68.dp)
+    var mediaUri: Uri? by rememberSaveable { mutableStateOf(null) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        mediaUri = uri
+    }
+    if(mediaUri != null){
+        val contentResolver: ContentResolver = context.contentResolver
+        val mimeType = getMimeType(contentResolver, mediaUri!!)
+        val testType = rememberSaveable {
+            mutableStateOf("")
+        }
+        testType.value = mimeType!!
+        print("HESITATION $mimeType")
+        if (mimeType != null) {
+                if (mimeType.startsWith("image")) {
+                    MediaChatUtil.uploadToStorage(context = context, uri = mediaUri!!, type = "Image", ChatId = ChatId)
+
+                } else if (mimeType.startsWith("video")) {
+                    MediaChatUtil.uploadToStorage(context = context, uri = mediaUri!!, type = "Video", ChatId = ChatId)
+                }
+        }
+
+        mediaUri = null
+    }
+
 
     LaunchedEffect(Unit){
         ChatData.clear()
         GetTheChats(ChatId)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                color = Color(0xfff1f1f1)
-            )
-    ) {
-        Box(
+        Column(
             modifier = Modifier
-                .wrapContentSize()
-                .fillMaxWidth()
-                .padding(top = 2.dp)
+                .fillMaxSize()
+                .background(
+                    color = Color(0xfff1f1f1)
+                )
         ) {
-            TopNavbarPersonal(navController = navController, ChatId = ChatId)
-        }
-        Box(
-            modifier = Modifier
-                .heightIn(max = maxHeightChatDisplay)
-                .weight(1f)
-        ) {
-            Column(
+            Box(
                 modifier = Modifier
-                    .verticalScroll(rememberScrollState(initial = 14))
+                    .wrapContentSize()
+                    .fillMaxWidth()
+                    .padding(top = 2.dp)
             ) {
-                ChatData.forEach {
-                    if(it.TheUser != currUser.value.email){
-                        LeftChat(Modifier, it.Content)
-                    }else{
-                        RightChat(Modifier, it.Content)
+                TopNavbarPersonal(navController = navController, ChatId = ChatId)
+            }
+            Box(
+                modifier = Modifier
+                    .heightIn(max = maxHeightChatDisplay)
+                    .weight(1f)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState(initial = 14))
+                ) {
+                    ChatData.forEach {
+                        if(it.TheUser != currUser.value.email){
+                            if(it.Content != ""){
+                                LeftChat(Modifier,it.Content, timeSent = it.TimeSent)
+                            }else{
+                                    MediaLeftChat(ChatId = ChatId,navController = navController,MediaContent = it.ContentMedia, MediaType = it.MediaType, timeSent = it.TimeSent)
+
+                            }
+
+                        }else{
+                            if(it.Content != ""){
+                                RightChat(Modifier, it.Content, timeSent = it.TimeSent)
+                            }else{
+                                    MediaRightChat(
+                                        ChatId = ChatId,
+                                        navController = navController,
+                                        MediaContent = it.ContentMedia,
+                                        MediaType = it.MediaType,
+                                        timeSent = it.TimeSent
+                                    )
+
+                                }
+
+                        }
                     }
                 }
             }
+            Box(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .fillMaxWidth()
+                    .padding(top = 2.dp)
+            ) {
+                MessageInput(ChatId = ChatId, launchers = launcher)
+            }
         }
-        Box(
-            modifier = Modifier
-                .wrapContentSize()
-                .fillMaxWidth()
-                .padding(top = 2.dp)
-        ) {
-            MessageInput(ChatId = ChatId)
-        }
-    }
+
+}
+fun getMimeType(contentResolver: ContentResolver, uri: Uri): String? {
+    return contentResolver.getType(uri)
+}
+@Composable
+fun MediaPreview(mediaUri:Uri?){
+
+
 }

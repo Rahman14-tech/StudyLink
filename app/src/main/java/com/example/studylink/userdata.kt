@@ -26,6 +26,8 @@ data class ChatDataType(
     val Content: String = "",
     val TheUser: String = "",
     val TimeSent: String = "",
+    val MediaType: String = "",
+    val ContentMedia: String = "",
 )
 val Realusers = mutableStateListOf<ProfileFirestore>(
 

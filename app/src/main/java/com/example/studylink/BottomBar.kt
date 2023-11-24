@@ -50,9 +50,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.example.studylink.forum.ForumScreen
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomBar(navController: NavHostController){
@@ -74,7 +74,7 @@ fun BottomBar(navController: NavHostController){
                     YourChatScreen(navController = navController)
                 }
                 composable(QNA.route){
-                    Forum(navController = navController)
+                    ForumScreen(navController = navController)
                 }
                 composable(TheChatS.route+"/{${TheChatS.ChatId}}", arguments = listOf(navArgument(TheChatS.ChatId){type = NavType.StringType})){ currIt ->
                     val id = requireNotNull(currIt.arguments?.getString(TheChatS.ChatId))

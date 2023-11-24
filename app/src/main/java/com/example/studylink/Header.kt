@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,9 +27,11 @@ import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -99,8 +102,8 @@ fun dashboard(){
     val brush2 = Brush.horizontalGradient(listOf(Color(0xFFFFC600), Color(0xFFF8C105)))
     Box(
         modifier = Modifier
-        .fillMaxWidth()
-        .background(color = Color.White)
+            .fillMaxWidth()
+            .background(color = Color.White)
     ) {
         Column(modifier = Modifier
             .fillMaxWidth()
@@ -140,11 +143,26 @@ fun dashboard(){
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 7.dp),
+                    .padding(bottom = 4.dp),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                Text(text = "Personal", fontSize = 17.sp, fontWeight = FontWeight.Medium)
-                Text(text = "Group", fontSize = 17.sp, fontWeight = FontWeight.Medium)
+                Column {
+                    TextButton(onClick = { selectedPeerDashboard.value = true }) {
+                        Text(text = "Personal", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = Color.Black)
+                    }
+                    if(selectedPeerDashboard.value){
+                        Divider(modifier = Modifier.width(95.dp), color = Color(0xFFFFC600))
+                    }
+                }
+                Column {
+                    TextButton(onClick = { selectedPeerDashboard.value = false }) {
+                        Text(text = "Group", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = Color.Black)
+                    }
+                    if(!selectedPeerDashboard.value){
+                        Divider(modifier = Modifier.width(80.dp), color = Color(0xFFFFC600))
+                    }
+                }
+
             }
         }
     }

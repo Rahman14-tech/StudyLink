@@ -65,9 +65,11 @@ fun GetChatData(){
 @Composable
 fun YourChatsCardPersonal(datum: YourChatsType, navController: NavHostController){
         println("OHARANG2 ${datum.id}")
-        val tempPartnerEmail = datum.FkUsers.firstOrNull{ it != currUser.value.email}
-        val tempPartnerProfile = Realusers.firstOrNull { it.email == tempPartnerEmail }
-        if(tempPartnerEmail != null){
+        val tempPartnerEmail = datum.FkUsers.contains(currUser.value.email)
+
+    if(tempPartnerEmail){
+        val tempNottheone = datum.FkUsers.firstOrNull { it != currUser.value.email }
+        val tempPartnerProfile = Realusers.firstOrNull { it.email == tempNottheone }
             Card(modifier = Modifier
                 .fillMaxWidth()
                 .background(color = Color.White)
@@ -101,15 +103,14 @@ fun YourChatsCardPersonal(datum: YourChatsType, navController: NavHostController
                                         Text(text = "15:36", fontWeight = FontWeight.Normal,fontSize = 15.sp,)
                                     }
                                     Text(text = "This method should be the easiest, so the way is",
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,fontSize = 15.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 5.dp))
+                                        maxLines = 1,                                        overflow = TextOverflow.Ellipsis,fontSize = 15.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 5.dp))
                                 }
                             }
                         }
                     }
                 }
             }
-        }
+    }
 }
 
 @Composable

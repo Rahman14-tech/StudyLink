@@ -1,5 +1,7 @@
 package com.example.studylink
 
+import android.content.ContentValues
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -51,6 +53,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -68,12 +71,69 @@ import java.util.Timer
 import java.util.TimerTask
 import java.util.logging.Handler
 import kotlin.math.log
+fun CreatePersonalChat(peerEmail:String, navController: NavHostController){
+    var alreadyContacted = false
+    db.collection("Chats").addSnapshotListener{snapshot, e ->
+        if (e != null) {
+            Log.w(ContentValues.TAG, "Listen failed.", e)
+            return@addSnapshotListener
+        }
+        if(snapshot != null && !snapshot.isEmpty){
+            val list = snapshot.documents
+            for(datum in list){
+                val c: YourChatsType? = datum.toObject(YourChatsType::class.java)
+                c?.id = datum.id
+                if(c!= null){
+                    if(!c.isGroup){
+                        if(c.FkUsers.containsAll(listOf(peerEmail, currUser.value.email))){
+                            alreadyContacted = true
+                            break
+                        }
+                    }
+                }
+            }
+            if(alreadyContacted){
+                navController.navigate(YourChats.route)
+            }else{
+                db.collection("Chats").add(hashMapOf(
+                    "FkUsers" to mutableListOf<String>(currUser.value.email, peerEmail),
+                    "IsGroup" to false
+                )).addOnSuccessListener {
+                    navController.navigate(TheChatS.route+"/${it.id}")
+                }.addOnFailureListener{
+                    tempUrl.value = TextFieldValue("")
+                }
+            }
+        }
+    }
 
-@OptIn(ExperimentalSwipeableCardApi::class)
+}
 @Composable
 fun DashboardScreen (navController: NavHostController) {
+    if(selectedPeerDashboard.value){
+        peerDashboard(navController = navController)
+    }else{
+        groupDashboard(navController = navController)
+    }
+}
+@Composable
+fun groupDashboard(navController: NavHostController){
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(color = Color(0xfff1f1f1)), ) {
+        Header("dashboard")
+        testViewGroup()
+    }
+}
+@OptIn(ExperimentalSwipeableCardApi::class)
+@Composable
+fun peerDashboard(navController: NavHostController){
+    removeCurrUser()
+    LaunchedEffect(Unit){
+        Filteredusers.removeAll(Filteredusers)
+        GetUsersData()
+    }
     val states =  Filteredusers.reversed().map { it to rememberSwipeableCardState() }
-    var nameindex by remember { mutableStateOf(0) }
     var finfilt by remember { mutableStateOf(false) }
     val context = LocalContext.current
     if(Filteredusers.isEmpty()){
@@ -100,11 +160,11 @@ fun DashboardScreen (navController: NavHostController) {
                                 .swipableCard(
                                     state = state,
                                     blockedDirections = listOf(Direction.Down),
-                                    onSwiped = { nameindex++ },
+                                    onSwiped = {  },
                                     onSwipeCancel = {
                                         println("The swiping was cancelled")
                                     }
-                                ), prof = profile, nameindex)
+                                ), prof = profile,navController = navController)
                         }
                     }
                 }
@@ -114,7 +174,7 @@ fun DashboardScreen (navController: NavHostController) {
 }
 
 @Composable
-fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, nameindex: Int){
+fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, navController: NavHostController){
     Box(modifier = modifier){
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -143,12 +203,12 @@ fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, nameindex: 
                             ContentScale.Crop
                         )
                         Text(
-                            text = Filteredusers[nameindex].fullName,
+                            text = prof.fullName,
                             color = Color.Black,
                             fontSize = 25.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
-                                .padding(start = 25.dp, bottom = 20.dp, top = 5.dp)
+                                .padding(start = 25.dp, bottom = 10.dp, top = 5.dp)
                         )
                         Row(
                             modifier = Modifier
@@ -165,7 +225,7 @@ fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, nameindex: 
                                         fontWeight = FontWeight.Medium,
                                         modifier = Modifier.padding(start = 25.dp)
                                     )
-                                    Filteredusers[nameindex].strongAt.map {
+                                    prof.strongAt.map {
                                         Text(
                                             text = "$it",
                                             color = Color(0xff373737),
@@ -177,7 +237,7 @@ fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, nameindex: 
                                 }
                                 Row(
                                     modifier = Modifier
-                                        .padding(bottom = 35.dp), horizontalArrangement = Arrangement.SpaceBetween
+                                        .padding(bottom = 15.dp), horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Row {
                                         Text(
@@ -187,7 +247,7 @@ fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, nameindex: 
                                             fontWeight = FontWeight.Medium,
                                             modifier = Modifier.padding(start = 25.dp)
                                         )
-                                        Filteredusers[nameindex].wantStudy.map {
+                                        prof.wantStudy.map {
                                             Text(
                                                 text = "$it",
                                                 color = Color(0xff373737),
@@ -211,7 +271,7 @@ fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, nameindex: 
                         colors = CardDefaults.cardColors(containerColor = Color(0xfff7f7f7))
                     ) {
                         TextButton(
-                            onClick = {  },
+                            onClick = { CreatePersonalChat(prof.email, navController) },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                             modifier = Modifier
                                 .fillMaxSize()

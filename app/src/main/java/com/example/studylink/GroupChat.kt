@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -38,6 +39,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -54,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -309,6 +312,79 @@ fun Splash(modifier: Modifier = Modifier) {
     }
 }
 
+@Composable
+fun CustomTextField1(
+    modifier: Modifier = Modifier,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
+    placeholderText: String = "Placeholder",
+    useClear: Boolean = true,
+    imeAction: ImeAction = ImeAction.Default,
+    singleLine: Boolean = true,
+    maxLine: Int = 1,
+    fontSize: TextUnit = 15.sp,
+    value: MutableState<String>,
+    onValueChange: (String) -> Unit
+) {
+    BasicTextField(
+        modifier = modifier
+            .background(Color(0x00ffffff)),
+        value = value.value,
+        onValueChange = {
+            value.value = it
+            onValueChange(it)
+        },
+        singleLine = singleLine,
+        maxLines = maxLine,
+        textStyle = LocalTextStyle.current.copy(
+            color = Color.Black,
+            fontSize = fontSize
+        ),
+        keyboardOptions = KeyboardOptions(
+            imeAction = imeAction
+        ),
+        decorationBox = { innerTextField ->
+            Row(
+                Modifier.padding(start = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (leadingIcon != null) {
+                    leadingIcon()
+                    Spacer(modifier = Modifier.width(5.dp))
+                }
+                Box(
+                    Modifier.weight(1f)
+                ) {
+                    if (value.value.isEmpty()) {
+                        Text(
+                            placeholderText,
+                            style = LocalTextStyle.current.copy(
+                                color = Color(0xff767676),
+                                fontSize = fontSize
+                            )
+                        )
+                    }
+                    innerTextField()
+                }
+                if (trailingIcon != null) trailingIcon()
+                if (useClear && !value.value.isEmpty()) {
+                    IconButton(
+                        onClick = {
+                            value.value = ""
+                            onValueChange("")
+                        }
+                    ) {
+                        Icon(
+                            Icons.Rounded.Cancel,
+                            null,
+                            tint = Color.DarkGray.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+            }
+        }
+    )
+}
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun SearchBar(modifier: Modifier = Modifier) {
@@ -325,7 +401,7 @@ fun SearchBar(modifier: Modifier = Modifier) {
                 .wrapContentSize()
                 .padding(start = 10.dp, end = 10.dp)
         ) {
-            CustomTextField(
+            CustomTextField1(
                 value = mutableStateOf(inputText.value),
                 onValueChange = {
                     inputText.value = it
@@ -372,7 +448,6 @@ private fun SearchBarPreview() {
     SearchBar()
 }
 
-@Preview(widthDp = 393)
 @Composable
 fun testViewGroup() {
     Column(

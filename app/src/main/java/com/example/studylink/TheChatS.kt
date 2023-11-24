@@ -2,6 +2,7 @@ package com.example.studylink
 
 import VideoPlayerScreen
 import android.R.attr.path
+import android.R.attr.textSize
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.ContentValues
@@ -51,8 +52,15 @@ import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import android.webkit.MimeTypeMap
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.google.mlkit.nl.smartreply.SmartReply
+import com.google.mlkit.nl.smartreply.SmartReplySuggestion
+import com.google.mlkit.nl.smartreply.SmartReplySuggestionResult
+import com.google.mlkit.nl.smartreply.TextMessage
 
-
+var inputText = mutableStateOf("")
 @RequiresApi(Build.VERSION_CODES.O)
 fun SendMessage(TheMessage: String, ChatId: String){
     val sdf = SimpleDateFormat("dd/M/yyyy HH:mm:ss")
@@ -67,79 +75,6 @@ fun SendMessage(TheMessage: String, ChatId: String){
 }
 
 
-@Composable
-fun CustomTextField(
-    modifier: Modifier = Modifier,
-    leadingIcon: (@Composable () -> Unit)? = null,
-    trailingIcon: (@Composable () -> Unit)? = null,
-    placeholderText: String = "Placeholder",
-    useClear: Boolean = true,
-    imeAction: ImeAction = ImeAction.Default,
-    singleLine: Boolean = true,
-    maxLine: Int = 1,
-    fontSize: TextUnit = 15.sp,
-    value: MutableState<String>,
-    onValueChange: (String) -> Unit
-) {
-    BasicTextField(
-        modifier = modifier
-            .background(Color(0x00ffffff)),
-        value = value.value,
-        onValueChange = {
-            value.value = it
-            onValueChange(it)
-        },
-        singleLine = singleLine,
-        maxLines = maxLine,
-        textStyle = LocalTextStyle.current.copy(
-            color = Color.Black,
-            fontSize = fontSize
-        ),
-        keyboardOptions = KeyboardOptions(
-            imeAction = imeAction
-        ),
-        decorationBox = { innerTextField ->
-            Row(
-                Modifier.padding(start = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (leadingIcon != null) {
-                    leadingIcon()
-                    Spacer(modifier = Modifier.width(5.dp))
-                }
-                Box(
-                    Modifier.weight(1f)
-                ) {
-                    if (value.value.isEmpty()) {
-                        Text(
-                            placeholderText,
-                            style = LocalTextStyle.current.copy(
-                                color = Color(0xff767676),
-                                fontSize = fontSize
-                            )
-                        )
-                    }
-                    innerTextField()
-                }
-                if (trailingIcon != null) trailingIcon()
-                if (useClear && !value.value.isEmpty()) {
-                    IconButton(
-                        onClick = {
-                            value.value = ""
-                            onValueChange("")
-                        }
-                    ) {
-                        Icon(
-                            Icons.Rounded.Cancel,
-                            null,
-                            tint = Color.DarkGray.copy(alpha = 0.8f)
-                        )
-                    }
-                }
-            }
-        }
-    )
-}
 
 @Composable
 fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostController, ChatId: String) {
@@ -238,7 +173,7 @@ fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostContr
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) {
-    var inputText = rememberSaveable { mutableStateOf("") }
+
     val context = LocalContext.current
     val displayMetrics = context.resources.displayMetrics
 
@@ -557,6 +492,7 @@ fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Mod
     var splittedtime = timeSent.split(" ").toTypedArray()
     var thehour = splittedtime[1]
     var hournmin = thehour.subSequence(0,5)
+
         Box(
             modifier = modifier
                 .fillMaxWidth(),
@@ -583,7 +519,9 @@ fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Mod
                         if(MediaType == "Video"){
                             VideoPlayerScreen(ChatId = ChatId, navController = navController,mediaUrl = MediaContent)
                         }else if(MediaType == "Image"){
-                            Image(painter = rememberAsyncImagePainter(MediaContent), contentDescription = "The Image", modifier = Modifier.size(250.dp).fillMaxHeight())
+                            Image(painter = rememberAsyncImagePainter(MediaContent), contentDescription = "The Image", modifier = Modifier
+                                .size(250.dp)
+                                .fillMaxHeight())
                         }
                     },
                     modifier = Modifier
@@ -623,11 +561,6 @@ fun GetTheChats(ChatId: String){
     }
 }
 
-@Composable
-fun MLConversation(){
-
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -638,7 +571,7 @@ fun ChatSystem(navController: NavHostController, ChatId: String) {
     val screenHeightInDp = with(LocalDensity.current) {
         displayMetrics.heightPixels.dp / density
     }
-
+    val conversationML: MutableList<TextMessage> = mutableListOf()
     val maxHeightChatDisplay = (screenHeightInDp - 68.dp)
     var mediaUri: Uri? by rememberSaveable { mutableStateOf(null) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -664,10 +597,62 @@ fun ChatSystem(navController: NavHostController, ChatId: String) {
         mediaUri = null
     }
 
-
     LaunchedEffect(Unit){
         ChatData.clear()
         GetTheChats(ChatId)
+    }
+    if(ChatData.isNotEmpty()){
+        if(conversationML.isNotEmpty()){
+            conversationML.clear()
+        }
+        ChatData.forEach{
+
+            if(it.TheUser == currUser.value.email){
+                if(it.Content == ""){
+                    conversationML.add(TextMessage.createForLocalUser("Here Some Image/Videos",System.currentTimeMillis()))
+                }else{
+                    conversationML.add(TextMessage.createForLocalUser(it.Content,System.currentTimeMillis()))
+                }
+
+            }else{
+                if(it.Content == ""){
+                    conversationML.add(TextMessage.createForRemoteUser("Here some Image/Videos",System.currentTimeMillis(),it.TheUser))
+                }else{
+                    conversationML.add(TextMessage.createForRemoteUser(it.Content,System.currentTimeMillis(),it.TheUser))
+                }
+
+            }
+        }
+        val smartReplyGenerator = SmartReply.getClient()
+        var tempRes: MutableList<SmartReplySuggestion> = mutableListOf<SmartReplySuggestion>()
+        smartReplyGenerator.suggestReplies(conversationML)
+            .addOnSuccessListener { result ->
+                if (result.getStatus() == SmartReplySuggestionResult.STATUS_NOT_SUPPORTED_LANGUAGE) {
+                    // The conversation's language isn't supported, so
+                    // the result doesn't contain any suggestions.\
+                    println("Apaansih")
+                    theSmartReply = mutableStateListOf()
+                } else if (result.getStatus() == SmartReplySuggestionResult.STATUS_SUCCESS) {
+                    // Task completed successfully
+                    // ...
+                    tempRes = result.suggestions
+                    println("NGEN ${tempRes}")
+
+
+                }
+            }
+            .addOnFailureListener {
+                println("Apaansih2")
+                theSmartReply = mutableStateListOf()
+            }.addOnCompleteListener{
+                theSmartReply.clear()
+                tempRes.forEach{
+                    theSmartReply.add(it.text)
+                    println("GEBURTSTAG ${it.text}")
+                }
+            }
+
+
     }
 
         Column(
@@ -699,7 +684,7 @@ fun ChatSystem(navController: NavHostController, ChatId: String) {
                             if(it.Content != ""){
                                 LeftChat(Modifier,it.Content, timeSent = it.TimeSent)
                             }else{
-                                    MediaLeftChat(ChatId = ChatId,navController = navController,MediaContent = it.ContentMedia, MediaType = it.MediaType, timeSent = it.TimeSent)
+                                MediaLeftChat(ChatId = ChatId,navController = navController,MediaContent = it.ContentMedia, MediaType = it.MediaType, timeSent = it.TimeSent)
 
                             }
 
@@ -721,16 +706,36 @@ fun ChatSystem(navController: NavHostController, ChatId: String) {
                     }
                 }
             }
-            Box(
-                modifier = Modifier
-                    .wrapContentSize()
-                    .fillMaxWidth()
-                    .padding(top = 2.dp)
-            ) {
-                MessageInput(ChatId = ChatId, launchers = launcher)
-            }
-        }
+            Column {
+                Row(
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState())
+                        .padding(bottom = 5.dp)
+                ) {
+                    theSmartReply.forEach{
+                        println(" $it")
+                        Card(modifier = Modifier
+                            .padding(2.dp), onClick = {inputText.value = it}) {
+                            Column(modifier = Modifier.padding(5.dp)) {
+                                Text(text = it, fontSize = 20.sp)
+                            }
 
+                        }
+                    }
+
+                }
+                Box(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .fillMaxWidth()
+                        .padding(top = 5.dp)
+                ) {
+
+                    MessageInput(ChatId = ChatId, launchers = launcher)
+                }
+            }
+
+            }
 }
 fun getMimeType(contentResolver: ContentResolver, uri: Uri): String? {
     return contentResolver.getType(uri)

@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
+import com.google.mlkit.nl.smartreply.SmartReplySuggestion
 import java.util.Date
 
 
@@ -14,12 +15,13 @@ data class ProfileFirestore(
     val fullName: String = "",
     val imageURL: String = "",
     val strongAt: MutableList<String> = mutableListOf(),
-    val wantStudy: MutableList<String> = mutableListOf()
+    val wantStudy: MutableList<String> = mutableListOf(),
 )
 
 data class YourChatsType(
     val FkUsers: MutableList<String> = mutableListOf(),
     var id: String = "",
+    var isGroup: Boolean = false
 )
 
 data class ChatDataType(
@@ -33,6 +35,8 @@ val Realusers = mutableStateListOf<ProfileFirestore>(
 
 )
 
+var theSmartReply= mutableStateListOf<String>()
+
 var Filteredusers = mutableStateListOf<ProfileFirestore>()
 
 val tempTheChat = mutableStateListOf<YourChatsType>()
@@ -41,4 +45,6 @@ val ChatData = mutableStateListOf<ChatDataType>()
 fun removeCurrUser(){
     Filteredusers.remove(currUser.value)
 }
+
+var selectedPeerDashboard = mutableStateOf<Boolean>(true)
 

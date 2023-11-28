@@ -83,6 +83,10 @@ fun ForumScreen(
                     timestamp = { forum.timestamp?.let { forumViewModel.getTimeFromNow(it.toDate()) } ?: ""},
                     text = forum.text,
                     tags = forum.tags.toSet(),
+                    onClick = { forumViewModel.goForumDetail(
+                        forumDocID = forum.documentId,
+                        navController = navController
+                    )},
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(10.dp)
@@ -98,6 +102,7 @@ fun ForumCard(
     title: String,
     author: String,
     timestamp: () -> String,
+    onClick: () -> Unit,
     text: String,
     tags: Set<String>,
     modifier: Modifier = Modifier ){
@@ -107,7 +112,7 @@ fun ForumCard(
     Card (
         modifier = modifier,
 //        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-        onClick = { TODO() }
+        onClick = { onClick() }
     ) {
             Column (
                 verticalArrangement = Arrangement.Top,
@@ -195,19 +200,19 @@ fun VoteButton(){
         Text(text = "Rounded")
     }
 }
-
-@Preview
-@Composable
-fun ForumCardPreview(){
-    ForumCard(
-        title = "About Palindrome Algorithm",
-        timestamp = {"19 August 2020 19:20"},
-        author = "James Cameron",
-        text = "I still confused as hell about this programming algorithm I still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithm",
-        tags = setOf<String>("C", "Algorithm","Computer Science"),
-        modifier = Modifier
-            .fillMaxWidth())
-}
+//
+//@Preview
+//@Composable
+//fun ForumCardPreview(){
+//    ForumCard(
+//        title = "About Palindrome Algorithm",
+//        timestamp = {"19 August 2020 19:20"},
+//        author = "James Cameron",
+//        text = "I still confused as hell about this programming algorithm I still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithm",
+//        tags = setOf<String>("C", "Algorithm","Computer Science"),
+//        modifier = Modifier
+//            .fillMaxWidth())
+//}
 
 @Preview
 @Composable

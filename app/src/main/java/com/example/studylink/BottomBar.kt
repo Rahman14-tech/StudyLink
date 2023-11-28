@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -50,7 +51,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.example.studylink.forum.ForumDetailScreen
 import com.example.studylink.forum.ForumScreen
+import com.example.studylink.forum.ForumViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,6 +79,14 @@ fun BottomBar(navController: NavHostController){
                 composable(QNA.route){
                     ForumScreen(navController = navController)
                 }
+                composable(route = "${QNA.route}/{detail}",
+                    arguments = listOf(navArgument("detail"){
+                        type = NavType.StringType
+                    })){backStackEntry ->
+
+                    ForumDetailScreen(forumId = requireNotNull(backStackEntry.arguments?.getString("detail")))
+                }
+
                 composable(TheChatS.route+"/{${TheChatS.ChatId}}", arguments = listOf(navArgument(TheChatS.ChatId){type = NavType.StringType})){ currIt ->
                     val id = requireNotNull(currIt.arguments?.getString(TheChatS.ChatId))
                     ChatSystem(navController = navController,id)

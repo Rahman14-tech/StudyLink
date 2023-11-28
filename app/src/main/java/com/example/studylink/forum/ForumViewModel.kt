@@ -5,6 +5,8 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavController
+import com.example.studylink.QNA
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ServerTimestamp
@@ -45,16 +47,16 @@ data class ForumModel(
 )
 
 data class CommentModel(
-    val text: String,
-    val timestamp: Timestamp,
-    val upvote: Int,
+    val documentId: String = "",
+    val text: String = "",
+    val timestamp: Timestamp? = null,
+    val upvote: Int = 0,
     val userId: String,
 )
 
 data class ForumUiState(
     val forumList: List<ForumModel> = listOf(),
-    val documentIdMap: Map<String, ForumModel> = mapOf(),
-    val activeForumId: String = "",
+    val activeForum: ForumModel? = ForumModel(),
     val commentList: List<CommentModel> = listOf(),
 )
 
@@ -62,23 +64,26 @@ class ForumViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ForumUiState())
     val uiState: StateFlow<ForumUiState> = _uiState.asStateFlow()
 
+    private val forumCollectionPath = "ForumTest"
+    private val commentCollectionPath = "CommentList"
+
     fun getAllForum() {
         println("GET ALLFORUM STARTED")
         val forumList = mutableListOf<ForumModel>()
         val documentIdMap: MutableMap<String,ForumModel> = mutableMapOf()
-        val forumRef = FirebaseFirestore.getInstance().collection("ForumTest")
+        val forumRef = FirebaseFirestore.getInstance().collection(forumCollectionPath)
 
         Log.d("GETALLFORUM", "GET ALL FORUM STARTED")
         forumRef.get().addOnSuccessListener { querySnapshot ->
             for (document in querySnapshot) {
                 val forum = document.toObject(ForumModel::class.java)
-                forumList.add(forum)
-                documentIdMap[document.id] = forum
+                val forumWithID = forum.copy(documentId = document.id)
+                forumList.add(forumWithID)
+//                documentIdMap[document.id] = forum
             }
             _uiState.update { currentState ->
                 currentState.copy(
-                    forumList = forumList,
-                    documentIdMap = documentIdMap
+                    forumList = forumList
                 )
             }
             Log.d("TEST", forumList.toString())
@@ -111,4 +116,67 @@ class ForumViewModel : ViewModel() {
             }
         }
     }
+
+
+    fun goForumDetail(navController: NavController, forumDocID: String) {
+        // Navigate to Forum Detail
+        navController.navigate("${QNA.route}/$forumDocID")
+    }
+
+    fun getForumDetail(forumDocID: String) {
+        val forumRef = FirebaseFirestore.getInstance().collection(forumCollectionPath).document(forumDocID)
+        Log.d("FORUM", "Get forum detail dijalankan dengan id: $forumDocID")
+        forumRef.get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    // Convert document data to ForumModel
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            activeForum = documentSnapshot.toObject(ForumModel::class.java)
+                        )
+                    }
+                    // Use the forumData here (forumData will be of type ForumModel)
+                } else {
+                    // Document doesn't exist
+                    println("Document does not exist")
+                }
+            }
+            .addOnFailureListener { exception ->
+                // Handle failures
+                println("Error getting documents: $exception")
+            }
+
+
+        // Get comment List
+        val newCommentList = mutableListOf<CommentModel>()
+        forumRef.collection(commentCollectionPath)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                for (document in querySnapshot) {
+                    val forumComment = document.toObject(CommentModel::class.java)
+                    val forumCommentWithID = forumComment.copy(documentId = document.id)
+                    newCommentList.add(forumCommentWithID)
+                }
+            }
+            .addOnFailureListener { exception ->
+                // Handle failures
+                println("Error getting CommentList documents: $exception")
+            }
+
+        // Sort comment
+        val newCommentListSorted = newCommentList.sortedByDescending { it.timestamp }
+
+        // Put to state
+        _uiState.update {currentState ->
+            currentState.copy(
+                commentList = newCommentListSorted
+            )
+        }
+
+
+    }
+
+
+
+
 }

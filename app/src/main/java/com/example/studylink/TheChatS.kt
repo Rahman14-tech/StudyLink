@@ -492,7 +492,6 @@ fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Mod
     var splittedtime = timeSent.split(" ").toTypedArray()
     var thehour = splittedtime[1]
     var hournmin = thehour.subSequence(0,5)
-
         Box(
             modifier = modifier
                 .fillMaxWidth(),

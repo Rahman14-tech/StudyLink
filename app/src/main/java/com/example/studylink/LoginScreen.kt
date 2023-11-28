@@ -60,6 +60,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -173,7 +174,7 @@ fun LoginScreen(navController: NavHostController){
                             Image(painter = painterResource(id = R.drawable.google), contentDescription = "Google Icon", modifier = Modifier
                                 .height(100.dp)
                                 .padding(end = 60.dp)
-                                .clickable(onClick = {}))
+                                .clickable(onClick = {oneTapClient.beginSignIn(signInRequest)}))
                             Image(painter = painterResource(id = R.drawable.facecom), contentDescription = "Face Icon", modifier = Modifier
                                 .height(100.dp)
                                 .clickable(onClick = {}))

@@ -78,8 +78,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation ("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-auth-ktx")
     implementation ("com.alexstyl.swipeablecard:swipeablecard:0.1.0")
     implementation ("com.google.android.exoplayer:exoplayer:2.18.7")
     implementation ("com.google.mlkit:smart-reply:17.0.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
 }

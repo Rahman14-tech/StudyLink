@@ -56,6 +56,7 @@ import com.example.studylink.forum.ForumScreen
 import com.example.studylink.forum.ForumViewModel
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomBar(navController: NavHostController){

@@ -74,7 +74,79 @@ fun SendMessage(TheMessage: String, ChatId: String){
     ))
 }
 
-
+@Composable
+fun CustomTextField(
+    modifier: Modifier = Modifier,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
+    placeholderText: String = "Placeholder",
+    useClear: Boolean = true,
+    imeAction: ImeAction = ImeAction.Default,
+    singleLine: Boolean = true,
+    maxLine: Int = 1,
+    fontSize: TextUnit = 15.sp,
+    value: MutableState<String>,
+    onValueChange: (String) -> Unit
+) {
+    BasicTextField(
+        modifier = modifier
+            .background(Color(0x00ffffff)),
+        value = value.value,
+        onValueChange = {
+            value.value = it
+            onValueChange(it)
+        },
+        singleLine = singleLine,
+        maxLines = maxLine,
+        textStyle = LocalTextStyle.current.copy(
+            color = Color.Black,
+            fontSize = fontSize
+        ),
+        keyboardOptions = KeyboardOptions(
+            imeAction = imeAction
+        ),
+        decorationBox = { innerTextField ->
+            Row(
+                Modifier.padding(start = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (leadingIcon != null) {
+                    leadingIcon()
+                    Spacer(modifier = Modifier.width(5.dp))
+                }
+                Box(
+                    Modifier.weight(1f)
+                ) {
+                    if (value.value.isEmpty()) {
+                        Text(
+                            placeholderText,
+                            style = LocalTextStyle.current.copy(
+                                color = Color(0xff767676),
+                                fontSize = fontSize
+                            )
+                        )
+                    }
+                    innerTextField()
+                }
+                if (trailingIcon != null) trailingIcon()
+                if (useClear && !value.value.isEmpty()) {
+                    IconButton(
+                        onClick = {
+                            value.value = ""
+                            onValueChange("")
+                        }
+                    ) {
+                        Icon(
+                            Icons.Rounded.Cancel,
+                            null,
+                            tint = Color.DarkGray.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+            }
+        }
+    )
+}
 
 @Composable
 fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostController, ChatId: String) {
@@ -96,9 +168,13 @@ fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostContr
         ) {
             Row {
                 TextButton(
-                    onClick = { navController.navigate(Dashboard.route){popUpTo(YourChats.route) {
-                        inclusive = true
-                    }} },
+                    onClick = {
+                        navController.navigate(Dashboard.route) {
+                            popUpTo(YourChats.route) {
+                                inclusive = true
+                            }
+                        }
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                     modifier = modifier
                         .size(20.dp)
@@ -169,6 +245,7 @@ fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostContr
 //    TopNavbar(Modifier)
 //}
 
+@SuppressLint("UnrememberedMutableState")
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -181,7 +258,7 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: Manag
         displayMetrics.widthPixels.dp / density
     }
 
-    val maxWidthTextField = (screenWidthInDp - 110.dp)
+    val maxWidthTextField = (screenWidthInDp - 90.dp)
 
     Box(
         modifier = modifier
@@ -191,7 +268,7 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: Manag
     ) {
         Box(
             modifier = Modifier
-                .width(maxWidthTextField + 40.dp)
+                .width(maxWidthTextField + 30.dp)
                 .wrapContentHeight()
                 .background(
                     color = Color.White,
@@ -201,19 +278,18 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: Manag
         ) {
             Row {
                 TextButton(
-                    onClick = { launchers.launch(
+                    onClick = {
                         PickVisualMediaRequest(
                             mediaType = ActivityResultContracts.PickVisualMedia.ImageAndVideo
                         )
-                    ) },
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                     modifier = modifier
-                        .requiredSize(size = 50.dp)
-                        .offset(x = 0.dp, y = 2.dp)
+                        .requiredSize(size = 45.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .requiredSize(size = 40.dp)
+                            .requiredSize(size = 30.dp)
                             .clip(shape = RoundedCornerShape(20.dp))
                             .background(color = Color.DarkGray)
                     ) {
@@ -223,34 +299,32 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: Manag
                             modifier = Modifier
                                 .align(alignment = Alignment.TopStart)
                                 .offset(x = 5.dp, y = 5.dp)
-                                .requiredSize(size = 30.dp))
+                                .requiredSize(size = 20.dp))
                     }
                 }
-                TextField(
-                    placeholder = {
-                        Text(
-                            "Type a Message",
-                            style = TextStyle(fontSize = 18.sp),
-                            color = Color(0xff202020),
-                            modifier = Modifier
-                                .padding(0.dp)
-                        )
+                CustomTextField(
+                    value = mutableStateOf(inputText.value),
+                    onValueChange = {
+                        inputText.value = it
                     },
-                    value = inputText.value,
-                    onValueChange = { inputText.value = it },
-                    textStyle = TextStyle(fontSize = 18.sp),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                    ),
+                    leadingIcon = null,
+                    trailingIcon = null,
                     modifier = Modifier
-                        .width(maxWidthTextField - 20.dp)
-                        .heightIn(max = 120.dp)
-                        .align(alignment = Alignment.Top)
-                        .drawWithContent {
-                            drawContent()
-                        }
+                        .background(
+                            Color(0x00ededed),
+                            RoundedCornerShape(percent = 100)
+                        )
+                        .clip(shape = RoundedCornerShape(16.dp))
+                        .heightIn(min = 45.dp)
+                        .fillMaxWidth()
+                        .align(alignment = Alignment.CenterVertically)
+                        .padding(end = 8.dp, top = 5.dp, bottom = 5.dp),
+                    placeholderText = "Type a Message",
+                    useClear = false,
+                    imeAction = ImeAction.None,
+                    singleLine = false,
+                    maxLine = 5,
+                    fontSize = 16.sp
                 )
             }
         }
@@ -262,13 +336,13 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: Manag
                 }
             },
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            modifier = modifier
+            modifier = Modifier
                 .align(alignment = Alignment.TopEnd)
-                .requiredSize(size = 55.dp)
+                .requiredSize(size = 45.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .requiredSize(size = 55.dp)
+                    .requiredSize(size = 45.dp)
                     .clip(shape = RoundedCornerShape(20.dp))
                     .background(color = Color(0xffffc600))
             ) {
@@ -276,9 +350,8 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: Manag
                     painter = painterResource(id = R.drawable.sendicon),
                     contentDescription = null,
                     modifier = Modifier
-                        .align(alignment = Alignment.TopStart)
-                        .offset(x = 16.dp, y = 14.dp)
-                        .requiredSize(size = 28.dp))
+                        .align(alignment = Alignment.Center)
+                        .requiredSize(size = 22.dp))
             }
         }
     }
@@ -357,6 +430,7 @@ fun LeftChat(modifier: Modifier = Modifier, message : String,timeSent: String) {
 }
 
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun MediaLeftChat(ChatId:String, navController: NavHostController,modifier: Modifier = Modifier, MediaContent : String,MediaType:String,timeSent: String) {
     var context = LocalContext.current
@@ -480,6 +554,7 @@ fun RightChat(modifier: Modifier = Modifier, message : String,timeSent: String) 
 }
 
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Modifier = Modifier, MediaContent : String,MediaType:String,timeSent: String) {
     var context = LocalContext.current

@@ -3,6 +3,9 @@ package com.example.studylink
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -19,35 +23,29 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.rounded.Cancel
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -56,83 +54,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun RegisterScreen(){
-
-}
-
-@Composable
-fun GroupChatCard(name: String, subject: String, modifier: Modifier = Modifier ){
-    Card (
-        modifier = modifier,
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
-    ) {
-        Row (
-            Modifier
-                .padding(5.dp)
-//            horizontalArrangement = Arrangement.Center,
-//            verticalAlignment = Alignment.CenterVertically
-        ){
-            Card (
-                modifier = Modifier
-                    .size(100.dp)
-                    .padding(5.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFC600)),
-
-            ) {
-//                Image(
-//                    painter = painterResource(id = R.drawable.default_image_group),
-//                    contentDescription = "GroupChat",
-//                    modifier = Modifier
-//                        .padding(top = 6.dp)
-//                        .align(Alignment.CenterHorizontally)
-//                        .size(80.dp)
-//
-//
-//                )
-            }
-            Column (
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.Start,
-                modifier = Modifier
-                    .padding(5.dp)
-            ) {
-                // Title
-                Text(
-                    text = name,
-//                    style = TextStyle(
-//                        fontSize = 16.sp,
-//                        fontWeight = FontWeight.Bold
-//                    )
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                //Subject
-                Text(text = subject)
-            }
-        }
-
-
-    }
-}
-
-@Preview
-@Composable
-fun PreviewGroupChatCard(){
-    GroupChatCard(
-        name = "Naufal, Humam",
-        subject = "Math | Physics",
-        modifier = Modifier
-            .padding(horizontal = 10.dp)
-            .fillMaxWidth())
-}
-
-@Composable
-fun groupcard(modifier: Modifier = Modifier, people : List<String>, scope : List<String>, personcount : Int) {
+fun groupcard(
+    modifier: Modifier = Modifier,
+    people : List<String>,
+    scope : List<String>,
+    personcount : Int,
+    onCardClick : (List<String>) -> Unit,
+    onButtonClick : () -> Unit
+) {
     val scopeSeparator = " | "
     val scopes = buildAnnotatedString {
         scope.forEachIndexed { index, string ->
@@ -156,10 +89,12 @@ fun groupcard(modifier: Modifier = Modifier, people : List<String>, scope : List
             containerColor = Color.White,
             contentColor = Color.White
         ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp)
+            .padding(start = 15.dp, end = 15.dp, top = 3.dp, bottom = 3.dp)
+            .clickable(onClick = { onCardClick(people) })
     ) {
         Box(
             modifier = Modifier
@@ -248,24 +183,134 @@ fun groupcard(modifier: Modifier = Modifier, people : List<String>, scope : List
             }
             Box(
                 modifier = Modifier
-                    .wrapContentSize()
                     .align(alignment = Alignment.CenterEnd)
-            ) {
-                IconButton(
-                    onClick = { },
-                    modifier = Modifier
-                        .requiredSize(size = 40.dp)
-                        .clip(shape = RoundedCornerShape(8.dp))
-                        .background(color = Color(0xff1c1a22))
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.chaticon2),
-                        contentDescription = "chat icon",
-                        modifier = Modifier
-                            .align(alignment = Alignment.TopStart)
-                            .offset(x = 5.dp, y = 5.dp)
-                            .requiredSize(size = 30.dp)
+                    .requiredSize(size = 40.dp)
+                    .clip(shape = RoundedCornerShape(8.dp))
+                    .background(color = Color(0xff1c1a22))
+                    .clickable(
+                        onClick = onButtonClick
                     )
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.chaticon2),
+                    contentDescription = "chat icon",
+                    modifier = Modifier
+                        .align(alignment = Alignment.Center)
+                        .requiredSize(size = 30.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun PersonBox(
+    name: String,
+    onPersonClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .background(color = Color.White)
+            .padding(top = 5.dp, bottom = 5.dp)
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onPersonClick
+            )
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(start = 20.dp, end = 20.dp)
+                .wrapContentSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(shape = CircleShape)
+                    .background(color = Color(0xffffc600))
+                    .size(38.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.personicon2),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(alignment = Alignment.Center)
+                        .size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = name,
+                color = Color.Black,
+                style = TextStyle(
+                    fontSize = 20.sp
+                ),
+                modifier = Modifier
+                    .align(alignment = Alignment.CenterVertically)
+            )
+        }
+    }
+}
+
+@Composable
+fun overlayGroupInfo(
+    people: List<String>,
+    onBackgoundClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0, 0, 0, 90))
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onBackgoundClick
+            )
+    ) {
+        Card(
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .fillMaxHeight(0.6f)
+                .heightIn(max = 420.dp)
+                .widthIn(max = 300.dp)
+                .align(Alignment.Center)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { /* Do nothing */ })
+                }
+        ) {
+            Box(
+                modifier = Modifier
+                    .background(color = Color.White)
+                    .fillMaxWidth()
+                    .height(58.dp)
+            ) {
+                Text(
+                    text = "Group Info",
+                    color = Color.Black,
+                    style = TextStyle(
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    modifier = Modifier
+                        .align(alignment = Alignment.CenterStart)
+                        .padding(start = 15.dp)
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .background(
+                        color = Color(0xfff1f1f1)
+                    )
+            ) {
+                people.forEach { person ->
+                    PersonBox(name = person, onPersonClick = { })
+                }
+                people.forEach { person ->
+                    PersonBox(name = person, onPersonClick = { })
                 }
             }
         }
@@ -273,7 +318,7 @@ fun groupcard(modifier: Modifier = Modifier, people : List<String>, scope : List
 }
 
 @Composable
-fun Splash(modifier: Modifier = Modifier) {
+fun GroupSplash(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -312,79 +357,6 @@ fun Splash(modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun CustomTextField1(
-    modifier: Modifier = Modifier,
-    leadingIcon: (@Composable () -> Unit)? = null,
-    trailingIcon: (@Composable () -> Unit)? = null,
-    placeholderText: String = "Placeholder",
-    useClear: Boolean = true,
-    imeAction: ImeAction = ImeAction.Default,
-    singleLine: Boolean = true,
-    maxLine: Int = 1,
-    fontSize: TextUnit = 15.sp,
-    value: MutableState<String>,
-    onValueChange: (String) -> Unit
-) {
-    BasicTextField(
-        modifier = modifier
-            .background(Color(0x00ffffff)),
-        value = value.value,
-        onValueChange = {
-            value.value = it
-            onValueChange(it)
-        },
-        singleLine = singleLine,
-        maxLines = maxLine,
-        textStyle = LocalTextStyle.current.copy(
-            color = Color.Black,
-            fontSize = fontSize
-        ),
-        keyboardOptions = KeyboardOptions(
-            imeAction = imeAction
-        ),
-        decorationBox = { innerTextField ->
-            Row(
-                Modifier.padding(start = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (leadingIcon != null) {
-                    leadingIcon()
-                    Spacer(modifier = Modifier.width(5.dp))
-                }
-                Box(
-                    Modifier.weight(1f)
-                ) {
-                    if (value.value.isEmpty()) {
-                        Text(
-                            placeholderText,
-                            style = LocalTextStyle.current.copy(
-                                color = Color(0xff767676),
-                                fontSize = fontSize
-                            )
-                        )
-                    }
-                    innerTextField()
-                }
-                if (trailingIcon != null) trailingIcon()
-                if (useClear && !value.value.isEmpty()) {
-                    IconButton(
-                        onClick = {
-                            value.value = ""
-                            onValueChange("")
-                        }
-                    ) {
-                        Icon(
-                            Icons.Rounded.Cancel,
-                            null,
-                            tint = Color.DarkGray.copy(alpha = 0.8f)
-                        )
-                    }
-                }
-            }
-        }
-    )
-}
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun SearchBar(modifier: Modifier = Modifier) {
@@ -401,7 +373,7 @@ fun SearchBar(modifier: Modifier = Modifier) {
                 .wrapContentSize()
                 .padding(start = 10.dp, end = 10.dp)
         ) {
-            CustomTextField1(
+            CustomTextField(
                 value = mutableStateOf(inputText.value),
                 onValueChange = {
                     inputText.value = it
@@ -433,13 +405,19 @@ fun SearchBar(modifier: Modifier = Modifier) {
 @Preview(widthDp = 393)
 @Composable
 private fun groupCardPv() {
-    groupcard(people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"), scope = listOf("Math", "Science"), personcount = 7)
+    groupcard(
+        people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"),
+        scope = listOf("Math", "Science"),
+        personcount = 7,
+        onCardClick = {  },
+        onButtonClick = { /* Perform the button action here */ }
+    )
 }
 
 @Preview(widthDp = 393)
 @Composable
 private fun SplashPreview() {
-    Splash()
+    GroupSplash()
 }
 
 @Preview(widthDp = 393)
@@ -448,23 +426,128 @@ private fun SearchBarPreview() {
     SearchBar()
 }
 
+@Preview(widthDp = 393)
 @Composable
 fun testViewGroup() {
+    var showOverlay = remember { mutableStateOf(false) }
+    var selectedPeople = remember { mutableStateOf<List<String>>(listOf()) }
+
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
+            .background(
+                color = Color(0xfff1f1f1)
+            )
+            .padding(bottom = 5.dp)
     ) {
-        Splash()
-        SearchBar()
-        groupcard(people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"), scope = listOf("Math", "Science"), personcount = 7)
-        groupcard(people = listOf("Jamal Hussein", "John Doe", "Jane Smith"), scope = listOf("Science", "Astrology", "Economy"), personcount = 5)
-        groupcard(people = listOf("Joanne Canonball", "Jane Smith"), scope = listOf("Science", "Astrology"), personcount = 2)
-        groupcard(people = listOf("Alan Becker", "Jane Smith", "Jane Smith"), scope = listOf("Science", "Geology", "Law"), personcount = 8)
-        groupcard(people = listOf("Jamal Hussein", "John Doe", "Jane Smith"), scope = listOf("Computer Science", "Physics"), personcount = 6)
-        groupcard(people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"), scope = listOf("Math", "Science"), personcount = 7)
-        groupcard(people = listOf("Jamal Hussein", "John Doe", "Jane Smith"), scope = listOf("Science", "Astrology", "Economy"), personcount = 5)
-        groupcard(people = listOf("Joanne Canonball", "Jane Smith"), scope = listOf("Science", "Astrology"), personcount = 2)
-        groupcard(people = listOf("Alan Becker", "Jane Smith", "Jane Smith"), scope = listOf("Science", "Geology", "Law"), personcount = 8)
-        groupcard(people = listOf("Jamal Hussein", "John Doe", "Jane Smith"), scope = listOf("Computer Science", "Physics"), personcount = 6)
+        GroupSplash()
+        SearchBar(Modifier.padding(bottom = 3.dp))
+        groupcard(
+            people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith", "Jamal Hussein", "John Doe", "Jane Smith", "Joanne Canonball"),
+            scope = listOf("Math", "Science"),
+            personcount = 7,
+            onCardClick = { people ->
+                showOverlay.value = true
+                selectedPeople.value = people
+            },
+            onButtonClick = { /* Perform the button action here */ }
+        )
+        groupcard(
+            people = listOf("Jamal Hussein", "John Doe", "Jane Smith"),
+            scope = listOf("Science", "Astrology", "Economy"),
+            personcount = 5,
+            onCardClick = { people ->
+                showOverlay.value = true
+                selectedPeople.value = people
+            },
+            onButtonClick = { /* Perform the button action here */ }
+        )
+        groupcard(
+            people = listOf("Joanne Canonball", "Jane Smith"),
+            scope = listOf("Science", "Astrology"),
+            personcount = 2,
+            onCardClick = { people ->
+                showOverlay.value = true
+                selectedPeople.value = people
+            },
+            onButtonClick = { /* Perform the button action here */ }
+        )
+        groupcard(
+            people = listOf("Alan Becker", "Jane Smith", "Jane Smith"),
+            scope = listOf("Science", "Geology", "Law"),
+            personcount = 8,
+            onCardClick = { people ->
+                showOverlay.value = true
+                selectedPeople.value = people
+            },
+            onButtonClick = { /* Perform the button action here */ }
+        )
+        groupcard(
+            people = listOf("Jamal Hussein", "John Doe", "Jane Smith"),
+            scope = listOf("Computer Science", "Physics"),
+            personcount = 6,
+            onCardClick = { people ->
+                showOverlay.value = true
+                selectedPeople.value = people
+            },
+            onButtonClick = { /* Perform the button action here */ }
+        )
+        groupcard(
+            people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"),
+            scope = listOf("Math", "Science"),
+            personcount = 7,
+            onCardClick = { people ->
+                showOverlay.value = true
+                selectedPeople.value = people
+            },
+            onButtonClick = { /* Perform the button action here */ }
+        )
+        groupcard(
+            people = listOf("Jamal Hussein", "John Doe", "Jane Smith"),
+            scope = listOf("Science", "Astrology", "Economy"),
+            personcount = 5,
+            onCardClick = { people ->
+                showOverlay.value = true
+                selectedPeople.value = people
+            },
+            onButtonClick = { /* Perform the button action here */ }
+        )
+        groupcard(
+            people = listOf("Joanne Canonball", "Jane Smith"),
+            scope = listOf("Science", "Astrology"),
+            personcount = 2,
+            onCardClick = { people ->
+                showOverlay.value = true
+                selectedPeople.value = people
+            },
+            onButtonClick = { /* Perform the button action here */ }
+        )
+        groupcard(
+            people = listOf("Alan Becker", "Jane Smith", "Jane Smith"),
+            scope = listOf("Science", "Geology", "Law"),
+            personcount = 8,
+            onCardClick = { people ->
+                showOverlay.value = true
+                selectedPeople.value = people
+            },
+            onButtonClick = { /* Perform the button action here */ }
+        )
+        groupcard(
+            people = listOf("Jamal Hussein", "John Doe", "Jane Smith"),
+            scope = listOf("Computer Science", "Physics"),
+            personcount = 6,
+            onCardClick = { people ->
+                showOverlay.value = true
+                selectedPeople.value = people
+            },
+            onButtonClick = { /* Perform the button action here */ }
+        )
+    }
+
+    if (showOverlay.value) {
+        overlayGroupInfo(
+            people = selectedPeople.value,
+            onBackgoundClick = { showOverlay.value = false }
+        )
     }
 }

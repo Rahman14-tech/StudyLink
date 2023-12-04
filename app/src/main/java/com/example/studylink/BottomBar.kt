@@ -62,8 +62,8 @@ import com.example.studylink.forum.ForumViewModel
 fun BottomBar(navController: NavHostController){
     Scaffold(bottomBar = {BottomContent(navController = navController)}) {
         Box(modifier = Modifier
-            .padding(it)
-            .fillMaxWidth()){
+                .padding(it)
+                .fillMaxWidth()){
             NavHost(navController = navController, startDestination = Login.route){
                 composable(Login.route){
                     LoginScreen(navController = navController)
@@ -99,6 +99,10 @@ fun BottomBar(navController: NavHostController){
                     val mediaUri = requireNotNull(currIt.arguments?.getString(MediaViewer.MediaUri))
                     MediaViewer(navController = navController, Id = id, MediaUri = mediaUri)
                 }
+                composable(Setting.route){
+                    ProfileScreen(navController = navController)
+                }
+                
             }
         }
     }

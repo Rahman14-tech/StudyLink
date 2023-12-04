@@ -16,6 +16,7 @@ data class ProfileFirestore(
     val imageURL: String = "",
     val strongAt: MutableList<String> = mutableListOf(),
     val wantStudy: MutableList<String> = mutableListOf(),
+    val studyField: String = "",
 )
 
 data class YourChatsType(
@@ -47,4 +48,6 @@ fun removeCurrUser(){
 }
 
 var selectedPeerDashboard = mutableStateOf<Boolean>(true)
-
+var showYourChatSearch = mutableStateOf(false)
+var showDashfilterPersonal = mutableStateOf(false)
+val listOfMajors = listOf<String>("Agriculture, and Related Sciences","Architecture and Related Services","Area, Ethnic, Cultural, Gender, and Group Studies","Aviation","Biological and Biomedical Sciences","Business, Management, and Related Support Services","Communication, Journalism, and Related Programs","Communications Technologies/technicians","Computer and Information Sciences","Construction Trades","Engineering","English Language and Literature/letters","Family and Consumer Sciences/human Sciences","Foreign Languages","Health Professions","History","Human Services","Mathematics and Statistics","Mechanic and Repair Technologies/technicians","Military Technologies and Applied Sciences","Natural Resources and Conservation","Culinary Services","Philosophy and Religious Studies","Physical Sciences","Psychology","Social Sciences","Theology and Religious Vocations","Transportation and Materials Moving","Visual and Performing Arts","Others")

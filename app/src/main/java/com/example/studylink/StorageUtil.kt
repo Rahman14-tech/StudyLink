@@ -14,7 +14,7 @@ class StorageUtil{
 
     companion object {
 
-        fun uploadToStorage(uri: Uri, context: Context, type: String, email: String, fullName: String, cont: Context, pass: String) {
+        fun uploadToStorage(uri: Uri, context: Context, type: String, email: String, fullName: String, cont: Context, pass: String, studyField:String) {
             var anjay = ""
             val storage = Firebase.storage
 
@@ -43,7 +43,7 @@ class StorageUtil{
                         Toast.LENGTH_SHORT
                     ).show()
                 }.addOnSuccessListener { taskSnapshot ->
-                    if(email.isNotEmpty() && fullName.isNotEmpty() && pass.isNotEmpty()) {
+                    if(email.isNotEmpty() && fullName.isNotEmpty() && pass.isNotEmpty() && studyField != "Choose here") {
                         spaceRef.downloadUrl.addOnSuccessListener {
                             db.collection("Users").add(hashMapOf(
                                 "email" to email,

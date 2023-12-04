@@ -30,7 +30,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
@@ -67,7 +70,42 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.annotation.ExperimentalCoilApi
 import com.google.android.gms.tasks.Task
+var selectedOptionText = mutableStateOf("Choose here")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DropDownSubjects() {
+    var expanded by remember { mutableStateOf(false) }
 
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+    ) {
+        TextField(
+            modifier = Modifier.menuAnchor(),
+            readOnly = true,
+            value = selectedOptionText.value,
+            onValueChange = {},
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.background(color = Color.White)
+        ) {
+            listOfMajors.forEach { selectionOption ->
+                DropdownMenuItem(
+                    text = { Text(selectionOption) },
+                    onClick = {
+                        selectedOptionText.value = selectionOption
+                        expanded = false
+                    },
+                )
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
 @Composable
@@ -101,7 +139,7 @@ fun RegisterScreen(navController: NavHostController){
                     Text(text = "Link", fontSize = 40.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.textBrush(brush2))
                 }
                 Card(modifier = Modifier
-                    .fillMaxHeight(0.9f)
+                    .fillMaxHeight(0.95f)
                     .fillMaxWidth(0.8f), shape = RoundedCornerShape(10.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
                     Column(modifier = Modifier
                         .fillMaxWidth()
@@ -164,6 +202,11 @@ fun RegisterScreen(navController: NavHostController){
                                 .height(65.dp),
                             colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
                         )
+
+                    }
+                    Text(text = "Choose a Major", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 25.dp, top = 10.dp))
+                    Column(modifier = Modifier.fillMaxWidth(),horizontalAlignment = Alignment.CenterHorizontally) {
+                        DropDownSubjects()
                     }
                     Column(modifier = Modifier
                         .fillMaxWidth()
@@ -185,7 +228,7 @@ fun RegisterScreen(navController: NavHostController){
                         Button(
                             onClick = {
                                 println(email.text)
-                                if(email.text.isNotEmpty() && password.text.isNotEmpty()){
+                                if(email.text.isNotEmpty() && password.text.isNotEmpty() && selectedOptionText.value != "Choose here"){
                                     auth.createUserWithEmailAndPassword(email.text, password.text).addOnCompleteListener { task ->
                                         if(task.isSuccessful){
                                             val tempMut = mutableListOf<String>()
@@ -199,6 +242,7 @@ fun RegisterScreen(navController: NavHostController){
                                                         fullName = FullName.text,
                                                         cont = Context,
                                                         pass = password.text,
+                                                        studyField = selectedOptionText.value
                                                     )
                                                 }
                                             }else{
@@ -223,29 +267,30 @@ fun RegisterScreen(navController: NavHostController){
                             Text(text = "Sign Up", color = Color.White)
                         }
                     }
-                    Column(modifier = Modifier.fillMaxWidth(),horizontalAlignment = Alignment.End) {
-                        Divider(thickness = 1.dp, color = Color.Black, modifier = Modifier
-                            .fillMaxWidth(0.90f)
-                            .padding(end = 25.dp, top = 10.dp))
-                    }
-                    Column(modifier = Modifier.fillMaxWidth(),horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "Or Sign up with", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 10.dp))
-                    }
-                    Column (modifier = Modifier.fillMaxWidth(),horizontalAlignment = Alignment.CenterHorizontally){
-                        Row(){
-                            Image(painter = painterResource(id = R.drawable.google), contentDescription = "Google Icon", modifier = Modifier
-                                .height(100.dp)
-                                .padding(end = 60.dp)
-                                .clickable(onClick = {}))
-                            Image(painter = painterResource(id = R.drawable.facecom), contentDescription = "Face Icon", modifier = Modifier
-                                .height(100.dp)
-                                .clickable(onClick = {}))
-                        }
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    Row(modifier = Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.Center) {
                         Text(text = "Have an account ?", fontSize = 15.sp, fontWeight = FontWeight.SemiBold,)
                         ClickableText(text = AnnotatedString("Login"), onClick = {navController?.navigate(Login.route)}, style = TextStyle(color = Color.Blue), modifier = Modifier.padding(start = 5.dp))
                     }
+//                    Column(modifier = Modifier.fillMaxWidth(),horizontalAlignment = Alignment.End) {
+//                        Divider(thickness = 1.dp, color = Color.Black, modifier = Modifier
+//                            .fillMaxWidth(0.90f)
+//                            .padding(end = 25.dp, top = 10.dp))
+//                    }
+//                    Column(modifier = Modifier.fillMaxWidth(),horizontalAlignment = Alignment.CenterHorizontally) {
+//                        Text(text = "Or Sign up with", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 10.dp))
+//                    }
+//                    Column (modifier = Modifier.fillMaxWidth(),horizontalAlignment = Alignment.CenterHorizontally){
+//                        Row(){
+//                            Image(painter = painterResource(id = R.drawable.google), contentDescription = "Google Icon", modifier = Modifier
+//                                .height(100.dp)
+//                                .padding(end = 60.dp)
+//                                .clickable(onClick = {}))
+//                            Image(painter = painterResource(id = R.drawable.facecom), contentDescription = "Face Icon", modifier = Modifier
+//                                .height(100.dp)
+//                                .clickable(onClick = {}))
+//                        }
+//                    }
+
                 }
             }
         }

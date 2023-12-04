@@ -84,7 +84,7 @@ fun chatheader(){
                 Row (modifier = Modifier.padding(end = 5.dp, top = 5.dp)) {
                     IconButton(
                         onClick = {
-//                        Toast.makeText(contextForToast, "Click!", Toast.LENGTH_SHORT).show()
+                            showYourChatSearch.value = !showYourChatSearch.value
                         }
                     ) {
                         Icon(imageVector = Icons.Outlined.Search, contentDescription = "", tint = Color.Black, modifier = Modifier
@@ -125,7 +125,7 @@ fun dashboard(){
                 }
                 IconButton(
                     onClick = {
-//                        Toast.makeText(contextForToast, "Click!", Toast.LENGTH_SHORT).show()
+                        showDashfilterPersonal.value = true
                     },
                     modifier = Modifier
                         .padding(end = 15.dp, top = 7.dp)

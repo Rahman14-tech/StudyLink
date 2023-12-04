@@ -1,6 +1,7 @@
 package com.example.studylink
 
 import android.content.ContentValues
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -20,6 +21,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,12 +32,15 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -56,8 +64,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.alexstyl.swipeablecard.Direction
@@ -71,6 +81,85 @@ import java.util.Timer
 import java.util.TimerTask
 import java.util.logging.Handler
 import kotlin.math.log
+var selectedOption = mutableStateOf("All Posts")
+@Composable
+fun dashDialog(onDismissRequest: (Boolean) -> Unit) {
+    Dialog(onDismissRequest = { onDismissRequest(false) }) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.9f)
+                .padding(14.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+        ) {
+            LazyColumn(){
+                item {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = (selectedOption == selectedOption),
+                                onClick = {
+                                    selectedOption.value = "All Posts"
+                                    onDismissRequest(false)
+                                }
+                            )
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        RadioButton(
+                            selected = ("All Posts" == selectedOption.value),
+                            modifier = Modifier.padding(all = Dp(value = 8F)),
+                            onClick = {
+                                selectedOption.value = "All Posts"
+                                onDismissRequest(false)
+                            },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = Color(0xFF00B0FF),
+                                unselectedColor = Color(0xFF986DF2),
+                            )
+                        )
+                        Text(
+                            text = "All Posts",
+                            modifier = Modifier.padding(start = 16.dp, top = 20.dp)
+                        )
+                    }
+                }
+                itemsIndexed(listOfMajors) { _, datum ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = (selectedOption == selectedOption),
+                                onClick = {
+                                    selectedOption.value = datum
+                                    onDismissRequest(false)
+                                }
+                            )
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        RadioButton(
+                            selected = (datum == selectedOption.value),
+                            modifier = Modifier.padding(all = Dp(value = 8F)),
+                            onClick = {
+                                selectedOption.value = datum
+                                onDismissRequest(false)
+                            },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = Color(0xFF00B0FF),
+                                unselectedColor = Color(0xFF986DF2),
+                            )
+                        )
+                        Text(
+                            text = datum,
+                            modifier = Modifier.padding(start = 16.dp, top = 20.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 fun CreatePersonalChat(peerEmail:String, navController: NavHostController){
     var alreadyContacted = false
     db.collection("Chats").addSnapshotListener{snapshot, e ->
@@ -133,7 +222,6 @@ fun peerDashboard(navController: NavHostController){
         Filteredusers.removeAll(Filteredusers)
         GetUsersData()
     }
-    val states =  Filteredusers.reversed().map { it to rememberSwipeableCardState() }
     var finfilt by remember { mutableStateOf(false) }
     val context = LocalContext.current
     if(Filteredusers.isEmpty()){
@@ -146,6 +234,9 @@ fun peerDashboard(navController: NavHostController){
         for (filtereduser in Filteredusers) {
             println("Siapa aja tuh $filtereduser")
         }
+        if(showDashfilterPersonal.value){
+            dashDialog(onDismissRequest = {showDashfilterPersonal.value = it})
+        }
         Column(modifier = Modifier
             .fillMaxSize()
             .background(color = Color(0xfff1f1f1)), ) {
@@ -154,19 +245,39 @@ fun peerDashboard(navController: NavHostController){
                 .fillMaxSize()
                 .padding(top = 15.dp)) {
                 Box(){
-                    states.forEach { (profile, state) ->
-                        if (state.swipedDirection == null) {
-                            UserCard(modifier = Modifier
-                                .swipableCard(
-                                    state = state,
-                                    blockedDirections = listOf(Direction.Down),
-                                    onSwiped = {  },
-                                    onSwipeCancel = {
-                                        println("The swiping was cancelled")
-                                    }
-                                ), prof = profile,navController = navController)
+                    if(selectedOption.value != "All Posts"){
+                        val filteredUserDashboard = Filteredusers.filter { it.studyField ==  selectedOption.value}
+                        val states =  filteredUserDashboard.reversed().map { it to rememberSwipeableCardState() }
+                        states.forEach { (profile, state) ->
+                            if (state.swipedDirection == null) {
+                                UserCard(modifier = Modifier
+                                    .swipableCard(
+                                        state = state,
+                                        blockedDirections = listOf(Direction.Down),
+                                        onSwiped = {  },
+                                        onSwipeCancel = {
+                                            println("The swiping was cancelled")
+                                        }
+                                    ), prof = profile,navController = navController)
+                            }
+                        }
+                    }else{
+                        val states =  Filteredusers.reversed().map { it to rememberSwipeableCardState() }
+                        states.forEach { (profile, state) ->
+                            if (state.swipedDirection == null) {
+                                UserCard(modifier = Modifier
+                                    .swipableCard(
+                                        state = state,
+                                        blockedDirections = listOf(Direction.Down),
+                                        onSwiped = {  },
+                                        onSwipeCancel = {
+                                            println("The swiping was cancelled")
+                                        }
+                                    ), prof = profile,navController = navController)
+                            }
                         }
                     }
+
                 }
             }
         }

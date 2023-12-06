@@ -28,6 +28,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.ButtonDefaults
@@ -36,6 +37,7 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
@@ -204,13 +206,36 @@ fun DashboardScreen (navController: NavHostController) {
         groupDashboard(navController = navController)
     }
 }
+fun GetGroupChatData(){
+    db.collection("Chatgroup").addSnapshotListener{snapshot, e ->
+        if (e != null) {
+            Log.w(ContentValues.TAG, "Listen failed.", e)
+            return@addSnapshotListener
+        }
+        if(snapshot != null && !snapshot.isEmpty){
+            val list = snapshot.documents
+            for(datum in list){
+                val c: GroupChatType? = datum.toObject(GroupChatType::class.java)
+                c?.id = datum.id
+                if(c!= null){
+                    groupChatsDashboard.add(c)
+                }
+            }
+        }
+    }
+}
 @Composable
 fun groupDashboard(navController: NavHostController){
+    LaunchedEffect(Unit){
+        groupChatsDashboard.removeAll(groupChatsDashboard)
+        GetGroupChatData()
+    }
     Column(modifier = Modifier
         .fillMaxSize()
         .background(color = Color(0xfff1f1f1)), ) {
         Header("dashboard")
         testViewGroup()
+
     }
 }
 @OptIn(ExperimentalSwipeableCardApi::class)

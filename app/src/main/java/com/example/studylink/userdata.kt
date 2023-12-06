@@ -26,6 +26,14 @@ data class YourChatsType(
     var id: String = "",
     var isGroup: Boolean = false
 )
+data class GroupChatType(
+    var id: String = "",
+    var groupFocus: String = "",
+    val hashTag:MutableList<String> = mutableListOf<String>(),
+    val members:MutableList<String> = mutableListOf(),
+    var maxMember: Int = 10
+)
+
 
 data class ChatDataType(
     val Content: String = "",
@@ -41,6 +49,7 @@ val Realusers = mutableStateListOf<ProfileFirestore>(
 var theSmartReply= mutableStateListOf<String>()
 
 var Filteredusers = mutableStateListOf<ProfileFirestore>()
+val groupChatsDashboard = mutableStateListOf<GroupChatType>()
 
 val tempTheChat = mutableStateListOf<YourChatsType>()
 

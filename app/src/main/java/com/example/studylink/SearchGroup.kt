@@ -1,6 +1,8 @@
 package com.example.studylink
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,9 +33,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.RadioButtonDefaults
@@ -315,9 +319,6 @@ fun overlayGroupInfo(
                 people.forEach { person ->
                     PersonBox(name = person, onPersonClick = { })
                 }
-                people.forEach { person ->
-                    PersonBox(name = person, onPersonClick = { })
-                }
             }
         }
     }
@@ -446,118 +447,80 @@ private fun SearchBarPreview() {
 fun testViewGroup() {
     var showOverlay = remember { mutableStateOf(false) }
     var selectedPeople = remember { mutableStateOf<List<String>>(listOf()) }
-
-    Column(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .background(
-                color = Color(0xfff1f1f1)
+    if(groupChatsDashboard.isEmpty()){
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color(0xfff1f1f1)), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = "Loading...", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp))
+            Text(text = "If the loading takes a lot of time then, there is no group.", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp))
+        }
+    }else{
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .background(
+                    color = Color(0xfff1f1f1)
+                )
+                .padding(bottom = 5.dp)
+        ) {
+            GroupSplash()
+            SearchBar(Modifier.padding(bottom = 3.dp))
+            groupChatsDashboard.map {
+                groupcard(
+                    people = it.members,
+                    scope = it.hashTag,
+                    personcount = it.maxMember,
+                    onCardClick = { people ->
+                        showOverlay.value = true
+                        selectedPeople.value = people
+                    },
+                    onButtonClick = { /* Perform the button action here */ }
+                )
+            }
+            groupcard(
+                people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith", "Jamal Hussein", "John Doe", "Jane Smith", "Joanne Canonball"),
+                scope = listOf("Math", "Science"),
+                personcount = 7,
+                onCardClick = { people ->
+                    showOverlay.value = true
+                    selectedPeople.value = people
+                },
+                onButtonClick = { /* Perform the button action here */ }
             )
-            .padding(bottom = 5.dp)
-    ) {
-        GroupSplash()
-        SearchBar(Modifier.padding(bottom = 3.dp))
-        groupcard(
-            people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith", "Jamal Hussein", "John Doe", "Jane Smith", "Joanne Canonball"),
-            scope = listOf("Math", "Science"),
-            personcount = 7,
-            onCardClick = { people ->
-                showOverlay.value = true
-                selectedPeople.value = people
-            },
-            onButtonClick = { /* Perform the button action here */ }
-        )
-        groupcard(
-            people = listOf("Jamal Hussein", "John Doe", "Jane Smith"),
-            scope = listOf("Science", "Astrology", "Economy"),
-            personcount = 5,
-            onCardClick = { people ->
-                showOverlay.value = true
-                selectedPeople.value = people
-            },
-            onButtonClick = { /* Perform the button action here */ }
-        )
-        groupcard(
-            people = listOf("Joanne Canonball", "Jane Smith"),
-            scope = listOf("Science", "Astrology"),
-            personcount = 2,
-            onCardClick = { people ->
-                showOverlay.value = true
-                selectedPeople.value = people
-            },
-            onButtonClick = { /* Perform the button action here */ }
-        )
-        groupcard(
-            people = listOf("Alan Becker", "Jane Smith", "Jane Smith"),
-            scope = listOf("Science", "Geology", "Law"),
-            personcount = 8,
-            onCardClick = { people ->
-                showOverlay.value = true
-                selectedPeople.value = people
-            },
-            onButtonClick = { /* Perform the button action here */ }
-        )
-        groupcard(
-            people = listOf("Jamal Hussein", "John Doe", "Jane Smith"),
-            scope = listOf("Computer Science", "Physics"),
-            personcount = 6,
-            onCardClick = { people ->
-                showOverlay.value = true
-                selectedPeople.value = people
-            },
-            onButtonClick = { /* Perform the button action here */ }
-        )
-        groupcard(
-            people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"),
-            scope = listOf("Math", "Science"),
-            personcount = 7,
-            onCardClick = { people ->
-                showOverlay.value = true
-                selectedPeople.value = people
-            },
-            onButtonClick = { /* Perform the button action here */ }
-        )
-        groupcard(
-            people = listOf("Jamal Hussein", "John Doe", "Jane Smith"),
-            scope = listOf("Science", "Astrology", "Economy"),
-            personcount = 5,
-            onCardClick = { people ->
-                showOverlay.value = true
-                selectedPeople.value = people
-            },
-            onButtonClick = { /* Perform the button action here */ }
-        )
-        groupcard(
-            people = listOf("Joanne Canonball", "Jane Smith"),
-            scope = listOf("Science", "Astrology"),
-            personcount = 2,
-            onCardClick = { people ->
-                showOverlay.value = true
-                selectedPeople.value = people
-            },
-            onButtonClick = { /* Perform the button action here */ }
-        )
-        groupcard(
-            people = listOf("Alan Becker", "Jane Smith", "Jane Smith"),
-            scope = listOf("Science", "Geology", "Law"),
-            personcount = 8,
-            onCardClick = { people ->
-                showOverlay.value = true
-                selectedPeople.value = people
-            },
-            onButtonClick = { /* Perform the button action here */ }
-        )
-        groupcard(
-            people = listOf("Jamal Hussein", "John Doe", "Jane Smith"),
-            scope = listOf("Computer Science", "Physics"),
-            personcount = 6,
-            onCardClick = { people ->
-                showOverlay.value = true
-                selectedPeople.value = people
-            },
-            onButtonClick = { /* Perform the button action here */ }
-        )
+            groupcard(
+                people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith", "Jamal Hussein", "John Doe", "Jane Smith", "Joanne Canonball"),
+                scope = listOf("Math", "Science"),
+                personcount = 7,
+                onCardClick = { people ->
+                    showOverlay.value = true
+                    selectedPeople.value = people
+                },
+                onButtonClick = { /* Perform the button action here */ }
+            )
+            groupcard(
+                people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith", "Jamal Hussein", "John Doe", "Jane Smith", "Joanne Canonball"),
+                scope = listOf("Math", "Science"),
+                personcount = 7,
+                onCardClick = { people ->
+                    showOverlay.value = true
+                    selectedPeople.value = people
+                },
+                onButtonClick = { /* Perform the button action here */ }
+            )
+            groupcard(
+                people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith", "Jamal Hussein", "John Doe", "Jane Smith", "Joanne Canonball"),
+                scope = listOf("Math", "Science"),
+                personcount = 7,
+                onCardClick = { people ->
+                    showOverlay.value = true
+                    selectedPeople.value = people
+                },
+                onButtonClick = { /* Perform the button action here */ }
+            )
+
+        }
     }
+
 
     if (showOverlay.value) {
         overlayGroupInfo(

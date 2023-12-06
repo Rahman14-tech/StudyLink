@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,6 +36,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -51,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -447,14 +450,8 @@ private fun SearchBarPreview() {
 fun testViewGroup() {
     var showOverlay = remember { mutableStateOf(false) }
     var selectedPeople = remember { mutableStateOf<List<String>>(listOf()) }
-    if(groupChatsDashboard.isEmpty()){
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color(0xfff1f1f1)), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Loading...", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp))
-            Text(text = "If the loading takes a lot of time then, there is no group.", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp))
-        }
-    }else{
+
+    Box {
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
@@ -465,18 +462,6 @@ fun testViewGroup() {
         ) {
             GroupSplash()
             SearchBar(Modifier.padding(bottom = 3.dp))
-            groupChatsDashboard.map {
-                groupcard(
-                    people = it.members,
-                    scope = it.hashTag,
-                    personcount = it.maxMember,
-                    onCardClick = { people ->
-                        showOverlay.value = true
-                        selectedPeople.value = people
-                    },
-                    onButtonClick = { /* Perform the button action here */ }
-                )
-            }
             groupcard(
                 people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith", "Jamal Hussein", "John Doe", "Jane Smith", "Joanne Canonball"),
                 scope = listOf("Math", "Science"),
@@ -488,7 +473,47 @@ fun testViewGroup() {
                 onButtonClick = { /* Perform the button action here */ }
             )
             groupcard(
-                people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith", "Jamal Hussein", "John Doe", "Jane Smith", "Joanne Canonball"),
+                people = listOf("Jamal Hussein", "John Doe", "Jane Smith"),
+                scope = listOf("Science", "Astrology", "Economy"),
+                personcount = 5,
+                onCardClick = { people ->
+                    showOverlay.value = true
+                    selectedPeople.value = people
+                },
+                onButtonClick = { /* Perform the button action here */ }
+            )
+            groupcard(
+                people = listOf("Joanne Canonball", "Jane Smith"),
+                scope = listOf("Science", "Astrology"),
+                personcount = 2,
+                onCardClick = { people ->
+                    showOverlay.value = true
+                    selectedPeople.value = people
+                },
+                onButtonClick = { /* Perform the button action here */ }
+            )
+            groupcard(
+                people = listOf("Alan Becker", "Jane Smith", "Jane Smith"),
+                scope = listOf("Science", "Geology", "Law"),
+                personcount = 8,
+                onCardClick = { people ->
+                    showOverlay.value = true
+                    selectedPeople.value = people
+                },
+                onButtonClick = { /* Perform the button action here */ }
+            )
+            groupcard(
+                people = listOf("Jamal Hussein", "John Doe", "Jane Smith"),
+                scope = listOf("Computer Science", "Physics"),
+                personcount = 6,
+                onCardClick = { people ->
+                    showOverlay.value = true
+                    selectedPeople.value = people
+                },
+                onButtonClick = { /* Perform the button action here */ }
+            )
+            groupcard(
+                people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"),
                 scope = listOf("Math", "Science"),
                 personcount = 7,
                 onCardClick = { people ->
@@ -498,9 +523,9 @@ fun testViewGroup() {
                 onButtonClick = { /* Perform the button action here */ }
             )
             groupcard(
-                people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith", "Jamal Hussein", "John Doe", "Jane Smith", "Joanne Canonball"),
-                scope = listOf("Math", "Science"),
-                personcount = 7,
+                people = listOf("Jamal Hussein", "John Doe", "Jane Smith"),
+                scope = listOf("Science", "Astrology", "Economy"),
+                personcount = 5,
                 onCardClick = { people ->
                     showOverlay.value = true
                     selectedPeople.value = people
@@ -508,24 +533,61 @@ fun testViewGroup() {
                 onButtonClick = { /* Perform the button action here */ }
             )
             groupcard(
-                people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith", "Jamal Hussein", "John Doe", "Jane Smith", "Joanne Canonball"),
-                scope = listOf("Math", "Science"),
-                personcount = 7,
+                people = listOf("Joanne Canonball", "Jane Smith"),
+                scope = listOf("Science", "Astrology"),
+                personcount = 2,
                 onCardClick = { people ->
                     showOverlay.value = true
                     selectedPeople.value = people
                 },
                 onButtonClick = { /* Perform the button action here */ }
             )
-
+            groupcard(
+                people = listOf("Alan Becker", "Jane Smith", "Jane Smith"),
+                scope = listOf("Science", "Geology", "Law"),
+                personcount = 8,
+                onCardClick = { people ->
+                    showOverlay.value = true
+                    selectedPeople.value = people
+                },
+                onButtonClick = { /* Perform the button action here */ }
+            )
+            groupcard(
+                people = listOf("Jamal Hussein", "John Doe", "Jane Smith"),
+                scope = listOf("Computer Science", "Physics"),
+                personcount = 6,
+                onCardClick = { people ->
+                    showOverlay.value = true
+                    selectedPeople.value = people
+                },
+                onButtonClick = { /* Perform the button action here */ }
+            )
         }
-    }
 
+        Button(
+            onClick = {},
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .wrapContentWidth()
+                .height(40.dp)
+                .offset(x = (-5).dp, y = (-8).dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.searchicon),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(30.dp)
+                    .align(Alignment.CenterVertically)
+            )
+            Spacer(modifier = Modifier.width(5.dp))
+            Text(text = "Auto Match")
+        }
 
-    if (showOverlay.value) {
-        overlayGroupInfo(
-            people = selectedPeople.value,
-            onDismissRequest = { showOverlay.value = it }
-        )
+        if (showOverlay.value) {
+            overlayGroupInfo(
+                people = selectedPeople.value,
+                onDismissRequest = { showOverlay.value = it }
+            )
+        }
     }
 }

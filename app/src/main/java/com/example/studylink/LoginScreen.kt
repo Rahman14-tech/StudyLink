@@ -144,7 +144,6 @@ fun LoginScreen(navController: NavHostController){
                                     if(task.isSuccessful){
                                         Toast.makeText(Context, "Login Successful", Toast.LENGTH_LONG)
                                         currUser.value = Realusers.first { it.email == email.text }
-
 //                                        val usersRef = firestore.collection("Users")
 //                                        usersRef.whereEqualTo("email", email.text).get()
 //                                            .addOnSuccessListener { documents ->

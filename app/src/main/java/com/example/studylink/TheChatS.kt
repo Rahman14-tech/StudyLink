@@ -205,7 +205,8 @@ fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostContr
                         .size(42.dp)
                         .clip(
                             CircleShape
-                        ))
+                        )
+                    )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(

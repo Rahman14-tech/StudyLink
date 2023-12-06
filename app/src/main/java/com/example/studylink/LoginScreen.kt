@@ -75,6 +75,7 @@ fun LoginScreen(navController: NavHostController){
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     val brush1 = Brush.horizontalGradient(listOf(Color(0xFF2C8DFF), Color(0xFF006DEC)))
     val brush2 = Brush.horizontalGradient(listOf(Color(0xFFF5ED37), Color(0xFFCCC51B)))
+
     Box(modifier = Modifier
         .fillMaxSize()
         .paint(painterResource(id = R.drawable.background), contentScale = ContentScale.FillBounds)){
@@ -143,6 +144,16 @@ fun LoginScreen(navController: NavHostController){
                                     if(task.isSuccessful){
                                         Toast.makeText(Context, "Login Successful", Toast.LENGTH_LONG)
                                         currUser.value = Realusers.first { it.email == email.text }
+
+//                                        val usersRef = firestore.collection("Users")
+//                                        usersRef.whereEqualTo("email", email.text).get()
+//                                            .addOnSuccessListener { documents ->
+//                                                for (document in documents) {
+//                                                    val user = document.toObject(ProfileFirestore::class.java)
+//                                                    currUser.value = user.copy(id = document.id) // Add the document ID here
+//                                                }
+//                                            }
+
                                         navController.navigate(Dashboard.route)
                                     }else{
                                         Toast.makeText(Context, "Credential Invalid", Toast.LENGTH_LONG).show()

@@ -36,6 +36,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +47,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -54,8 +57,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 
 @Composable
 fun groupcard(
@@ -257,29 +262,30 @@ fun PersonBox(
 @Composable
 fun overlayGroupInfo(
     people: List<String>,
-    onBackgoundClick: () -> Unit
+    onDismissRequest: (Boolean) -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0, 0, 0, 90))
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() },
-                onClick = onBackgoundClick
-            )
-    ) {
+    var context = LocalContext.current
+    var displayMetrics = context.resources.displayMetrics
+
+    var screenWidthInDp = with(LocalDensity.current) {
+        displayMetrics.widthPixels.dp / density
+    }
+
+    var screenHeightInDp = with(LocalDensity.current) {
+        displayMetrics.heightPixels.dp / density
+    }
+
+    var overlayHeight = (screenHeightInDp * 0.6f)
+    var overlayWidth = (screenWidthInDp * 0.85f)
+
+    Dialog(onDismissRequest = { onDismissRequest(false) }) {
         Card(
             colors = CardDefaults.cardColors(containerColor = Color.White),
             modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .fillMaxHeight(0.6f)
+                .width(overlayWidth)
+                .height(overlayHeight)
                 .heightIn(max = 420.dp)
                 .widthIn(max = 300.dp)
-                .align(Alignment.Center)
-                .pointerInput(Unit) {
-                    detectTapGestures(onTap = { /* Do nothing */ })
-                }
         ) {
             Box(
                 modifier = Modifier
@@ -315,6 +321,15 @@ fun overlayGroupInfo(
             }
         }
     }
+}
+
+@Preview(widthDp = 393)
+@Composable
+fun OverlayGroupInfoPv() {
+    overlayGroupInfo(
+        people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith", "Jamal Hussein", "John Doe", "Jane Smith", "Joanne Canonball"),
+        onDismissRequest = { }
+    )
 }
 
 @Composable
@@ -547,7 +562,7 @@ fun testViewGroup() {
     if (showOverlay.value) {
         overlayGroupInfo(
             people = selectedPeople.value,
-            onBackgoundClick = { showOverlay.value = false }
+            onDismissRequest = { showOverlay.value = it }
         )
     }
 }

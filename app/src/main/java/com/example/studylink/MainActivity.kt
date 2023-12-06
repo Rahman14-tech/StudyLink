@@ -1,22 +1,36 @@
 package com.example.studylink
 
 import android.content.ContentValues.TAG
+import android.Manifest
 import android.content.Intent
 import android.content.IntentSender
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
 import com.example.studylink.ui.theme.StudyLinkTheme
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
@@ -58,6 +72,7 @@ fun GetUsersData(){
         }
     }
 }
+
 class MainActivity : ComponentActivity() {
 
     private val REQ_ONE_TAP = 2  // Can be any integer unique to the Activity

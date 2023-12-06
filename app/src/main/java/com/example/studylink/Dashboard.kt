@@ -186,7 +186,6 @@ fun CreatePersonalChat(peerEmail:String, navController: NavHostController){
             }else{
                 db.collection("Chats").add(hashMapOf(
                     "FkUsers" to mutableListOf<String>(currUser.value.email, peerEmail),
-                    "IsGroup" to false
                 )).addOnSuccessListener {
                     navController.navigate(TheChatS.route+"/${it.id}")
                 }.addOnFailureListener{

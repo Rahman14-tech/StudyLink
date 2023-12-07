@@ -49,6 +49,11 @@ object TheChatS: Destinations{
     const val ChatId = "ChatId"
 
 }
+object AutoMatch: Destinations{
+    override val route: String = "AutoMatch"
+    override val icon: Int = R.drawable.chaticon
+    override val title: String = "Auto Match"
+}
 
 object MediaViewer:Destinations{
     override val route: String = "MediaViewer"

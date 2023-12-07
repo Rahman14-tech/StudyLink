@@ -106,6 +106,9 @@ fun BottomBar(navController: NavHostController){
                 composable(Setting.route){
                     ProfileScreen(navController = navController)
                 }
+                composable(AutoMatch.route){
+                    AutoMatch(navController = navController)
+                }
                 
             }
         }

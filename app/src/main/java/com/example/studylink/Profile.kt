@@ -3,6 +3,7 @@ package com.example.studylink
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +29,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -49,6 +51,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -69,6 +72,7 @@ import androidx.navigation.NavHostController
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
@@ -368,12 +372,9 @@ private fun AccountPreview() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableState")
 @Composable
 fun trymodal() {
-    val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
-
     Scaffold(
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -385,45 +386,8 @@ fun trymodal() {
             )
         }
     ) {  contentPadding ->
-        // Screen content
-
         if (showBottomSheet.value) {
-            ModalBottomSheet(
-                onDismissRequest = {
-                    showBottomSheet.value = false
-                },
-                sheetState = sheetState,
-                containerColor = Color.White,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .background(color = Color.White)
-                        .fillMaxWidth()
-                        .height(58.dp)
-                ) {
-                    Text(
-                        text = "Enter your name",
-                        color = Color.Black,
-                        style = TextStyle(
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        modifier = Modifier
-                            .align(alignment = Alignment.CenterStart)
-                            .padding(start = 15.dp)
-                    )
-                }
-                TextButton(
-                    onClick = {
-                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-                        if (!sheetState.isVisible) {
-                            showBottomSheet.value = false
-                        }
-                    }
-                }) {
-                    Text(text = "Cancel")
-                }
-            }
+
         }
     }
 }
@@ -434,63 +398,103 @@ private fun modalpv() {
     trymodal()
 }
 
+@SuppressLint("UnrememberedMutableState")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun overlayNameChange(
-    onDismissRequest: (Boolean) -> Unit
-) {
-    var context = LocalContext.current
-    var displayMetrics = context.resources.displayMetrics
+fun overlayNameChange() {
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
 
-    var screenWidthInDp = with(LocalDensity.current) {
-        displayMetrics.widthPixels.dp / density
-    }
-
-    var screenHeightInDp = with(LocalDensity.current) {
-        displayMetrics.heightPixels.dp / density
-    }
-
-    var overlayHeight = (screenHeightInDp * 0.2f)
-
-    Dialog(
-        onDismissRequest = { onDismissRequest(false) },
-        properties = DialogProperties(usePlatformDefaultWidth = true)
+    ModalBottomSheet(
+        onDismissRequest = {
+            showOverlayNameProfile.value = false
+        },
+        shape = RoundedCornerShape(
+            topStart = 8.dp,
+            topEnd = 8.dp,
+            bottomStart = 0.dp,
+            bottomEnd = 0.dp
+        ),
+        sheetState = sheetState,
+        containerColor = Color.White,
+        contentColor = Color.Transparent,
+        dragHandle = { },
+        modifier = Modifier
+            .background(Color.Transparent)
     ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth()
+        Box(
+            modifier = Modifier
+                .background(color = Color.White)
+                .fillMaxWidth()
+                .height(58.dp)
         ) {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                shape = RoundedCornerShape(
-                    topStart = 8.dp,
-                    topEnd = 8.dp,
-                    bottomStart = 0.dp,
-                    bottomEnd = 0.dp
+            Text(
+                text = "Enter your name",
+                color = Color.Black,
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
                 ),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(overlayHeight)
-                    .heightIn(max = 420.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .background(color = Color.White)
-                        .fillMaxWidth()
-                        .height(58.dp)
-                ) {
-                    Text(
-                        text = "Enter your name",
-                        color = Color.Black,
-                        style = TextStyle(
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        modifier = Modifier
-                            .align(alignment = Alignment.CenterStart)
-                            .padding(start = 15.dp)
-                    )
-                }
-            }
+                    .align(alignment = Alignment.CenterStart)
+                    .padding(start = 15.dp)
+            )
         }
+        CustomTextField(
+            value = mutableStateOf(inputText.value),
+            onValueChange = { inputText.value = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .background(Color.White),
+            useClear = false
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(
+            modifier = Modifier
+                .align(Alignment.End)
+        ) {
+            TextButton(
+                onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showOverlayNameProfile.value = false
+                        }
+                    }
+                }
+            ) {
+                Text(
+                    text = "Cancel",
+                    color = Color(0xffffc600),
+                    style = TextStyle(
+                        fontSize = 16.sp
+                    )
+                )
+            }
+            Spacer(modifier = Modifier.width(5.dp))
+            TextButton(
+                onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+
+                        // Save Data
+
+                        if (!sheetState.isVisible) {
+                            showOverlayNameProfile.value = false
+                        }
+                    }
+                }
+            ) {
+                Text(
+                    text = "Save",
+                    color = Color(0xffffc600),
+                    style = TextStyle(
+                        fontSize = 16.sp
+                    )
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+        }
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
@@ -498,25 +502,30 @@ fun overlayNameChange(
 @Preview(widthDp = 393)
 @Composable
 private fun overlayNamePreview() {
-    overlayNameChange(onDismissRequest = {})
+    overlayNameChange()
 }
 
 @Composable
 fun ProfileScreen(navController: NavHostController) {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = Color(0xfff1f1f1))
     ) {
-        ProfileTopNavbar()
-        Column {
-            userStatus()
-            Account()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color(0xfff1f1f1))
+        ) {
+            ProfileTopNavbar()
+            Column {
+                userStatus()
+                Account()
+            }
         }
-    }
 
-    if (showOverlayNameProfile.value) {
-        overlayNameChange(onDismissRequest = { showOverlayNameProfile.value = it })
+        if (showOverlayNameProfile.value) {
+            overlayNameChange()
+        }
     }
 }
 

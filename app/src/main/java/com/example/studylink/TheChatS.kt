@@ -55,6 +55,9 @@ import android.webkit.MimeTypeMap
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import com.google.mlkit.nl.smartreply.SmartReply
 import com.google.mlkit.nl.smartreply.SmartReplySuggestion
 import com.google.mlkit.nl.smartreply.SmartReplySuggestionResult
@@ -86,15 +89,34 @@ fun CustomTextField(
     maxLine: Int = 1,
     fontSize: TextUnit = 15.sp,
     value: MutableState<String>,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    maxChar: Int = 8,
+    useCounter: Boolean = false
 ) {
+    val focusRequester = remember { FocusRequester() }
+    val maxLength = maxChar
+
     BasicTextField(
         modifier = modifier
-            .background(Color(0x00ffffff)),
+            .background(Color(0x00ffffff))
+            .focusRequester(focusRequester)
+            .onFocusChanged { state ->
+                if (state.isFocused) {
+                    focusRequester.requestFocus()
+                }
+            },
         value = value.value,
         onValueChange = {
-            value.value = it
-            onValueChange(it)
+            if (useCounter) {
+                if (it.length <= maxLength) {
+                    value.value = it
+                    onValueChange(it)
+                }
+            }
+            else {
+                value.value = it
+                onValueChange(it)
+            }
         },
         singleLine = singleLine,
         maxLines = maxLine,
@@ -142,6 +164,13 @@ fun CustomTextField(
                             tint = Color.DarkGray.copy(alpha = 0.8f)
                         )
                     }
+                }
+                if (useCounter) {
+                    Text(
+                        text = "${maxLength - value.value.length}",
+                        fontSize = fontSize,
+                        color = Color(0xff4b4b4b)
+                    )
                 }
             }
         }

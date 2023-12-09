@@ -9,13 +9,16 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -37,6 +40,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -76,6 +81,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
@@ -85,6 +91,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
 @Composable
@@ -130,58 +138,66 @@ private fun TopNavbarPreview() {
 fun userNameBox(
     contentSpace: Dp
 ) {
-    Box(
+    Button(
+        onClick = {
+            showOverlayNameProfile.value = true
+            inputText.value = currUser.value.fullName
+        },
+        contentPadding = PaddingValues(0.dp),
+        shape = RectangleShape,
+        colors = ButtonDefaults.buttonColors(Color.Transparent),
         modifier = Modifier
             .fillMaxWidth()
             .height(70.dp)
-            .clickable(
-                onClick = { showOverlayNameProfile.value = true }
-            )
     ) {
-        Row(
-            modifier = Modifier
-                .align(alignment = Alignment.CenterStart)
+        Box(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Spacer(modifier = Modifier.width(contentSpace))
-            Spacer(modifier = Modifier.fillMaxWidth(0.05f))
-            Column(
+            Row(
                 modifier = Modifier
-                    .wrapContentSize()
+                    .align(alignment = Alignment.CenterStart)
             ) {
-                Text(
-                    text = currUser.value.fullName,
-                    color = Color(0xff202020),
-                    style = TextStyle(
-                        fontSize = 16.sp)
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "Name",
-                    color = Color.DarkGray,
-                    style = TextStyle(
-                        fontSize = 13.sp)
-                )
-            }
-        }
-        Row(
-            modifier = Modifier
-                .align(alignment = Alignment.CenterEnd)
-        ) {
-            Box(
-                modifier = Modifier
-                    .align(alignment = Alignment.CenterVertically)
-                    .requiredSize(size = 20.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "edit",
-                    tint = Color(0xff444444),
+                Spacer(modifier = Modifier.width(contentSpace))
+                Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+                Column(
                     modifier = Modifier
-                        .align(alignment = Alignment.Center)
-                )
+                        .wrapContentSize()
+                ) {
+                    Text(
+                        text = currUser.value.fullName,
+                        color = Color(0xff202020),
+                        style = TextStyle(
+                            fontSize = 16.sp)
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "Name",
+                        color = Color.DarkGray,
+                        style = TextStyle(
+                            fontSize = 13.sp)
+                    )
+                }
             }
-            Spacer(modifier = Modifier.fillMaxWidth(0.05f))
-            Spacer(modifier = Modifier.width(contentSpace))
+            Row(
+                modifier = Modifier
+                    .align(alignment = Alignment.CenterEnd)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(alignment = Alignment.CenterVertically)
+                        .requiredSize(size = 20.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "edit",
+                        tint = Color(0xff444444),
+                        modifier = Modifier
+                            .align(alignment = Alignment.Center)
+                    )
+                }
+                Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+                Spacer(modifier = Modifier.width(contentSpace))
+            }
         }
     }
 }
@@ -190,58 +206,65 @@ fun userNameBox(
 fun userBioBox(
     contentSpace: Dp
 ) {
-    Box(
+    Button(
+        onClick = {
+            showOverlayBioProfile.value = true
+        },
+        contentPadding = PaddingValues(0.dp),
+        shape = RectangleShape,
+        colors = ButtonDefaults.buttonColors(Color.Transparent),
         modifier = Modifier
             .fillMaxWidth()
             .height(70.dp)
-            .clickable(
-                onClick = { showOverlayBioProfile.value = true }
-            )
     ) {
-        Row(
-            modifier = Modifier
-                .align(alignment = Alignment.CenterStart)
+        Box(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Spacer(modifier = Modifier.width(contentSpace))
-            Spacer(modifier = Modifier.fillMaxWidth(0.05f))
-            Column(
+            Row(
                 modifier = Modifier
-                    .wrapContentSize()
+                    .align(alignment = Alignment.CenterStart)
             ) {
-                Text(
-                    text = "Bio",
-                    color = Color(0xff202020),
-                    style = TextStyle(
-                        fontSize = 16.sp)
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "Add a few words about yourself",
-                    color = Color.DarkGray,
-                    style = TextStyle(
-                        fontSize = 13.sp)
-                )
-            }
-        }
-        Row(
-            modifier = Modifier
-                .align(alignment = Alignment.CenterEnd)
-        ) {
-            Box(
-                modifier = Modifier
-                    .align(alignment = Alignment.CenterVertically)
-                    .requiredSize(size = 20.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "edit",
-                    tint = Color(0xff444444),
+                Spacer(modifier = Modifier.width(contentSpace))
+                Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+                Column(
                     modifier = Modifier
-                        .align(alignment = Alignment.Center)
-                )
+                        .wrapContentSize()
+                ) {
+                    Text(
+                        text = "Bio",
+                        color = Color(0xff202020),
+                        style = TextStyle(
+                            fontSize = 16.sp)
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "Add a few words about yourself",
+                        color = Color.DarkGray,
+                        style = TextStyle(
+                            fontSize = 13.sp)
+                    )
+                }
             }
-            Spacer(modifier = Modifier.fillMaxWidth(0.05f))
-            Spacer(modifier = Modifier.width(contentSpace))
+            Row(
+                modifier = Modifier
+                    .align(alignment = Alignment.CenterEnd)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(alignment = Alignment.CenterVertically)
+                        .requiredSize(size = 20.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "edit",
+                        tint = Color(0xff444444),
+                        modifier = Modifier
+                            .align(alignment = Alignment.Center)
+                    )
+                }
+                Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+                Spacer(modifier = Modifier.width(contentSpace))
+            }
         }
     }
 }
@@ -408,6 +431,7 @@ fun overlayNameChange() {
     ModalBottomSheet(
         onDismissRequest = {
             showOverlayNameProfile.value = false
+            inputText.value = ""
         },
         shape = RoundedCornerShape(
             topStart = 8.dp,
@@ -419,82 +443,117 @@ fun overlayNameChange() {
         containerColor = Color.White,
         contentColor = Color.Transparent,
         dragHandle = { },
+        windowInsets = WindowInsets.ime,
         modifier = Modifier
             .background(Color.Transparent)
     ) {
-        Box(
-            modifier = Modifier
-                .background(color = Color.White)
-                .fillMaxWidth()
-                .height(58.dp)
-        ) {
-            Text(
-                text = "Enter your name",
-                color = Color.Black,
-                style = TextStyle(
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                ),
+        val context = LocalContext.current
+        val displayMetrics = context.resources.displayMetrics
+
+        val screenWidthInDp = with(LocalDensity.current) {
+            displayMetrics.widthPixels.dp / density
+        }
+
+        val maxWidthTextField = (screenWidthInDp - 40.dp)
+
+        Row {
+            Spacer(modifier = Modifier.width(20.dp))
+            Column(
                 modifier = Modifier
-                    .align(alignment = Alignment.CenterStart)
-                    .padding(start = 15.dp)
-            )
-        }
-        CustomTextField(
-            value = mutableStateOf(inputText.value),
-            onValueChange = { inputText.value = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .background(Color.White),
-            useClear = false
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Row(
-            modifier = Modifier
-                .align(Alignment.End)
-        ) {
-            TextButton(
-                onClick = {
-                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-                        if (!sheetState.isVisible) {
-                            showOverlayNameProfile.value = false
-                        }
-                    }
-                }
+                    .fillMaxWidth()
             ) {
-                Text(
-                    text = "Cancel",
-                    color = Color(0xffffc600),
-                    style = TextStyle(
-                        fontSize = 16.sp
+                Box(
+                    modifier = Modifier
+                        .background(color = Color.White)
+                        .fillMaxWidth()
+                        .height(58.dp)
+                ) {
+                    Text(
+                        text = "Enter your name",
+                        color = Color.Black,
+                        style = TextStyle(
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterStart)
                     )
-                )
-            }
-            Spacer(modifier = Modifier.width(5.dp))
-            TextButton(
-                onClick = {
-                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-
-                        // Save Data
-
-                        if (!sheetState.isVisible) {
-                            showOverlayNameProfile.value = false
-                        }
-                    }
                 }
-            ) {
-                Text(
-                    text = "Save",
-                    color = Color(0xffffc600),
-                    style = TextStyle(
-                        fontSize = 16.sp
-                    )
+                Spacer(modifier = Modifier.height(10.dp))
+                CustomTextField(
+                    value = mutableStateOf(inputText.value),
+                    onValueChange = { inputText.value = it },
+                    modifier = Modifier
+                        .width(maxWidthTextField)
+                        .background(Color.White),
+                    useClear = false,
+                    fontSize = 18.sp,
+                    singleLine = true,
+                    placeholderText = "Enter Name",
+                    imeAction = ImeAction.Done,
+                    useCounter = true,
+                    maxChar = 10
                 )
+                Spacer(modifier = Modifier.height(1.dp))
+                Divider(
+                    modifier = Modifier
+                    .width(maxWidthTextField-24.dp)
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.End)
+                ) {
+                    TextButton(
+                        onClick = {
+                            inputText.value = ""
+
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showOverlayNameProfile.value = false
+                                }
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            color = Color(0xffffc600),
+                            style = TextStyle(
+                                fontSize = 16.sp
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(5.dp))
+                    TextButton(
+                        onClick = {
+                            val docRef = Firebase.firestore.collection("Users").document(currUser.value.id)
+
+                            docRef.update("fullName", inputText.value)
+                            currUser.value.fullName = inputText.value
+
+                            inputText.value = ""
+
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showOverlayNameProfile.value = false
+                                }
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = "Save",
+                            color = Color(0xffffc600),
+                            style = TextStyle(
+                                fontSize = 16.sp
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                }
             }
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(20.dp))
         }
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(15.dp))
     }
 }
 
@@ -515,6 +574,7 @@ fun ProfileScreen(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = Color(0xfff1f1f1))
+                .verticalScroll(rememberScrollState())
         ) {
             ProfileTopNavbar()
             Column {

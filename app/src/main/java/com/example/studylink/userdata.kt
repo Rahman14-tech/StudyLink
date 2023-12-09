@@ -16,7 +16,7 @@ val tempUrl = mutableStateOf(TextFieldValue(""))
 data class ProfileFirestore(
     val id: String = "",
     val email: String = "",
-    val fullName: String = "",
+    var fullName: String = "",
     val imageURL: String = "",
     val strongAt: MutableList<String> = mutableListOf(),
     val wantStudy: MutableList<String> = mutableListOf(),

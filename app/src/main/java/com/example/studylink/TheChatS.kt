@@ -58,6 +58,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.unit.Dp
 import com.google.mlkit.nl.smartreply.SmartReply
 import com.google.mlkit.nl.smartreply.SmartReplySuggestion
 import com.google.mlkit.nl.smartreply.SmartReplySuggestionResult
@@ -93,7 +94,8 @@ fun CustomTextField(
     value: MutableState<String>,
     onValueChange: (String) -> Unit,
     maxChar: Int = 8,
-    useCounter: Boolean = false
+    useCounter: Boolean = false,
+    counterPadding: Dp = 5.dp
 ) {
     val focusRequester = remember { FocusRequester() }
     val maxLength = maxChar
@@ -171,7 +173,9 @@ fun CustomTextField(
                     Text(
                         text = "${maxLength - value.value.length}",
                         fontSize = fontSize,
-                        color = Color(0xff4b4b4b)
+                        color = Color(0xff4b4b4b),
+                        modifier = Modifier
+                            .padding(start = counterPadding)
                     )
                 }
             }

@@ -78,6 +78,7 @@ import androidx.navigation.NavHostController
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -429,6 +430,7 @@ fun overlayNameChange() {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     var dasBio = remember { mutableStateOf(currUser.value.fullName) }
+    val color = remember { mutableStateOf(Color.Gray) }
 
     ModalBottomSheet(
         onDismissRequest = {
@@ -487,17 +489,24 @@ fun overlayNameChange() {
                     onValueChange = { dasBio.value = it },
                     modifier = Modifier
                         .width(maxWidthTextField)
-                        .background(Color.White),
+                        .background(Color.White)
+                        .onFocusChanged { focusState ->
+                            when (focusState.isFocused) {
+                                true -> color.value = Color(0xFFFFC600)
+                                false -> color.value = Color.Gray
+                            }
+                        },
                     useClear = false,
-                    fontSize = 18.sp,
+                    fontSize = 17.sp,
                     singleLine = true,
                     placeholderText = "Enter Name",
                     imeAction = ImeAction.Done,
                     useCounter = true,
-                    maxChar = 10
+                    maxChar = 20
                 )
                 Spacer(modifier = Modifier.height(1.dp))
                 Divider(
+                    color = color.value,
                     modifier = Modifier
                     .width(maxWidthTextField-24.dp)
                 )
@@ -542,7 +551,6 @@ fun overlayNameChange() {
                             }.addOnFailureListener{
                                 Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
                             }
-
                         }
                     ) {
                         Text(
@@ -562,11 +570,156 @@ fun overlayNameChange() {
     }
 }
 
-
 @Preview(widthDp = 393)
 @Composable
 private fun overlayNamePreview() {
     overlayNameChange()
+}
+
+@SuppressLint("UnrememberedMutableState")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun overlayBioChange() {
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    val color = remember { mutableStateOf(Color.Gray) }
+
+    ModalBottomSheet(
+        onDismissRequest = {
+            showOverlayBioProfile.value = false
+            inputText.value = ""
+        },
+        shape = RoundedCornerShape(
+            topStart = 8.dp,
+            topEnd = 8.dp,
+            bottomStart = 0.dp,
+            bottomEnd = 0.dp
+        ),
+        sheetState = sheetState,
+        containerColor = Color.White,
+        contentColor = Color.Transparent,
+        dragHandle = { },
+        windowInsets = WindowInsets.ime,
+        modifier = Modifier
+            .background(Color.Transparent)
+    ) {
+        val context = LocalContext.current
+        val displayMetrics = context.resources.displayMetrics
+
+        val screenWidthInDp = with(LocalDensity.current) {
+            displayMetrics.widthPixels.dp / density
+        }
+
+        val maxWidthTextField = (screenWidthInDp - 40.dp)
+
+        Row {
+            Spacer(modifier = Modifier.width(20.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(color = Color.White)
+                        .fillMaxWidth()
+                        .height(58.dp)
+                ) {
+                    Text(
+                        text = "Enter your bio",
+                        color = Color.Black,
+                        style = TextStyle(
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterStart)
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                CustomTextField(
+                    value = mutableStateOf(inputText.value),
+                    onValueChange = { inputText.value = it },
+                    modifier = Modifier
+                        .width(maxWidthTextField)
+                        .background(Color.White)
+                        .onFocusChanged { focusState ->
+                            when (focusState.isFocused) {
+                                true -> color.value = Color(0xFFFFC600)
+                                false -> color.value = Color.Gray
+                            }
+                        },
+                    useClear = false,
+                    fontSize = 17.sp,
+                    singleLine = false,
+                    maxLine = 3,
+                    placeholderText = "Few words about yourself",
+                    imeAction = ImeAction.Done,
+                    useCounter = true,
+                    maxChar = 80,
+                    counterPadding = 14.dp
+                )
+                Spacer(modifier = Modifier.height(1.dp))
+                Divider(
+                    color = color.value,
+                    modifier = Modifier
+                        .width(maxWidthTextField-24.dp)
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.End)
+                ) {
+                    TextButton(
+                        onClick = {
+                            inputText.value = ""
+
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showOverlayBioProfile.value = false
+                                }
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            color = Color(0xffffc600),
+                            style = TextStyle(
+                                fontSize = 16.sp
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(5.dp))
+                    TextButton(
+                        onClick = {
+                            val docRef = Firebase.firestore.collection("Users").document(currUser.value.id)
+
+                            docRef.update("fullName", inputText.value)
+                            currUser.value.fullName = inputText.value
+
+                            inputText.value = ""
+
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showOverlayBioProfile.value = false
+                                }
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = "Save",
+                            color = Color(0xffffc600),
+                            style = TextStyle(
+                                fontSize = 16.sp
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                }
+            }
+            Spacer(modifier = Modifier.width(20.dp))
+        }
+        Spacer(modifier = Modifier.height(15.dp))
+    }
 }
 
 @Composable
@@ -590,6 +743,9 @@ fun ProfileScreen(navController: NavHostController) {
 
         if (showOverlayNameProfile.value) {
             overlayNameChange()
+        }
+        if (showOverlayBioProfile.value) {
+            overlayBioChange()
         }
     }
 }

@@ -2,6 +2,7 @@ package com.example.studylink
 
 import android.content.ContentValues
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -44,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -184,6 +186,31 @@ fun YourChatsCardPersonalSearched(datum: YourChatsType, navController: NavHostCo
 
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun YourChatsCardGroup(datum: GroupChatType, navController: NavHostController){
+    println("OHARANG2 ${datum.id}")
+    val tempPartnerEmail = datum.members.contains(currUser.value.email)
+    var showOverlay = remember { mutableStateOf(false) }
+    var selectedPeople = remember { mutableStateOf<List<String>>(listOf()) }
+    val context = LocalContext.current
+    if(tempPartnerEmail){
+        groupcard(
+            people = datum.members,
+            scope = datum.hashTag,
+            personcount = datum.maxMember,
+            onCardClick = { people ->
+                showOverlay.value = true
+                selectedPeople.value = people
+            },
+            onButtonClick = {
+                println("Wie Spiele ein spiel ${GroupChats.route+"/${datum.id}"}")
+                navController?.navigate(GroupChats.route+"/${datum.id}")
+            }
+        )
+    }
+}
 @Composable
 fun CustomTextField2(
     modifier: Modifier = Modifier,
@@ -261,6 +288,8 @@ fun YourChatScreen(navController: NavHostController){
     LaunchedEffect(Unit){
         tempTheChat.removeAll(tempTheChat)
         GetChatData()
+        groupChatsDashboard.removeAll(groupChatsDashboard)
+        GetGroupChatData()
     }
     Column {
         Header("YourChatScreen")
@@ -301,19 +330,28 @@ fun YourChatScreen(navController: NavHostController){
                 Text(text = "You haven't start any chat yet or refresh it", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp), textAlign = TextAlign.Center)
             }
         }else{
-            if(searchYourChat.value != ""){
-                LazyColumn() {
-                    itemsIndexed(tempTheChat) { _, datum ->
-                        YourChatsCardPersonalSearched(datum, navController)
+            if(selectedPeerChats.value){
+                if(searchYourChat.value != ""){
+                    LazyColumn() {
+                        itemsIndexed(tempTheChat) { _, datum ->
+                            YourChatsCardPersonalSearched(datum, navController)
+                        }
+                    }
+                }else if(searchYourChat.value == "") {
+                    LazyColumn() {
+                        itemsIndexed(tempTheChat) { _, datum ->
+                            YourChatsCardPersonal(datum, navController)
+                        }
                     }
                 }
-            }else if(searchYourChat.value == "") {
+            }else{
                 LazyColumn() {
-                    itemsIndexed(tempTheChat) { _, datum ->
-                        YourChatsCardPersonal(datum, navController)
+                    itemsIndexed(groupChatsDashboard) { _, datum ->
+                        YourChatsCardGroup(datum, navController)
                     }
                 }
             }
+
         }
     }
 }

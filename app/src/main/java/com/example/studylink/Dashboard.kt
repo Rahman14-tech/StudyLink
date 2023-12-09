@@ -224,6 +224,7 @@ fun GetGroupChatData(){
         }
     }
 }
+
 @Composable
 fun groupDashboard(navController: NavHostController){
     LaunchedEffect(Unit){
@@ -234,7 +235,7 @@ fun groupDashboard(navController: NavHostController){
         .fillMaxSize()
         .background(color = Color(0xfff1f1f1)), ) {
         Header("dashboard")
-        testViewGroup()
+        testViewGroup(navController)
 
     }
 }

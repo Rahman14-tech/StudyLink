@@ -14,7 +14,7 @@ import java.util.UUID
 class MediaChatUtil {
     companion object {
 
-        fun uploadToStorage(uri: Uri, type: String,  context: Context, ChatId: String) {
+        fun uploadToStorage(uri: Uri, type: String,  context: Context, ChatId: String, isGroup:Boolean) {
             var anjay = ""
             val storage = Firebase.storage
             val sdf = SimpleDateFormat("dd/M/yyyy HH:mm:ss")
@@ -45,6 +45,21 @@ class MediaChatUtil {
                         Toast.LENGTH_SHORT
                     ).show()
                 }.addOnSuccessListener { taskSnapshot ->
+                    if(isGroup){
+                        spaceRef.downloadUrl.addOnSuccessListener {
+                            db.collection("Chatgroup").document(ChatId).collection("ChatData").add(hashMapOf(
+                                "Content" to "",
+                                "ContentMedia" to it.toString(),
+                                "MediaType" to type,
+                                "TheUser" to currUser.value.email,
+                                "TimeSent" to currentDate,
+                            )).addOnSuccessListener {
+                                Toast.makeText(context,"Image/Video Successfully sent",Toast.LENGTH_SHORT)
+                            }.addOnFailureListener{
+                                Toast.makeText(context,"Image/Video Failed to sent",Toast.LENGTH_SHORT)
+                            }
+                        }
+                    }else{
                         spaceRef.downloadUrl.addOnSuccessListener {
                             db.collection("Chats").document(ChatId).collection("ChatData").add(hashMapOf(
                                 "Content" to "",
@@ -58,6 +73,8 @@ class MediaChatUtil {
                                 Toast.makeText(context,"Image/Video Failed to sent",Toast.LENGTH_SHORT)
                             }
                         }
+                    }
+
                     }
             }
         }

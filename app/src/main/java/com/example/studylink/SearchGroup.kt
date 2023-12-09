@@ -3,6 +3,7 @@ package com.example.studylink
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -68,6 +69,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavHostController
 
 @Composable
 fun groupcard(
@@ -458,11 +460,12 @@ private fun SearchBarPreview() {
     SearchBar()
 }
 
-@Preview(widthDp = 393)
+
 @Composable
-fun testViewGroup() {
+fun testViewGroup(navController: NavHostController) {
     var showOverlay = remember { mutableStateOf(false) }
     var selectedPeople = remember { mutableStateOf<List<String>>(listOf()) }
+    var context = LocalContext.current
 
     if(Filteredusers.isEmpty()){
         Column(modifier = Modifier
@@ -492,7 +495,23 @@ fun testViewGroup() {
                             showOverlay.value = true
                             selectedPeople.value = people
                         },
-                        onButtonClick = { /* Perform the button action here */ }
+                        onButtonClick = {
+                            if(it.members.size >= it.maxMember){
+                                Toast.makeText(context, "The group is full.", Toast.LENGTH_LONG).show()
+                            }else{
+                                if(it.members.contains(currUser.value.email)){
+                                    Toast.makeText(context,"You've enrolled to this group", Toast.LENGTH_LONG).show()
+                                }else{
+                                    val damember = it.members
+                                    damember.add(currUser.value.email)
+                                    db.collection("Chatgroup").document(it.id).update("members",damember).addOnSuccessListener {sucIt ->
+                                        Toast.makeText(context,"Successfully join group", Toast.LENGTH_LONG)
+                                        navController.navigate(GroupChats.route+"/{${it.id}}")
+                                    }
+                                }
+
+                            }
+                        }
                     )
                 }
 

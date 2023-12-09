@@ -109,6 +109,15 @@ fun BottomBar(navController: NavHostController){
                 composable(AutoMatch.route){
                     AutoMatch(navController = navController)
                 }
+                composable(GroupChats.route+"/{${GroupChats.GroupChatId}}", arguments = listOf(
+                    navArgument(GroupChats.GroupChatId){type = NavType.StringType}
+                )){currIt2->
+                    val id = requireNotNull(currIt2.arguments?.getString(GroupChats.GroupChatId))
+                    println("ANJAYTHE ${id}")
+                    GroupChatSystem(navController = navController, GroupChatId = id)
+
+                }
+
                 
             }
         }
@@ -122,6 +131,7 @@ fun BottomContent(navController: NavHostController){
     when (navBackStackEntry?.destination?.route) {
         "Login"->bottomBarState.value = false
         "Register"->bottomBarState.value = false
+        GroupChats.route+"/{${GroupChats.GroupChatId}}" ->bottomBarState.value = false
         TheChatS.route+"/{${TheChatS.ChatId}}"-> bottomBarState.value = false
         MediaViewer.route+"/{${MediaViewer.ChatId}}"+"/{${MediaViewer.MediaUri}}" -> false
         else -> bottomBarState.value = true

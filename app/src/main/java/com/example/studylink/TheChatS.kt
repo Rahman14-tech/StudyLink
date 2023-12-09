@@ -74,6 +74,8 @@ fun SendMessage(TheMessage: String, ChatId: String){
     ))
 }
 
+
+
 @Composable
 fun CustomTextField(
     modifier: Modifier = Modifier,
@@ -250,7 +252,7 @@ fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostContr
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) {
+fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>,isGroup:Boolean) {
 
     val context = LocalContext.current
     val displayMetrics = context.resources.displayMetrics
@@ -280,8 +282,10 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: Manag
             Row {
                 TextButton(
                     onClick = {
-                        PickVisualMediaRequest(
-                            mediaType = ActivityResultContracts.PickVisualMedia.ImageAndVideo
+                        launchers.launch(
+                            PickVisualMediaRequest(
+                                mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                            )
                         )
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
@@ -332,7 +336,11 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: Manag
         TextButton(
             onClick = {
                 if(inputText.value != ""){
-                    SendMessage(TheMessage = inputText.value, ChatId = ChatId)
+                    if(!isGroup){
+                        SendMessage(TheMessage = inputText.value, ChatId = ChatId)
+                    }else{
+                        SendMessageGroup(TheMessage = inputText.value, GroupChatId = ChatId)
+                    }
                     inputText.value = ""
                 }
             },
@@ -431,7 +439,6 @@ fun LeftChat(modifier: Modifier = Modifier, message : String,timeSent: String) {
 }
 
 
-@SuppressLint("SuspiciousIndentation")
 @Composable
 fun MediaLeftChat(ChatId:String, navController: NavHostController,modifier: Modifier = Modifier, MediaContent : String,MediaType:String,timeSent: String) {
     var context = LocalContext.current
@@ -662,10 +669,10 @@ fun ChatSystem(navController: NavHostController, ChatId: String) {
         print("HESITATION $mimeType")
         if (mimeType != null) {
                 if (mimeType.startsWith("image")) {
-                    MediaChatUtil.uploadToStorage(context = context, uri = mediaUri!!, type = "Image", ChatId = ChatId)
+                    MediaChatUtil.uploadToStorage(context = context, uri = mediaUri!!, type = "Image", ChatId = ChatId, isGroup = false)
 
                 } else if (mimeType.startsWith("video")) {
-                    MediaChatUtil.uploadToStorage(context = context, uri = mediaUri!!, type = "Video", ChatId = ChatId)
+                    MediaChatUtil.uploadToStorage(context = context, uri = mediaUri!!, type = "Video", ChatId = ChatId, isGroup = false)
                 }
         }
 
@@ -806,7 +813,7 @@ fun ChatSystem(navController: NavHostController, ChatId: String) {
                         .padding(top = 5.dp)
                 ) {
 
-                    MessageInput(ChatId = ChatId, launchers = launcher)
+                    MessageInput(ChatId = ChatId, launchers = launcher, isGroup = false)
                 }
             }
 

@@ -61,6 +61,7 @@ fun GetUsersData(){
             val list = snapshot.documents
             for(datum in list){
                 val c: ProfileFirestore? = datum.toObject(ProfileFirestore::class.java)
+                c?.id = datum.id
                 if (c != null){
                     Realusers.add(c)
                     Filteredusers.add(c)

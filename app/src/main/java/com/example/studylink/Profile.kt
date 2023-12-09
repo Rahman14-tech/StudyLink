@@ -1,6 +1,7 @@
 package com.example.studylink
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -427,11 +428,12 @@ private fun modalpv() {
 fun overlayNameChange() {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
+    var dasBio = remember { mutableStateOf(currUser.value.fullName) }
 
     ModalBottomSheet(
         onDismissRequest = {
             showOverlayNameProfile.value = false
-            inputText.value = ""
+            dasBio.value = ""
         },
         shape = RoundedCornerShape(
             topStart = 8.dp,
@@ -481,8 +483,8 @@ fun overlayNameChange() {
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 CustomTextField(
-                    value = mutableStateOf(inputText.value),
-                    onValueChange = { inputText.value = it },
+                    value = mutableStateOf(dasBio.value),
+                    onValueChange = { dasBio.value = it },
                     modifier = Modifier
                         .width(maxWidthTextField)
                         .background(Color.White),
@@ -506,7 +508,7 @@ fun overlayNameChange() {
                 ) {
                     TextButton(
                         onClick = {
-                            inputText.value = ""
+                            dasBio.value = ""
 
                             scope.launch { sheetState.hide() }.invokeOnCompletion {
                                 if (!sheetState.isVisible) {
@@ -526,18 +528,21 @@ fun overlayNameChange() {
                     Spacer(modifier = Modifier.width(5.dp))
                     TextButton(
                         onClick = {
-                            val docRef = Firebase.firestore.collection("Users").document(currUser.value.id)
+                            println("WAS IST DAS ${dasBio.value} und ${currUser.value.id}")
+                            db.collection("Users").document(currUser.value.id).update("fullName", dasBio.value).addOnSuccessListener {
+                                currUser.value.fullName = dasBio.value
 
-                            docRef.update("fullName", inputText.value)
-                            currUser.value.fullName = inputText.value
+                                dasBio.value = ""
 
-                            inputText.value = ""
-
-                            scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                if (!sheetState.isVisible) {
-                                    showOverlayNameProfile.value = false
+                                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                    if (!sheetState.isVisible) {
+                                        showOverlayNameProfile.value = false
+                                    }
                                 }
+                            }.addOnFailureListener{
+                                Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
                             }
+
                         }
                     ) {
                         Text(
@@ -593,7 +598,7 @@ fun ProfileScreen(navController: NavHostController) {
 @Composable
 fun ProfileScreens(navController: NavHostController) {
     val isEditingBio = remember { mutableStateOf(false) }
-    val editedBio = remember { mutableStateOf(TextFieldValue("")) }
+
 
     Scaffold(
             topBar = {
@@ -606,7 +611,7 @@ fun ProfileScreens(navController: NavHostController) {
                     .padding(contentPadding) // Add padding to the entire profile content
         ) {
             if (currUser != null) {
-
+                val editedBio = remember { mutableStateOf(TextFieldValue(currUser.value.fullName)) }
                 Spacer(modifier = Modifier.height(15.dp))
 
                 Row(modifier = Modifier.padding(top = 10.dp, start = 10.dp)) {

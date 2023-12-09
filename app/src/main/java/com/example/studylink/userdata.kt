@@ -14,7 +14,7 @@ import java.util.Date
 val currUser = mutableStateOf(ProfileFirestore())
 val tempUrl = mutableStateOf(TextFieldValue(""))
 data class ProfileFirestore(
-    val id: String = "",
+    var id: String = "",
     val email: String = "",
     var fullName: String = "",
     val imageURL: String = "",

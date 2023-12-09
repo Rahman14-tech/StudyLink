@@ -61,6 +61,7 @@ fun removeCurrUser(){
 }
 
 var selectedPeerDashboard = mutableStateOf<Boolean>(true)
+var selectedPeerChats = mutableStateOf<Boolean>(true)
 var showYourChatSearch = mutableStateOf(false)
 var showDashfilterPersonal = mutableStateOf(false)
 var showOverlayNameProfile = mutableStateOf(false)

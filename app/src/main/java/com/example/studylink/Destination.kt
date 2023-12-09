@@ -54,6 +54,12 @@ object AutoMatch: Destinations{
     override val icon: Int = R.drawable.chaticon
     override val title: String = "Auto Match"
 }
+object GroupChats: Destinations{
+    override val route: String = "GroupChatSystem"
+    override val icon: Int = R.drawable.chaticon
+    override val title: String = "Current Group Chat"
+    const val GroupChatId = "GroupChatId"
+}
 
 object MediaViewer:Destinations{
     override val route: String = "MediaViewer"

@@ -93,6 +93,31 @@ fun chatheader(){
                 }
             }
         }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp)
+                .background(color = Color.White),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            Column {
+                TextButton(onClick = { selectedPeerChats.value = true }) {
+                    Text(text = "Personal", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = Color.Black)
+                }
+                if(selectedPeerChats.value){
+                    Divider(modifier = Modifier.width(95.dp), color = Color(0xFFFFC600))
+                }
+            }
+            Column {
+                TextButton(onClick = { selectedPeerChats.value = false }) {
+                    Text(text = "Group", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = Color.Black)
+                }
+                if(!selectedPeerChats.value){
+                    Divider(modifier = Modifier.width(80.dp), color = Color(0xFFFFC600))
+                }
+            }
+
+        }
     }
 }
 

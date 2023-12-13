@@ -101,7 +101,8 @@ fun chatheader(){
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             Column {
-                TextButton(onClick = { selectedPeerChats.value = true }) {
+                TextButton(onClick = { selectedPeerChats.value = true
+                    searchYourChat.value = ""}) {
                     Text(text = "Personal", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = Color.Black)
                 }
                 if(selectedPeerChats.value){
@@ -109,7 +110,9 @@ fun chatheader(){
                 }
             }
             Column {
-                TextButton(onClick = { selectedPeerChats.value = false }) {
+                TextButton(onClick = { selectedPeerChats.value = false
+                    searchYourChat.value = ""
+                }) {
                     Text(text = "Group", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = Color.Black)
                 }
                 if(!selectedPeerChats.value){

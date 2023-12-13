@@ -206,11 +206,43 @@ fun YourChatsCardGroup(datum: GroupChatType, navController: NavHostController){
                 showOverlay.value = true
                 selectedPeople.value = people
             },
+            groupName = datum.groupName,
             onButtonClick = {
                 println("Wie Spiele ein spiel ${GroupChats.route+"/${datum.id}"}")
                 navController?.navigate(GroupChats.route+"/${datum.id}")
             }
+            , groupId = datum.id
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun YourChatsCardGroupSearched(datum: GroupChatType, navController: NavHostController){
+    println("OHARANG2 ${datum.id}")
+    val tempPartnerEmail = datum.members.contains(currUser.value.email)
+    var showOverlay = remember { mutableStateOf(false) }
+    var selectedPeople = remember { mutableStateOf<List<String>>(listOf()) }
+    val context = LocalContext.current
+    if(tempPartnerEmail){
+        if(datum!!.groupName.lowercase().contains(searchYourChat.value.lowercase())){
+            groupcard(
+                people = datum.members,
+                scope = datum.hashTag,
+                personcount = datum.maxMember,
+                onCardClick = { people ->
+                    showOverlay.value = true
+                    selectedPeople.value = people
+                },
+                groupName = datum.groupName,
+                onButtonClick = {
+                    println("Wie Spiele ein spiel ${GroupChats.route+"/${datum.id}"}")
+                    navController?.navigate(GroupChats.route+"/${datum.id}")
+                }
+                , groupId = datum.id
+            )
+        }
+
     }
 }
 @Composable
@@ -347,13 +379,22 @@ fun YourChatScreen(navController: NavHostController){
                     }
                 }
             }else{
-                LazyColumn() {
-                    itemsIndexed(groupChatsDashboard) { _, datum ->
-                        YourChatsCardGroup(datum, navController)
+                if(searchYourChat.value != ""){
+                    LazyColumn() {
+                        itemsIndexed(groupChatsDashboard) { _, datum ->
+                            YourChatsCardGroupSearched(datum, navController)
+                        }
+                    }
+                }else if(searchYourChat.value == "") {
+                    LazyColumn() {
+                        itemsIndexed(groupChatsDashboard) { _, datum ->
+                            YourChatsCardGroup(datum, navController)
+                        }
                     }
                 }
+                }
+
             }
 
         }
-    }
 }

@@ -41,12 +41,14 @@ class UpdateProfileUtil{
                         "upload failed",
                         Toast.LENGTH_SHORT
                     ).show()
-                }.addOnSuccessListener { taskSnapshot ->
-                    db.collection("Users").document(currUser.value.id).update("imageURL", taskSnapshot.toString()).addOnSuccessListener {
-                        tempUrl.value = TextFieldValue("")
-                    }.addOnFailureListener{
-                        Toast.makeText(cont, "Upload Failed", Toast.LENGTH_LONG).show()
-                        tempUrl.value = TextFieldValue("")
+                }.addOnSuccessListener {snaps ->
+                    spaceRef.downloadUrl.addOnSuccessListener {
+                        db.collection("Users").document(currUser.value.id).update("imageURL", it.toString()).addOnSuccessListener {
+                            tempUrl.value = TextFieldValue("")
+                        }.addOnFailureListener{
+                            Toast.makeText(cont, "Upload Failed", Toast.LENGTH_LONG).show()
+                            tempUrl.value = TextFieldValue("")
+                        }
                     }
                 }
             }

@@ -74,6 +74,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
@@ -99,8 +101,10 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -108,6 +112,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImagePainter.State.Empty.painter
@@ -321,14 +328,14 @@ fun userExpBox(
                         .wrapContentSize()
                 ) {
                     Text(
-                        text = "Bio",
+                        text = "Experience",
                         color = Color(0xff202020),
                         style = TextStyle(
                             fontSize = 16.sp)
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "Add a few words about yourself",
+                        text = "Your Experience",
                         color = Color.DarkGray,
                         style = TextStyle(
                             fontSize = 13.sp)
@@ -502,23 +509,28 @@ fun AnimatedBorderCard(
             color = MaterialTheme.colorScheme.surface,
             shape = shape
         ) {
-            Image(
-                painter = image,
-                contentDescription = "User Image",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-                    .clickable(
-                        onClick = {
-                            launchers.launch(
-                                PickVisualMediaRequest(
-                                    mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
-                                )
-                            )
-                        }
+            Button(
+                onClick = {
+                    launchers.launch(
+                        PickVisualMediaRequest(
+                            mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                        )
                     )
-            )
+                },
+                contentPadding = PaddingValues(0.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape)
+            ) {
+                Image(
+                    painter = image,
+                    contentDescription = "User Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape)
+                )
+            }
         }
     }
 }
@@ -565,7 +577,10 @@ private fun AccountPreview() {
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun overlayNameChange() {
+fun overlayNameChange(
+    refreshTrigger: MutableState<Int>,
+    lifecycleOwner: LifecycleOwner
+) {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     var dasBio = remember { mutableStateOf(currUser.value.fullName) }
@@ -689,6 +704,8 @@ fun overlayNameChange() {
                                             showOverlayNameProfile.value = false
                                         }
                                     }
+
+                                    refreshTrigger.value++
                                 }.addOnFailureListener{
                                     Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
                                 }
@@ -711,11 +728,11 @@ fun overlayNameChange() {
     }
 }
 
-@Preview(widthDp = 393)
-@Composable
-private fun overlayNamePreview() {
-    overlayNameChange()
-}
+//@Preview(widthDp = 393)
+//@Composable
+//private fun overlayNamePreview() {
+//    overlayNameChange()
+//}
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -888,6 +905,23 @@ fun ProfileScreen(navController: NavHostController) {
         mediaUri = null
     }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val refreshTrigger = remember { mutableStateOf(0) }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                refreshTrigger.value++
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -906,7 +940,7 @@ fun ProfileScreen(navController: NavHostController) {
         }
 
         if (showOverlayNameProfile.value) {
-            overlayNameChange()
+            overlayNameChange(refreshTrigger, lifecycleOwner)
         }
         if (showOverlayBioProfile.value) {
             overlayBioChange()

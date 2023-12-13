@@ -236,7 +236,6 @@ fun groupDashboard(navController: NavHostController){
         .background(color = Color(0xfff1f1f1)), ) {
         Header("dashboard")
         testViewGroup(navController)
-
     }
 }
 @OptIn(ExperimentalSwipeableCardApi::class)

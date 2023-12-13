@@ -51,7 +51,7 @@ class StorageUtil{
                                 "imageURL" to it.toString(),
                                 "strongAt" to mutableListOf<String>(),
                                 "wantStudy" to mutableListOf<String>(),
-                                "DataofChats" to mutableListOf<String>()
+                                "bio" to ""
                             )).addOnSuccessListener {
                                 Toast.makeText(cont, "Registration Success", Toast.LENGTH_LONG).show()
                                 tempUrl.value = TextFieldValue("")

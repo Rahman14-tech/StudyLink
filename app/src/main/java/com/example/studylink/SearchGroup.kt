@@ -30,7 +30,10 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -43,9 +46,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -462,6 +467,29 @@ private fun SearchBarPreview() {
 
 
 @Composable
+fun butDialog(onDismissRequest: (Boolean) -> Unit) {
+    LaunchedEffect(Unit){
+        selectedOptionText.value = "Choose here"
+    }
+    Dialog(onDismissRequest = { onDismissRequest(false) }) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.9f)
+                .padding(14.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+        ) {
+            Column(modifier = Modifier.fillMaxSize()){
+                Text(text = "Create a group")
+                Text(text = "Create a group")
+                DropDownSubjects()
+            }
+
+        }
+    }
+}
+@Composable
 fun testViewGroup(navController: NavHostController) {
     var showOverlay = remember { mutableStateOf(false) }
     var selectedPeople = remember { mutableStateOf<List<String>>(listOf()) }
@@ -475,6 +503,9 @@ fun testViewGroup(navController: NavHostController) {
             Text(text = "Stuck at loading? Then there is no group", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp))
         }
     }else{
+        if(showAutoMatch.value){
+            butDialog(onDismissRequest = {showAutoMatch.value = it})
+        }
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
@@ -519,7 +550,9 @@ fun testViewGroup(navController: NavHostController) {
             }
 
             Button(
-                onClick = {},
+                onClick = {
+                    showAutoMatch.value = true
+                },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .wrapContentWidth()

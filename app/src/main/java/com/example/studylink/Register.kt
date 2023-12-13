@@ -228,7 +228,7 @@ fun RegisterScreen(navController: NavHostController){
                         Button(
                             onClick = {
                                 println(email.text)
-                                if(email.text.isNotEmpty() && password.text.isNotEmpty() && selectedOptionText.value != "Choose here"){
+                                if(email.text.isNotEmpty() && password.text.isNotEmpty()  && photoUri != null && selectedOptionText.value != "Choose here"){
                                     auth.createUserWithEmailAndPassword(email.text, password.text).addOnCompleteListener { task ->
                                         if(task.isSuccessful){
                                             val tempMut = mutableListOf<String>()

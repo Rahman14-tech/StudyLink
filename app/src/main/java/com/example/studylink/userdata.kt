@@ -21,6 +21,7 @@ data class ProfileFirestore(
     val strongAt: MutableList<String> = mutableListOf(),
     val wantStudy: MutableList<String> = mutableListOf(),
     val studyField: String = "",
+    val bio: String = "",
 )
 
 data class YourChatsType(
@@ -64,6 +65,7 @@ var selectedPeerDashboard = mutableStateOf<Boolean>(true)
 var selectedPeerChats = mutableStateOf<Boolean>(true)
 var showYourChatSearch = mutableStateOf(false)
 var showDashfilterPersonal = mutableStateOf(false)
+var showAutoMatch = mutableStateOf(false)
 var showOverlayNameProfile = mutableStateOf(false)
 var showOverlayBioProfile = mutableStateOf(false)
 var showBottomSheet = mutableStateOf(false)

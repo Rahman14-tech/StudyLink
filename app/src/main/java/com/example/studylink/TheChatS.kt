@@ -317,7 +317,7 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: Manag
                     onClick = {
                         launchers.launch(
                             PickVisualMediaRequest(
-                                mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                                mediaType = ActivityResultContracts.PickVisualMedia.ImageAndVideo
                             )
                         )
                     },

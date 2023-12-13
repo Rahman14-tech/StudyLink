@@ -106,9 +106,6 @@ fun BottomBar(navController: NavHostController){
                 composable(Setting.route){
                     ProfileScreen(navController = navController)
                 }
-                composable(AutoMatch.route){
-                    AutoMatch(navController = navController)
-                }
                 composable(GroupChats.route+"/{${GroupChats.GroupChatId}}", arguments = listOf(
                     navArgument(GroupChats.GroupChatId){type = NavType.StringType}
                 )){currIt2->

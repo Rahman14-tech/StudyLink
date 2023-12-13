@@ -21,6 +21,7 @@ data class ProfileFirestore(
     val strongAt: MutableList<String> = mutableListOf(),
     val wantStudy: MutableList<String> = mutableListOf(),
     val studyField: String = "",
+    val bio: String = ""
 )
 
 data class YourChatsType(

@@ -92,9 +92,11 @@ fun YourChatsCardPersonal(datum: YourChatsType, navController: NavHostController
             Card(modifier = Modifier
                 .fillMaxWidth()
                 .background(color = Color.White)
-                .height(80.dp), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp), onClick = {
-                println("OHARANG ${datum.id}")
-                navController?.navigate(TheChatS.route+"/${datum.id}")}) {
+                .height(80.dp), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+                onClick = {
+                    navController?.navigate(TheChatS.route+"/${datum.id}")
+                }
+            ) {
                 Column(modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 0.1.dp)

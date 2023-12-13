@@ -472,6 +472,7 @@ fun LeftChat(modifier: Modifier = Modifier, message : String,timeSent: String) {
 }
 
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun MediaLeftChat(ChatId:String, navController: NavHostController,modifier: Modifier = Modifier, MediaContent : String,MediaType:String,timeSent: String) {
     var context = LocalContext.current

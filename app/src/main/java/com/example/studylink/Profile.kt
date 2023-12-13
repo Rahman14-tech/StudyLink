@@ -1,7 +1,19 @@
 package com.example.studylink
 
 import android.annotation.SuppressLint
+import android.content.ContentResolver
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -77,9 +89,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
@@ -91,11 +110,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
+import java.util.Collections
+import java.util.Collections.rotate
 
 @Composable
 fun ProfileTopNavbar(
@@ -143,7 +165,6 @@ fun userNameBox(
     Button(
         onClick = {
             showOverlayNameProfile.value = true
-            inputText.value = currUser.value.fullName
         },
         contentPadding = PaddingValues(0.dp),
         shape = RectangleShape,
@@ -206,6 +227,73 @@ fun userNameBox(
 
 @Composable
 fun userBioBox(
+    contentSpace: Dp
+) {
+    Button(
+        onClick = {
+            showOverlayBioProfile.value = true
+        },
+        contentPadding = PaddingValues(0.dp),
+        shape = RectangleShape,
+        colors = ButtonDefaults.buttonColors(Color.Transparent),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .align(alignment = Alignment.CenterStart)
+            ) {
+                Spacer(modifier = Modifier.width(contentSpace))
+                Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+                Column(
+                    modifier = Modifier
+                        .wrapContentSize()
+                ) {
+                    Text(
+                        text = "Bio",
+                        color = Color(0xff202020),
+                        style = TextStyle(
+                            fontSize = 16.sp)
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "Add a few words about yourself",
+                        color = Color.DarkGray,
+                        style = TextStyle(
+                            fontSize = 13.sp)
+                    )
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .align(alignment = Alignment.CenterEnd)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(alignment = Alignment.CenterVertically)
+                        .requiredSize(size = 20.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "edit",
+                        tint = Color(0xff444444),
+                        modifier = Modifier
+                            .align(alignment = Alignment.Center)
+                    )
+                }
+                Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+                Spacer(modifier = Modifier.width(contentSpace))
+            }
+        }
+    }
+}
+
+@Composable
+fun userExpBox(
     contentSpace: Dp
 ) {
     Button(
@@ -350,6 +438,17 @@ fun Account(
                     )
                 }
 
+                userExpBox(contentSpace = contentSpace)
+
+                Row {
+                    Spacer(modifier = Modifier.width(contentSpace))
+                    Divider(
+                        color = Color(0xff959595),
+                        modifier = Modifier
+                            .width(contentSize)
+                    )
+                }
+                
                 userBioBox(contentSpace = contentSpace)
             }
             Spacer(modifier = Modifier.height(20.dp))
@@ -358,21 +457,88 @@ fun Account(
 }
 
 @Composable
-fun userStatus() {
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .background(color = Color(0xFFF1F1F1))
-        .padding(bottom = 10.dp)) {
+fun AnimatedBorderCard(
+    modifier: Modifier = Modifier,
+    image: Painter,
+    shape: Shape = RoundedCornerShape(size = 0.dp),
+    borderWidth: Dp = 2.dp,
+    gradient: Brush = Brush.sweepGradient(listOf(Color.Gray, Color.White)),
+    animationDuration: Int = 10000,
+    onCardClick: () -> Unit = {},
+    launchers: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>
+) {
+    val brush1 = Brush.horizontalGradient(listOf(Color(0xFF2C8DFF), Color(0xFF006DEC)))
+    val infiniteTransition = rememberInfiniteTransition(label = "Infinite Color Animation")
+    val degrees by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = animationDuration, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "Infinite Colors"
+    )
 
-        Row(modifier = Modifier.padding(top = 20.dp, start = 20.dp)) {
-            val painter = rememberAsyncImagePainter(model = currUser.value.imageURL)
+    Surface(
+        modifier = modifier
+            .clip(shape)
+            .clickable { onCardClick() },
+        shape = shape
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(borderWidth)
+                .drawWithContent {
+                    rotate(degrees = degrees) {
+                        drawCircle(
+                            brush = gradient,
+                            radius = size.width,
+                            blendMode = BlendMode.SrcIn,
+                        )
+                    }
+                    drawContent()
+                },
+            color = MaterialTheme.colorScheme.surface,
+            shape = shape
+        ) {
             Image(
-                painter = painter,
+                painter = image,
                 contentDescription = "User Image",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(80.dp)
                     .clip(CircleShape)
+                    .clickable(
+                        onClick = {
+                            launchers.launch(
+                                PickVisualMediaRequest(
+                                    mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                                )
+                            )
+                        }
+                    )
+            )
+        }
+    }
+}
+
+@Composable
+fun userStatus(launchers: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .background(color = Color(0xFFF1F1F1))
+        .padding(bottom = 10.dp)) {
+
+        Row(modifier = Modifier.padding(top = 20.dp, start = 20.dp, bottom = 10.dp)) {
+            val painter = rememberAsyncImagePainter(model = currUser.value.imageURL)
+            AnimatedBorderCard(
+                image = painter,
+                launchers = launchers,
+                shape = CircleShape,
+                modifier = Modifier
+                    .size(80.dp),
+                gradient = Brush.linearGradient(listOf(Color(0xffffc600), Color.Cyan))
             )
             Spacer(modifier = Modifier.width(15.dp))
             Column(
@@ -394,33 +560,6 @@ fun userStatus() {
 @Composable
 private fun AccountPreview() {
     Account()
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableState")
-@Composable
-fun trymodal() {
-    Scaffold(
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                text = { Text("Show bottom sheet") },
-                icon = { Icon(Icons.Filled.Add, contentDescription = "") },
-                onClick = {
-                    showBottomSheet.value = true
-                }
-            )
-        }
-    ) {  contentPadding ->
-        if (showBottomSheet.value) {
-
-        }
-    }
-}
-
-@Preview(widthDp = 393)
-@Composable
-private fun modalpv() {
-    trymodal()
 }
 
 @SuppressLint("UnrememberedMutableState")
@@ -538,19 +677,21 @@ fun overlayNameChange() {
                     TextButton(
                         onClick = {
                             println("WAS IST DAS ${dasBio.value} und ${currUser.value.id}")
-                            db.collection("Users").document(currUser.value.id).update("fullName", dasBio.value).addOnSuccessListener {
-                                currUser.value.fullName = dasBio.value
+                            db.collection("Users")
+                                .document(currUser.value.id)
+                                .update("fullName", dasBio.value)
+                                .addOnSuccessListener {
+                                    currUser.value.fullName = dasBio.value
+                                    dasBio.value = ""
 
-                                dasBio.value = ""
-
-                                scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                    if (!sheetState.isVisible) {
-                                        showOverlayNameProfile.value = false
+                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                        if (!sheetState.isVisible) {
+                                            showOverlayNameProfile.value = false
+                                        }
                                     }
+                                }.addOnFailureListener{
+                                    Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
                                 }
-                            }.addOnFailureListener{
-                                Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
-                            }
                         }
                     ) {
                         Text(
@@ -724,6 +865,29 @@ fun overlayBioChange() {
 
 @Composable
 fun ProfileScreen(navController: NavHostController) {
+    val context = LocalContext.current
+    var mediaUri: Uri? by rememberSaveable { mutableStateOf(null) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        mediaUri = uri
+    }
+
+    if(mediaUri != null){
+        val contentResolver: ContentResolver = context.contentResolver
+        val mimeType = getMimeType(contentResolver, mediaUri!!)
+        val testType = rememberSaveable {
+            mutableStateOf("")
+        }
+        testType.value = mimeType!!
+        print("HESITATION $mimeType")
+        if (mimeType != null) {
+            if (mimeType.startsWith("image")) {
+                UpdateProfileUtil.uploadToStorage(uri = mediaUri!!, context = context, cont = context)
+            }
+        }
+
+        mediaUri = null
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -736,7 +900,7 @@ fun ProfileScreen(navController: NavHostController) {
         ) {
             ProfileTopNavbar()
             Column {
-                userStatus()
+                userStatus(launchers = launcher)
                 Account()
             }
         }

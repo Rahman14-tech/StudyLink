@@ -7,6 +7,7 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.example.studylink.QNA
+import com.example.studylink.currUser
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ServerTimestamp
@@ -16,6 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.w3c.dom.Comment
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldValue
+import kotlinx.coroutines.flow.isActive
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
@@ -51,7 +54,7 @@ data class CommentModel(
     val text: String = "",
     val timestamp: Timestamp? = null,
     val upvote: Int = 0,
-    val userId: String,
+    val userId: String = "",
 )
 
 data class ForumUiState(
@@ -66,12 +69,13 @@ class ForumViewModel : ViewModel() {
 
     private val forumCollectionPath = "ForumTest"
     private val commentCollectionPath = "CommentList"
+    private val forumRef = FirebaseFirestore.getInstance().collection(forumCollectionPath)
 
     fun getAllForum() {
         println("GET ALLFORUM STARTED")
         val forumList = mutableListOf<ForumModel>()
         val documentIdMap: MutableMap<String,ForumModel> = mutableMapOf()
-        val forumRef = FirebaseFirestore.getInstance().collection(forumCollectionPath)
+
 
         Log.d("GETALLFORUM", "GET ALL FORUM STARTED")
         forumRef.get().addOnSuccessListener { querySnapshot ->
@@ -131,8 +135,10 @@ class ForumViewModel : ViewModel() {
                 if (documentSnapshot.exists()) {
                     // Convert document data to ForumModel
                     _uiState.update { currentState ->
+                        val newForum: ForumModel? = documentSnapshot.toObject(ForumModel::class.java)
+                        newForum?.documentId = forumDocID
                         currentState.copy(
-                            activeForum = documentSnapshot.toObject(ForumModel::class.java)
+                            activeForum = newForum
                         )
                     }
                     // Use the forumData here (forumData will be of type ForumModel)
@@ -145,35 +151,54 @@ class ForumViewModel : ViewModel() {
                 // Handle failures
                 println("Error getting documents: $exception")
             }
+    }
 
-
-        // Get comment List
-        val newCommentList = mutableListOf<CommentModel>()
-        forumRef.collection(commentCollectionPath)
+    fun getForumCommentByForumID(forumDocID: String) {
+        forumRef.document(forumDocID).collection(commentCollectionPath)
             .get()
             .addOnSuccessListener { querySnapshot ->
+                val newCommentList = mutableListOf<CommentModel>()
                 for (document in querySnapshot) {
                     val forumComment = document.toObject(CommentModel::class.java)
                     val forumCommentWithID = forumComment.copy(documentId = document.id)
                     newCommentList.add(forumCommentWithID)
+                    Log.d("FORUMCOMMENT", "doc id: $forumDocID, comment text: ${forumCommentWithID.text}")
+                }
+
+                // Sort comments by timestamp
+                val newCommentListSorted = newCommentList.sortedBy { it.timestamp }
+
+                // Update UI state after sorting
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        commentList = newCommentListSorted
+                    )
+                }
+
+                // Logging or any other operations related to sorted comments can also be done here
+                for (comment in newCommentListSorted) {
+                    Log.d("COMMENTLIST", comment.text)
                 }
             }
             .addOnFailureListener { exception ->
                 // Handle failures
                 println("Error getting CommentList documents: $exception")
             }
-
-        // Sort comment
-        val newCommentListSorted = newCommentList.sortedByDescending { it.timestamp }
-
-        // Put to state
-        _uiState.update {currentState ->
-            currentState.copy(
-                commentList = newCommentListSorted
-            )
-        }
+    }
 
 
+    fun addForumComment(Input: String) {
+        Log.d("ADDFORUM", "adding forum ${uiState.value.activeForum?.documentId}");
+        val activeForumDocumentId : String = checkNotNull(uiState.value.activeForum?.documentId)
+        val commentValue = hashMapOf(
+            "text" to Input,
+            "timestamp" to  FieldValue.serverTimestamp(),
+            "upvote" to 0,
+            "userId" to currUser.value.email
+        )
+        forumRef.document(activeForumDocumentId).collection(commentCollectionPath).add(
+            commentValue
+        )
     }
 
 

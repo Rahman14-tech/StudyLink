@@ -94,40 +94,31 @@ fun ForumScreen(
             initialLoadFinished = true
         }
     }
-    Scaffold(
-        modifier = Modifier
-            .background(background),
-        containerColor = background,
-        contentColor = background
-    ) { paddingValue ->
-        Column {
-            ForumProfileTopNavbar()
-            ForumSplash()
-            SearchBarForum()
-            LazyColumn(
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues = paddingValue)
-            ) {
-                // Display data forum
-                items(forumUiState.forumList) {forum ->
-                    ForumCard(
-                        title = forum.title,
-                        author = forum.authorId,
-                        timestamp = { forum.timestamp?.let { forumViewModel.getTimeFromNow(it.toDate()) } ?: ""},
-                        text = forum.text,
-                        tags = forum.tags.toSet(),
-                        onClick = { forumViewModel.goForumDetail(
-                            forumDocID = forum.documentId,
-                            navController = navController
-                        )},
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 10.dp, end = 10.dp, top = 3.dp, bottom = 3.dp)
-                    )
-                }
+
+    Scaffold () {paddingValue ->
+        LazyColumn(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues = paddingValue)
+        ) {
+            // Display data forum
+            items(forumUiState.forumList) {forum ->
+                ForumCard(
+                    title = forum.title,
+                    author = forum.authorId,
+                    timestamp = { forum.timestamp?.let { forumViewModel.getTimeFromNow(it.toDate()) } ?: ""},
+                    text = forum.text,
+                    tags = forum.tags.toSet(),
+                    onClick = { forumViewModel.goForumDetail(
+                        forumDocID = forum.documentId,
+                        navController = navController
+                    )},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                )
             }
         }
     }

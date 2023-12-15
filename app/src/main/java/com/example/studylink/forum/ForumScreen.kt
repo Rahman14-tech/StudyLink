@@ -67,7 +67,6 @@ fun ForumScreen(
     }
 
     Scaffold () {paddingValue ->
-        Text("This is FORUM")
         LazyColumn(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,

@@ -34,7 +34,8 @@ data class GroupChatType(
     var groupFocus: String = "",
     val hashTag:MutableList<String> = mutableListOf<String>(),
     val members:MutableList<String> = mutableListOf(),
-    var maxMember: Int = 10
+    var maxMember: Int = 10,
+    val groupName: String = ""
 )
 
 
@@ -60,6 +61,38 @@ val ChatData = mutableStateListOf<ChatDataType>()
 fun removeCurrUser(){
     Filteredusers.remove(currUser.value)
 }
+val classCode = mapOf<String,String>(
+    "Agriculture, and Related Sciences" to "AGR",
+    "Architecture and Related Services" to "ARC",
+    "Area, Ethnic, Cultural, Gender, and Group Studies" to "AECG",
+    "Aviation" to "AVI",
+    "Biological and Biomedical Sciences" to "BIO",
+    "Business, Management, and Related Support Services" to "BMR",
+    "Communication, Journalism, and Related Programs" to "CJR",
+    "Communications Technologies/technicians" to "CT",
+    "Computer and Information Sciences" to "CSC",
+    "Construction Trades" to "CTRA",
+    "Engineering" to "ENGI",
+    "English Language and Literature/letters" to "ELL",
+    "Family and Consumer Sciences/human Sciences" to "FCS",
+    "Foreign Languages" to "FLS",
+    "Health Professions" to "HP",
+    "History" to "HIST",
+    "Human Services" to "HUS",
+    "Mathematics and Statistics" to "MATH",
+    "Mechanic and Repair Technologies/technicians" to "MECH",
+    "Military Technologies and Applied Sciences" to "MIL",
+    "Natural Resources and Conservation" to "NRC",
+    "Culinary Services" to "CULS",
+    "Philosophy and Religious Studies" to "PHIL",
+    "Physical Sciences" to "PHYSCI",
+    "Psychology" to "PSY",
+    "Social Sciences" to "SOSC",
+    "Theology and Religious Vocations" to "TRV",
+    "Transportation and Materials Moving" to "TMM",
+    "Visual and Performing Arts" to "ARTS",
+    "Others" to "OTH",
+)
 
 var selectedPeerDashboard = mutableStateOf<Boolean>(true)
 var selectedPeerChats = mutableStateOf<Boolean>(true)

@@ -2,6 +2,7 @@ package com.example.studylink
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -41,6 +42,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -68,6 +70,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -75,15 +79,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.UUID
 
 @Composable
 fun groupcard(
     modifier: Modifier = Modifier,
     people : List<String>,
+    groupId: String,
     scope : List<String>,
     personcount : Int,
     onCardClick : (List<String>) -> Unit,
-    onButtonClick : () -> Unit
+    onButtonClick : () -> Unit,
+    groupName:String
 ) {
     val scopeSeparator = " | "
     val scopes = buildAnnotatedString {
@@ -156,15 +165,24 @@ fun groupcard(
                         modifier = Modifier
                             .fillMaxHeight()
                     ) {
-                        Text(
-                            text = peoples,
-                            color = Color(0xff202020),
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold),
-                            modifier = Modifier
-                                .align(alignment = Alignment.Start)
-                        )
+                        Row {
+                            Text(
+                                text = groupName,
+                                color = Color(0xff202020),
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold),
+                            )
+                            Text(
+                                text = " #${groupId.substring(0,10)}",
+                                color = Color(0xff202020),
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold),
+                            )
+
+                        }
+
                         Text(
                             text = scopes,
                             color = Color.DarkGray,
@@ -441,17 +459,17 @@ fun SearchBar(modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(widthDp = 393)
-@Composable
-private fun groupCardPv() {
-    groupcard(
-        people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"),
-        scope = listOf("Math", "Science"),
-        personcount = 7,
-        onCardClick = {  },
-        onButtonClick = { /* Perform the button action here */ }
-    )
-}
+//@Preview(widthDp = 393)
+//@Composable
+//private fun groupCardPv() {
+//    groupcard(
+//        people = listOf("Alan Becker", "Joanne Canonball", "John Doe", "Jane Smith"),
+//        scope = listOf("Math", "Science"),
+//        personcount = 7,
+//        onCardClick = {  },
+//        onButtonClick = { /* Perform the button action here */ }
+//    )
+//}
 
 @Preview(widthDp = 393)
 @Composable
@@ -467,7 +485,10 @@ private fun SearchBarPreview() {
 
 
 @Composable
-fun butDialog(onDismissRequest: (Boolean) -> Unit) {
+fun butDialog(onDismissRequest: (Boolean) -> Unit, cont: Context) {
+    var inputDial = remember {
+        mutableStateOf("")
+    }
     LaunchedEffect(Unit){
         selectedOptionText.value = "Choose here"
     }
@@ -475,15 +496,90 @@ fun butDialog(onDismissRequest: (Boolean) -> Unit) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.9f)
+                .fillMaxHeight(0.8f)
                 .padding(14.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
         ) {
             Column(modifier = Modifier.fillMaxSize()){
-                Text(text = "Create a group")
-                Text(text = "Create a group")
+                Text(text = "Create a group", modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(), textAlign = TextAlign.Center, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Group hashtag (up to 3)", modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, start = 5.dp), textAlign = TextAlign.Start, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                Text(text = "Ex: Computer,Mathematics,Biology", modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, start = 5.dp), textAlign = TextAlign.Start, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                CustomTextField(
+                    value = inputDial,
+                    onValueChange = {
+                        inputDial.value = it
+                    },
+                    leadingIcon = null,
+                    trailingIcon = null,
+                    modifier = Modifier
+                        .background(
+                            Color(0x00ededed),
+                            RoundedCornerShape(percent = 100)
+                        )
+                        .clip(shape = RoundedCornerShape(16.dp))
+                        .heightIn(min = 45.dp)
+                        .fillMaxWidth()
+                        .align(alignment = Alignment.CenterHorizontally)
+                        .padding(end = 8.dp, top = 20.dp, bottom = 5.dp),
+                    placeholderText = "Type a Hashtag",
+                    useClear = false,
+                    imeAction = ImeAction.None,
+                    singleLine = false,
+                    maxLine = 5,
+                    fontSize = 16.sp,
+                )
+                Text(text = "Choose Your Major", modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp, start = 5.dp), textAlign = TextAlign.Start, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                 DropDownSubjects()
+
+
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.Bottom) {
+                    Button(
+                        onClick = {
+                            var seperatedTag = inputDial.value.split(",")
+                            if(seperatedTag.size > 3){
+                                seperatedTag = listOf(seperatedTag[0],seperatedTag[1],seperatedTag[2])
+                            }
+                            val sdf = SimpleDateFormat("dd/M/yyyy HH:mm:ss")
+                            val currentDate = sdf.format(Date())
+
+                            if(selectedOptionText.value != "Choose here" && inputDial.value != ""){
+                                db.collection("Chatgroup").add(hashMapOf(
+                                    "groupFocus" to selectedOptionText.value,
+                                    "groupName" to classCode[selectedOptionText.value],
+                                    "hashTag" to seperatedTag,
+                                    "maxMember" to 8,
+                                    "members" to mutableListOf<String>(currUser.value.email),
+                                    "timeCreated" to currentDate
+                                )).addOnSuccessListener {
+                                    Toast.makeText(cont, "Creation Success", Toast.LENGTH_LONG).show()
+                                    inputDial.value ="Choose here"
+                                }.addOnFailureListener{
+                                    Toast.makeText(cont, "Creation Failed", Toast.LENGTH_LONG).show()
+                                    inputDial.value = "Choose here"
+                                }
+                            }
+                                  },
+                        shape = RoundedCornerShape(20),
+                        modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                            .padding(bottom = 10.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0066E4)),
+                    ) {
+                        Text(text = "Create Group", color = Color.White)
+                    }
+                }
+
             }
 
         }
@@ -504,7 +600,7 @@ fun testViewGroup(navController: NavHostController) {
         }
     }else{
         if(showAutoMatch.value){
-            butDialog(onDismissRequest = {showAutoMatch.value = it})
+            butDialog(onDismissRequest = {showAutoMatch.value = it}, cont = context)
         }
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -520,12 +616,14 @@ fun testViewGroup(navController: NavHostController) {
                 groupChatsDashboard.map {
                     groupcard(
                         people = it.members,
+                        groupName = it.groupName,
                         scope = it.hashTag,
                         personcount = it.maxMember,
                         onCardClick = { people ->
                             showOverlay.value = true
                             selectedPeople.value = people
                         },
+                        groupId = it.id,
                         onButtonClick = {
                             if(it.members.size >= it.maxMember){
                                 Toast.makeText(context, "The group is full.", Toast.LENGTH_LONG).show()

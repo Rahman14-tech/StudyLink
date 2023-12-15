@@ -67,19 +67,26 @@ import com.google.mlkit.nl.smartreply.SmartReply
 import com.google.mlkit.nl.smartreply.SmartReplySuggestion
 import com.google.mlkit.nl.smartreply.SmartReplySuggestionResult
 import com.google.mlkit.nl.smartreply.TextMessage
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import kotlin.time.Duration.Companion.seconds
 
 var inputText = mutableStateOf("")
 @RequiresApi(Build.VERSION_CODES.O)
 fun SendMessage(TheMessage: String, ChatId: String){
-    val sdf = SimpleDateFormat("dd/M/yyyy HH:mm:ss")
+    val sdf = SimpleDateFormat("dd/M/yyyy")
     val currentDate = sdf.format(Date())
+    val sdft = SimpleDateFormat("HH:mm:ss")
+    val currentTime = sdft.format(Date())
     db.collection("Chats").document(ChatId).collection("ChatData").add(hashMapOf(
         "Content" to TheMessage,
         "TheUser" to currUser.value.email,
-        "TimeSent" to currentDate,
+        "DateSent" to currentDate,
+        "TimeSent" to currentTime,
         "MediaType" to "",
         "ContentMedia" to "",
+        "OrderNo" to ChatData.size + 1
     ))
 }
 
@@ -445,9 +452,7 @@ fun LeftChat(modifier: Modifier = Modifier, message : String,timeSent: String) {
     }
 
     var eightyPercentOfScreenWidth = (screenWidthInDp * 0.8f)
-    var splittedtime = timeSent.split(" ").toTypedArray()
-    var thehour = splittedtime[1]
-    var hournmin = thehour.subSequence(0,5)
+    var hournmin = timeSent.subSequence(0,5)
 
     Box(
         modifier = modifier
@@ -545,7 +550,10 @@ fun MediaLeftChat(ChatId:String, navController: NavHostController,modifier: Modi
                                 modifier = Modifier
                                     .align(alignment = Alignment.Start)
                                     .padding(5.dp)
-                                    .sizeIn(maxWidth = eightyPercentOfScreenWidth, maxHeight = fortyPercentOfScreenHeight)
+                                    .sizeIn(
+                                        maxWidth = eightyPercentOfScreenWidth,
+                                        maxHeight = fortyPercentOfScreenHeight
+                                    )
                                     .clip(shape = RoundedCornerShape(8.dp))
                             )
                         }
@@ -583,9 +591,7 @@ fun RightChat(modifier: Modifier = Modifier, message : String,timeSent: String) 
         displayMetrics.widthPixels.dp / density
     }
     var eightyPercentOfScreenWidth = (screenWidthInDp * 0.8f)
-    var splittedtime = timeSent.split(" ").toTypedArray()
-    var thehour = splittedtime[1]
-    var hournmin = thehour.subSequence(0,5)
+    var hournmin = timeSent.subSequence(0,5)
 
     Box(
         modifier = modifier
@@ -651,9 +657,7 @@ fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Mod
     }
     var fortyPercentOfScreenHeight = (screenHeightInDp * 0.4f)
     var eightyPercentOfScreenWidth = (screenWidthInDp * 0.8f)
-    var splittedtime = timeSent.split(" ").toTypedArray()
-    var thehour = splittedtime[1]
-    var hournmin = thehour.subSequence(0,5)
+    var hournmin = timeSent.subSequence(0,5)
         Box(
             modifier = modifier
                 .fillMaxWidth(),
@@ -691,7 +695,10 @@ fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Mod
                                 modifier = Modifier
                                     .align(alignment = Alignment.Start)
                                     .padding(5.dp)
-                                    .sizeIn(maxWidth = eightyPercentOfScreenWidth, maxHeight = fortyPercentOfScreenHeight)
+                                    .sizeIn(
+                                        maxWidth = eightyPercentOfScreenWidth,
+                                        maxHeight = fortyPercentOfScreenHeight
+                                    )
                                     .clip(shape = RoundedCornerShape(8.dp))
                             )
                         }
@@ -711,6 +718,56 @@ fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Mod
             }
         }
 }
+fun sortChat(){
+    ChatData.sortBy { it.DateSent }
+    var i = 0
+    var j = 0
+    for(chat in ChatData){
+        for(chat2 in ChatData){
+            if(chat.id == chat2.id){
+                break
+            }else{
+                if(chat.DateSent == chat2.DateSent){
+                    val tempTime1 = chat.TimeSent.split(":")
+                    var tempTime1Int = mutableListOf<Int>()
+                    val tempTime2 = chat2.TimeSent.split(":")
+                    var tempTime2Int = mutableListOf<Int>()
+                    tempTime1.forEach{
+                        tempTime1Int.add(it.toInt())
+                    }
+                    tempTime2.forEach{
+                        tempTime2Int.add(it.toInt())
+                    }
+                    if(tempTime2Int[0] < tempTime1Int[0]){
+                        val tempC = ChatData[i]
+                        ChatData[i] = ChatData[j]
+                        ChatData[j] = tempC
+                    }else{
+                        if(tempTime2Int[1] < tempTime1Int[1]){
+                            val tempC = ChatData[i]
+                            ChatData[i] = ChatData[j]
+                            ChatData[j] = tempC
+                        }else{
+                            if(tempTime2Int[2] < tempTime1Int[2]){
+                                val tempC = ChatData[i]
+                                ChatData[i] = ChatData[j]
+                                ChatData[j] = tempC
+                            }else{
+                                break
+                            }
+                        }
+                    }
+                    j+=1
+                }else{
+                    break
+                }
+            }
+
+        }
+        j = 0
+        i+=1
+    }
+}
 
 fun GetTheChats(ChatId: String){
     db.collection("Chats").document(ChatId).collection("ChatData").addSnapshotListener{snapshot, e ->
@@ -723,12 +780,14 @@ fun GetTheChats(ChatId: String){
             val list = snapshot.documents
             for(datum in list){
                 val c: ChatDataType? = datum.toObject(ChatDataType::class.java)
+                c?.id = datum.id
                 if(c!= null){
                     ChatData.add(c)
+                    TempChatData.add(c)
                     println("Testing Anjay $c")
                 }
             }
-            ChatData.sortBy { it.TimeSent }
+            ChatData.sortBy { it.OrderNo }
         }
     }
 }

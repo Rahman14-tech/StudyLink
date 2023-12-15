@@ -40,11 +40,14 @@ data class GroupChatType(
 
 
 data class ChatDataType(
+    var id: String = "",
     val Content: String = "",
     val TheUser: String = "",
     val TimeSent: String = "",
+    val DateSent: String = "",
     val MediaType: String = "",
     val ContentMedia: String = "",
+    val OrderNo: Int = 0
 )
 val Realusers = mutableStateListOf<ProfileFirestore>(
 
@@ -58,6 +61,8 @@ val groupChatsDashboard = mutableStateListOf<GroupChatType>()
 val tempTheChat = mutableStateListOf<YourChatsType>()
 
 val ChatData = mutableStateListOf<ChatDataType>()
+val TempChatData = mutableStateListOf<ChatDataType>()
+var sortChatTrue = mutableStateOf(false)
 fun removeCurrUser(){
     Filteredusers.remove(currUser.value)
 }

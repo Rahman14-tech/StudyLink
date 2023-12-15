@@ -518,9 +518,7 @@ fun MediaLeftChat(ChatId:String, navController: NavHostController,modifier: Modi
     }
     var fortyPercentOfScreenHeight = (screenHeightInDp * 0.4f)
     var eightyPercentOfScreenWidth = (screenWidthInDp * 0.8f)
-    var splittedtime = timeSent.split(" ").toTypedArray()
-    var thehour = splittedtime[1]
-    var hournmin = thehour.subSequence(0,5)
+    var hournmin = timeSent.subSequence(0,5)
         Box(
             modifier = modifier
                 .fillMaxWidth(),

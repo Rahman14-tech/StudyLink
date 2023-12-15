@@ -14,6 +14,7 @@ var placeholderColor: Color = Color(0xff767676)
 var leftChatColor: Color = Color(0xffffffff)
 var dividerColor: Color = Color(0xff959595)
 var cardsColor: Color = Color(0xffffffff)
+var groupButtonColor: Color = Color(0xff1c1a22)
 
 var isDark = mutableStateOf(false)
 var schemaCond = mutableStateOf("Light")
@@ -29,6 +30,7 @@ fun coloringSchema() {
         leftChatColor = Color(0xff1C1C24)
         dividerColor = Color(0xffBABABA)
         cardsColor = Color(0xff2C2B33)
+        groupButtonColor = Color(0xffffc600)
     } else {
         schemaCond.value = "Light"
         background = Color(0xfff1f1f1)
@@ -39,5 +41,6 @@ fun coloringSchema() {
         leftChatColor = Color(0xffffffff)
         dividerColor = Color(0xff959595)
         cardsColor = Color(0xffffffff)
+        groupButtonColor = Color(0xff1c1a22)
     }
 }

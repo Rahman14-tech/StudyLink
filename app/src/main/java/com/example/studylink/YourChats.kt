@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -365,6 +366,7 @@ fun YourChatScreen(navController: NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .background(color = defaultColor)
+            .fillMaxHeight()
     ) {
         Header("YourChatScreen")
         if(showYourChatSearch.value) {

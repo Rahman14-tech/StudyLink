@@ -83,6 +83,7 @@ import java.util.Timer
 import java.util.TimerTask
 import java.util.logging.Handler
 import kotlin.math.log
+
 var selectedOption = mutableStateOf("All Posts")
 @Composable
 fun dashDialog(onDismissRequest: (Boolean) -> Unit) {
@@ -93,7 +94,7 @@ fun dashDialog(onDismissRequest: (Boolean) -> Unit) {
                 .fillMaxHeight(0.9f)
                 .padding(14.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = cardsColor),
         ) {
             LazyColumn(){
                 item {
@@ -123,6 +124,7 @@ fun dashDialog(onDismissRequest: (Boolean) -> Unit) {
                         )
                         Text(
                             text = "All Posts",
+                            color = headText,
                             modifier = Modifier.padding(start = 16.dp, top = 20.dp)
                         )
                     }
@@ -154,6 +156,7 @@ fun dashDialog(onDismissRequest: (Boolean) -> Unit) {
                         )
                         Text(
                             text = datum,
+                            color = headText,
                             modifier = Modifier.padding(start = 16.dp, top = 20.dp)
                         )
                     }
@@ -162,6 +165,7 @@ fun dashDialog(onDismissRequest: (Boolean) -> Unit) {
         }
     }
 }
+
 fun CreatePersonalChat(peerEmail:String, navController: NavHostController){
     var alreadyContacted = false
     db.collection("Chats").addSnapshotListener{snapshot, e ->
@@ -195,8 +199,8 @@ fun CreatePersonalChat(peerEmail:String, navController: NavHostController){
             }
         }
     }
-
 }
+
 @Composable
 fun DashboardScreen (navController: NavHostController) {
     if(selectedPeerDashboard.value){
@@ -237,6 +241,7 @@ fun groupDashboard(navController: NavHostController){
         testViewGroup(navController)
     }
 }
+
 @OptIn(ExperimentalSwipeableCardApi::class)
 @Composable
 fun peerDashboard(navController: NavHostController){
@@ -247,60 +252,77 @@ fun peerDashboard(navController: NavHostController){
     }
     var finfilt by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    if(Filteredusers.isEmpty()){
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color(0xfff1f1f1)), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Loading...", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp))
+    if(Filteredusers.isEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = background),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Loading...",
+                fontSize = 20.sp,
+                color = headText,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(20.dp)
+            )
         }
-    }else{
+    } else {
         for (filtereduser in Filteredusers) {
             println("Siapa aja tuh $filtereduser")
         }
         if(showDashfilterPersonal.value){
             dashDialog(onDismissRequest = {showDashfilterPersonal.value = it})
         }
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color(0xfff1f1f1)), ) {
-            Header("dashboard")
-            Column(modifier = Modifier
+        Column(
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 15.dp)) {
-                Box(){
+                .background(color = background)
+        ) {
+            Header("dashboard")
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 15.dp)
+            ) {
+                Box{
                     if(selectedOption.value != "All Posts"){
                         val filteredUserDashboard = Filteredusers.filter { it.studyField ==  selectedOption.value}
                         val states =  filteredUserDashboard.reversed().map { it to rememberSwipeableCardState() }
                         states.forEach { (profile, state) ->
                             if (state.swipedDirection == null) {
-                                UserCard(modifier = Modifier
-                                    .swipableCard(
-                                        state = state,
-                                        blockedDirections = listOf(Direction.Down),
-                                        onSwiped = {  },
-                                        onSwipeCancel = {
-                                            println("The swiping was cancelled")
-                                        }
-                                    ), prof = profile,navController = navController)
+                                UserCard(
+                                    modifier = Modifier
+                                        .swipableCard(
+                                            state = state,
+                                            blockedDirections = listOf(Direction.Down),
+                                            onSwiped = {  },
+                                            onSwipeCancel = { println("The swiping was cancelled") }
+                                    ),
+                                    prof = profile,
+                                    navController = navController
+                                )
                             }
                         }
-                    }else{
+                    } else {
                         val states =  Filteredusers.reversed().map { it to rememberSwipeableCardState() }
                         states.forEach { (profile, state) ->
                             if (state.swipedDirection == null) {
-                                UserCard(modifier = Modifier
-                                    .swipableCard(
-                                        state = state,
-                                        blockedDirections = listOf(Direction.Down),
-                                        onSwiped = {  },
-                                        onSwipeCancel = {
-                                            println("The swiping was cancelled")
-                                        }
-                                    ), prof = profile,navController = navController)
+                                UserCard(
+                                    modifier = Modifier
+                                        .swipableCard(
+                                            state = state,
+                                            blockedDirections = listOf(Direction.Down),
+                                            onSwiped = {  },
+                                            onSwipeCancel = { println("The swiping was cancelled") }
+                                    ),
+                                    prof = profile,
+                                    navController = navController
+                                )
                             }
                         }
                     }
-
                 }
             }
         }
@@ -318,7 +340,7 @@ fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, navControll
                 modifier = Modifier
                     .fillMaxHeight(0.9f)
                     .fillMaxWidth(0.9f),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = cardsColor),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Box(
@@ -338,7 +360,7 @@ fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, navControll
                         )
                         Text(
                             text = prof.fullName,
-                            color = Color.Black,
+                            color = headText,
                             fontSize = 25.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
@@ -354,7 +376,7 @@ fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, navControll
                                 ) {
                                     Text(
                                         text = "+",
-                                        color = Color(0xff373737),
+                                        color = subheadText,
                                         fontSize = 20.sp,
                                         fontWeight = FontWeight.Medium,
                                         modifier = Modifier.padding(start = 25.dp)
@@ -362,7 +384,7 @@ fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, navControll
                                     prof.strongAt.map {
                                         Text(
                                             text = "$it",
-                                            color = Color(0xff373737),
+                                            color = subheadText,
                                             fontSize = 20.sp,
                                             fontWeight = FontWeight.Medium,
                                             modifier = Modifier.padding(start = 5.dp)
@@ -376,7 +398,7 @@ fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, navControll
                                     Row {
                                         Text(
                                             text = "-",
-                                            color = Color(0xff373737),
+                                            color = subheadText,
                                             fontSize = 20.sp,
                                             fontWeight = FontWeight.Medium,
                                             modifier = Modifier.padding(start = 25.dp)
@@ -384,7 +406,7 @@ fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, navControll
                                         prof.wantStudy.map {
                                             Text(
                                                 text = "$it",
-                                                color = Color(0xff373737),
+                                                color = subheadText,
                                                 fontSize = 20.sp,
                                                 fontWeight = FontWeight.Medium,
                                                 modifier = Modifier.padding(start = 5.dp)

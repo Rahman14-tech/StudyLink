@@ -18,6 +18,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -107,14 +108,11 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
 val LocalIsDark = compositionLocalOf { mutableStateOf(false) }
-val refreshTrigger = mutableStateOf(0)
 
 @Composable
 fun ProfileTopNavbar(
     modifier: Modifier = Modifier
 ) {
-    val isDark = LocalIsDark.current
-
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -366,12 +364,21 @@ fun userBioBox(
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Row {
-                        Text(
-                            text = "Add a few words about yourself",
-                            color = subheadText,
-                            style = TextStyle(
-                                fontSize = 13.sp)
-                        )
+                        if (currUser.value.bio == "") {
+                            Text(
+                                text = "Add a few words about yourself",
+                                color = subheadText,
+                                style = TextStyle(
+                                    fontSize = 13.sp)
+                            )
+                        } else {
+                            Text(
+                                text = currUser.value.bio,
+                                color = subheadText,
+                                style = TextStyle(
+                                    fontSize = 13.sp)
+                            )
+                        }
                         Text(
                             text = inRefresh.value.toString(),
                             color = Color.Transparent,
@@ -735,6 +742,7 @@ fun overlayNameChange() {
 fun overlayBioChange() {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
+    var dasBio = remember { mutableStateOf(currUser.value.bio) }
     val color = remember { mutableStateOf(subheadText) }
 
     ModalBottomSheet(
@@ -790,8 +798,8 @@ fun overlayBioChange() {
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 CustomTextField(
-                    value = mutableStateOf(inputText.value),
-                    onValueChange = { inputText.value = it },
+                    value = mutableStateOf(dasBio.value),
+                    onValueChange = { dasBio.value = it },
                     modifier = Modifier
                         .width(maxWidthTextField)
                         .background(Color.Transparent)
@@ -824,7 +832,7 @@ fun overlayBioChange() {
                 ) {
                     TextButton(
                         onClick = {
-                            inputText.value = ""
+                            dasBio.value = ""
 
                             scope.launch { sheetState.hide() }.invokeOnCompletion {
                                 if (!sheetState.isVisible) {
@@ -844,13 +852,23 @@ fun overlayBioChange() {
                     Spacer(modifier = Modifier.width(5.dp))
                     TextButton(
                         onClick = {
-                            inputText.value = ""
+                            db.collection("Users")
+                                .document(currUser.value.id)
+                                .update("bio", dasBio.value)
+                                .addOnSuccessListener {
+                                    currUser.value.bio = dasBio.value
+                                    dasBio.value = ""
 
-                            scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                if (!sheetState.isVisible) {
-                                    showOverlayBioProfile.value = false
+                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                        if (!sheetState.isVisible) {
+                                            showOverlayBioProfile.value = false
+                                        }
+                                    }
+
+                                    inRefresh.value++
+                                }.addOnFailureListener{
+                                    Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
                                 }
-                            }
                         }
                     ) {
                         Text(
@@ -874,12 +892,23 @@ fun overlayBioChange() {
 fun ThemeSwitch(
     contentSpace: Dp
 ) {
-    val switchColor by animateColorAsState(if (isDark.value) Color.Black else Color.Gray)
+    val switchColor by animateColorAsState(if (isDark.value) Color.Black else Color.Gray,
+        label = ""
+    )
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(70.dp)
             .background(Color.Transparent)
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = {
+                    isDark.value = !isDark.value
+                    coloringSchema()
+                    inRefresh.value++
+                }
+            )
     ) {
         Row(
             modifier = Modifier
@@ -927,7 +956,6 @@ fun ThemeSwitch(
                     onCheckedChange = {
                         isDark.value = it
                         coloringSchema()
-                        refreshTrigger.value++
                         inRefresh.value++
                     },
                     colors = SwitchDefaults.colors(

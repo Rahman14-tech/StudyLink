@@ -73,7 +73,8 @@ fun BottomBar(navController: NavHostController){
     Scaffold(bottomBar = {BottomContent(navController = navController)}) {
         Box(modifier = Modifier
             .padding(it)
-            .fillMaxWidth()){
+            .fillMaxWidth()
+        ) {
             NavHost(navController = navController, startDestination = Login.route){
                 composable(Login.route){
                     LoginScreen(navController = navController)
@@ -118,10 +119,7 @@ fun BottomBar(navController: NavHostController){
                     val id = requireNotNull(currIt2.arguments?.getString(GroupChats.GroupChatId))
                     println("ANJAYTHE ${id}")
                     GroupChatSystem(navController = navController, GroupChatId = id)
-
                 }
-
-                
             }
         }
     }

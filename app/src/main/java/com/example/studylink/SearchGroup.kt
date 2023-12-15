@@ -92,7 +92,7 @@ fun groupcard(
     personcount : Int,
     onCardClick : (List<String>) -> Unit,
     onButtonClick : () -> Unit,
-    groupName:String
+    groupName: String
 ) {
     val scopeSeparator = " | "
     val scopes = buildAnnotatedString {
@@ -120,8 +120,8 @@ fun groupcard(
 
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = Color.White,
-            contentColor = Color.White
+            containerColor = cardsColor,
+            contentColor = cardsColor
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         modifier = Modifier
@@ -168,24 +168,24 @@ fun groupcard(
                         Row {
                             Text(
                                 text = groupName,
-                                color = Color(0xff202020),
+                                color = headText,
                                 style = TextStyle(
                                     fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold),
+                                    fontWeight = FontWeight.Bold
+                                )
                             )
                             Text(
                                 text = " #${groupId.substring(0,10)}",
-                                color = Color(0xff202020),
+                                color = headText,
                                 style = TextStyle(
                                     fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold),
+                                    fontWeight = FontWeight.Bold
+                                )
                             )
-
                         }
-
                         Text(
                             text = scopes,
-                            color = Color.DarkGray,
+                            color = subheadText,
                             style = TextStyle(
                                 fontSize = 13.sp),
                             modifier = Modifier
@@ -196,7 +196,7 @@ fun groupcard(
                                 .requiredWidth(width = 48.dp)
                                 .requiredHeight(height = 24.dp)
                                 .clip(shape = RoundedCornerShape(8.dp))
-                                .background(color = Color(0xff848484))
+                                .background(color = subheadText)
                         ) {
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -229,7 +229,7 @@ fun groupcard(
                     .align(alignment = Alignment.CenterEnd)
                     .requiredSize(size = 40.dp)
                     .clip(shape = RoundedCornerShape(8.dp))
-                    .background(color = Color(0xff1c1a22))
+                    .background(color = groupButtonColor)
                     .clickable(
                         onClick = onButtonClick
                     )
@@ -380,7 +380,7 @@ fun GroupSplash(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .background(color = Color.White)
+            .background(color = defaultColor)
     ) {
         Row(
             modifier = Modifier
@@ -397,12 +397,12 @@ fun GroupSplash(modifier: Modifier = Modifier) {
             Text(
                 text = buildAnnotatedString {
                     withStyle(style = SpanStyle(
-                        color = Color(0xff202020),
+                        color = headText,
                         fontSize = 21.sp,
                         fontWeight = FontWeight.Bold)
                     ) {append("Find")}
                     withStyle(style = SpanStyle(
-                        color = Color(0xff202020),
+                        color = headText,
                         fontSize = 21.sp,
                         fontWeight = FontWeight.Normal)
                     ) {append(" Your Study\nGroup Here")}},
@@ -422,7 +422,7 @@ fun SearchBar(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .requiredHeight(height = 42.dp)
-            .background(color = Color.White)
+            .background(color = defaultColor)
     ) {
         Box(
             modifier = Modifier
@@ -598,17 +598,22 @@ fun testViewGroup(navController: NavHostController) {
             Text(text = "Loading...", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp))
             Text(text = "Stuck at loading? Then there is no group", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp))
         }
-    }else{
-        if(showAutoMatch.value){
-            butDialog(onDismissRequest = {showAutoMatch.value = it}, cont = context)
+    } else {
+        if(showAutoMatch.value) {
+            butDialog(onDismissRequest = { showAutoMatch.value = it },
+                cont = context
+            )
         }
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    color = background
+                )
+        ) {
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
-                    .background(
-                        color = Color(0xfff1f1f1)
-                    )
                     .padding(bottom = 5.dp)
             ) {
                 GroupSplash()
@@ -643,10 +648,7 @@ fun testViewGroup(navController: NavHostController) {
                         }
                     )
                 }
-
-
             }
-
             Button(
                 onClick = {
                     showAutoMatch.value = true
@@ -667,7 +669,6 @@ fun testViewGroup(navController: NavHostController) {
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(text = "Auto Match")
             }
-
             if (showOverlay.value) {
                 overlayGroupInfo(
                     people = selectedPeople.value,
@@ -676,6 +677,4 @@ fun testViewGroup(navController: NavHostController) {
             }
         }
     }
-
-
 }

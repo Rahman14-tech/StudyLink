@@ -11,7 +11,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +28,7 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
@@ -37,6 +40,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -44,6 +48,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -74,7 +79,7 @@ fun TopNavbarGroup(modifier: Modifier = Modifier, navController: NavHostControll
         modifier = modifier
             .fillMaxWidth()
             .requiredHeight(height = 60.dp)
-            .background(color = Color.White)
+            .background(defaultColor)
     ) {
         Box(
             modifier = Modifier
@@ -83,24 +88,28 @@ fun TopNavbarGroup(modifier: Modifier = Modifier, navController: NavHostControll
                 .padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp),
         ) {
             Row {
-                TextButton(
-                    onClick = {
-                        navController.navigate(Dashboard.route) {
-                            popUpTo(YourChats.route) {
-                                inclusive = true
-                            }
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                Box(
                     modifier = modifier
                         .size(20.dp)
                         .align(alignment = Alignment.CenterVertically)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = {
+                                navController.navigate(Dashboard.route) {
+                                    popUpTo(YourChats.route) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                        )
                 ) {
-                    Image(
+                    Icon(
                         painter = painterResource(id = R.drawable.backbutton),
                         contentDescription = "Back Button",
+                        tint = headText,
                         modifier = Modifier
-                            .align(alignment = Alignment.CenterVertically)
+                            .align(alignment = Alignment.Center)
                             .requiredWidth(width = 10.dp)
                             .requiredHeight(height = 18.dp)
                     )
@@ -133,21 +142,22 @@ fun TopNavbarGroup(modifier: Modifier = Modifier, navController: NavHostControll
                 ) {
                     Text(
                         text = "Anjay Group",
-                        color = Color(0xff202020),
+                        color = headText,
                         style = TextStyle(
                             fontSize = 18.sp)
                     )
                     Text(
                         text = "last seen 15:47",
-                        color = Color.DarkGray,
+                        color = subheadText,
                         style = TextStyle(
                             fontSize = 13.sp)
                     )
                 }
             }
-            Image(
+            Icon(
                 painter = painterResource(id = R.drawable.dotmenu),
                 contentDescription = "dot menu",
+                tint = headText,
                 modifier = Modifier
                     .align(alignment = Alignment.CenterEnd)
                     .requiredSize(size = 20.dp)
@@ -176,7 +186,7 @@ fun GroupLeftChat(modifier: Modifier = Modifier,timeSent:String, sender: String,
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 8.dp, top = 5.dp, bottom = 5.dp),
+                .padding(start = 8.dp, top = 3.dp, bottom = 3.dp),
             horizontalArrangement = Arrangement.Start,
         ) {
             Box(
@@ -213,14 +223,14 @@ fun GroupLeftChat(modifier: Modifier = Modifier,timeSent:String, sender: String,
                                 bottomEnd = 8.dp
                             )
                         )
-                        .background(color = Color.White)
+                        .background(leftChatColor)
                 ) {
                     Column {
                         Text(
                             text = theOtherUser!!.fullName,
-                            color = Color(0xff202020),
+                            color = headText,
                             style = TextStyle(
-                                fontSize = 16.sp, fontWeight = FontWeight.Bold
+                                fontSize = 16.sp, fontWeight = FontWeight.SemiBold
                             ),
                             modifier = Modifier
                                 .align(alignment = Alignment.Start)
@@ -229,7 +239,7 @@ fun GroupLeftChat(modifier: Modifier = Modifier,timeSent:String, sender: String,
                         )
                         Text(
                             text = message,
-                            color = Color(0xff202020),
+                            color = headText,
                             style = TextStyle(fontSize = 16.sp),
                             modifier = Modifier
                                 .align(alignment = Alignment.Start)
@@ -241,7 +251,7 @@ fun GroupLeftChat(modifier: Modifier = Modifier,timeSent:String, sender: String,
             }
             Text(
                 text = hournmin.toString(),
-                color = Color.DarkGray,
+                color = subheadText,
                 style = TextStyle(fontSize = 12.sp),
                 modifier = Modifier
                     .align(Alignment.Bottom)
@@ -250,6 +260,7 @@ fun GroupLeftChat(modifier: Modifier = Modifier,timeSent:String, sender: String,
         }
     }
 }
+
 fun GetTheGroupChats(GroupChatId: String){
     db.collection("Chatgroup").document(GroupChatId).collection("ChatData").addSnapshotListener{snapshot, e ->
         if (e != null) {
@@ -272,56 +283,112 @@ fun GetTheGroupChats(GroupChatId: String){
 }
 
 @Composable
-fun GroupMediaLeftChat(ChatId:String, navController: NavHostController,modifier: Modifier = Modifier, MediaContent : String,MediaType:String,timeSent: String) {
+fun GroupMediaLeftChat(
+    modifier: Modifier = Modifier,
+    timeSent:String,
+    sender: String,
+    ChatId:String,
+    navController: NavHostController,
+    MediaContent : String,
+    MediaType:String
+) {
     var context = LocalContext.current
     var displayMetrics = context.resources.displayMetrics
 
     var screenWidthInDp = with(LocalDensity.current) {
         displayMetrics.widthPixels.dp / density
     }
-    var eightyPercentOfScreenWidth = (screenWidthInDp * 0.8f)
+    var screenHeightInDp = with(LocalDensity.current) {
+        displayMetrics.heightPixels.dp / density
+    }
+    var fortyPercentOfScreenHeight = (screenHeightInDp * 0.4f)
+    var seventyPercentOfScreenWidth = (screenWidthInDp * 0.7f)
     var splittedtime = timeSent.split(" ").toTypedArray()
     var thehour = splittedtime[1]
     var hournmin = thehour.subSequence(0,5)
+    val theOtherUser = Realusers.firstOrNull{ it.email == sender }
     Box(
         modifier = modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 5.dp, top = 5.dp, bottom = 5.dp),
+                .fillMaxWidth()
+                .padding(start = 8.dp, top = 3.dp, bottom = 3.dp),
             horizontalArrangement = Arrangement.Start,
         ) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
-                ),
-                content = {
-                    if (MediaType == "Video") {
-                        VideoPlayerScreen(ChatId = ChatId, navController = navController,MediaContent)
-                    } else if (MediaType == "Image") {
-                        Image(
-                            painter = rememberAsyncImagePainter(MediaContent),
-                            contentDescription = "The Image", modifier = Modifier.size(250.dp)
-                        )
-                    }
-                },
+            Box(
                 modifier = Modifier
-                    .wrapContentSize()
-                    .clip(
-                        shape = RoundedCornerShape(
-                            topStart = 0.dp,
-                            topEnd = 8.dp,
-                            bottomStart = 8.dp,
-                            bottomEnd = 8.dp
+                    .align(alignment = Alignment.Top)
+                    .requiredSize(size = 32.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .requiredSize(size = 32.dp)
+                        .clip(shape = CircleShape)
+                        .background(color = Color(0xffffc600))
+                )
+                Image(
+                    painter = rememberAsyncImagePainter(model = theOtherUser!!.imageURL),
+                    contentDescription = "user image",
+                    modifier = Modifier
+                        .align(alignment = Alignment.Center)
+                        .clip(shape = CircleShape)
+                        .requiredSize(size = 32.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(5.dp))
+            Column {
+                Spacer(modifier = Modifier.height(6.dp))
+                Box(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .clip(
+                            shape = RoundedCornerShape(
+                                topStart = 0.dp,
+                                topEnd = 8.dp,
+                                bottomStart = 8.dp,
+                                bottomEnd = 8.dp
+                            )
                         )
-                    )
-                    .background(color = Color.White)
-            )
+                        .background(leftChatColor)
+                ) {
+                    Column {
+                        Text(
+                            text = theOtherUser!!.fullName,
+                            color = headText,
+                            style = TextStyle(
+                                fontSize = 16.sp, fontWeight = FontWeight.SemiBold
+                            ),
+                            modifier = Modifier
+                                .align(alignment = Alignment.Start)
+                                .widthIn(max = seventyPercentOfScreenWidth)
+                                .padding(top = 5.dp, bottom = 4.dp, start = 10.dp, end = 10.dp)
+                        )
+                        if (MediaType == "Video") {
+                            VideoPlayerScreen(
+                                ChatId = ChatId,
+                                navController = navController,
+                                MediaContent
+                            )
+                        } else if (MediaType == "Image") {
+                            Image(
+                                painter = rememberAsyncImagePainter(MediaContent),
+                                contentDescription = "The Image",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .align(alignment = Alignment.Start)
+                                    .padding(5.dp)
+                                    .sizeIn(maxWidth = seventyPercentOfScreenWidth, maxHeight = fortyPercentOfScreenHeight)
+                                    .clip(shape = RoundedCornerShape(8.dp))
+                            )
+                        }
+                    }
+                }
+            }
             Text(
                 text = hournmin.toString(),
-                color = Color.DarkGray,
+                color = subheadText,
                 style = TextStyle(fontSize = 12.sp),
                 modifier = Modifier
                     .align(Alignment.Bottom)
@@ -330,6 +397,7 @@ fun GroupMediaLeftChat(ChatId:String, navController: NavHostController,modifier:
         }
     }
 }
+
 @RequiresApi(Build.VERSION_CODES.O)
 fun SendMessageGroup(TheMessage: String, GroupChatId: String){
     val sdf = SimpleDateFormat("dd/M/yyyy HH:mm:ss")
@@ -440,7 +508,7 @@ fun GroupChatSystem(navController: NavHostController, GroupChatId: String){
         modifier = Modifier
             .fillMaxSize()
             .background(
-                color = Color(0xfff1f1f1)
+                color = background
             )
     ) {
         Box(
@@ -466,7 +534,7 @@ fun GroupChatSystem(navController: NavHostController, GroupChatId: String){
                         if(it.Content != ""){
                             GroupLeftChat(Modifier, timeSent = it.TimeSent, sender = it.TheUser, message = it.Content)
                         }else{
-                            GroupMediaLeftChat(ChatId = GroupChatId,navController = navController,MediaContent = it.ContentMedia, MediaType = it.MediaType, timeSent = it.TimeSent)
+                            GroupMediaLeftChat(ChatId = GroupChatId,navController = navController,MediaContent = it.ContentMedia, MediaType = it.MediaType, timeSent = it.TimeSent, sender = it.TheUser)
                         }
 
                     }else{

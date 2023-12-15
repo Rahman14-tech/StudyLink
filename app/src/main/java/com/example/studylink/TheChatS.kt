@@ -1,6 +1,7 @@
 package com.example.studylink
 
 import VideoPlayerScreen
+import android.R.attr.end
 import android.R.attr.path
 import android.R.attr.textSize
 import android.annotation.SuppressLint
@@ -531,6 +532,7 @@ fun MediaLeftChat(ChatId:String, navController: NavHostController,modifier: Modi
                                     .align(alignment = Alignment.Start)
                                     .padding(5.dp)
                                     .sizeIn(maxWidth = eightyPercentOfScreenWidth, maxHeight = fortyPercentOfScreenHeight)
+                                    .clip(shape = RoundedCornerShape(8.dp))
                             )
                         }
                     },
@@ -676,6 +678,7 @@ fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Mod
                                     .align(alignment = Alignment.Start)
                                     .padding(5.dp)
                                     .sizeIn(maxWidth = eightyPercentOfScreenWidth, maxHeight = fortyPercentOfScreenHeight)
+                                    .clip(shape = RoundedCornerShape(8.dp))
                             )
                         }
                     },
@@ -865,15 +868,21 @@ fun ChatSystem(navController: NavHostController, ChatId: String) {
                 Row(
                     modifier = Modifier
                         .horizontalScroll(rememberScrollState())
-                        .padding(bottom = 5.dp)
+                        .padding(start = 5.dp, bottom = 5.dp, end = 5.dp)
                 ) {
                     theSmartReply.forEach{
                         println(" $it")
-                        Card(modifier = Modifier
-                            .padding(2.dp), onClick = {inputText.value = it}) {
-                            Column(modifier = Modifier.padding(5.dp)) {
-                                Text(text = it, fontSize = 20.sp)
-                            }
+                        Card(
+                            modifier = Modifier
+                                .padding(2.dp),
+                            onClick = {inputText.value = it}
+                        ) {
+                            Text(
+                                text = it,
+                                fontSize = 16.sp,
+                                modifier = Modifier
+                                    .padding(5.dp)
+                            )
 
                         }
                     }

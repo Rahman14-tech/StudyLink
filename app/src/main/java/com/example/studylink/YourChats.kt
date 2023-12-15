@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -275,7 +276,9 @@ fun YourChatsCardGroup(datum: GroupChatType, navController: NavHostController){
             onButtonClick = {
                 println("Wie Spiele ein spiel ${GroupChats.route+"/${datum.id}"}")
                 navController?.navigate(GroupChats.route+"/${datum.id}")
-            }
+            },
+            groupId = datum.id,
+            groupName = datum.groupName
         )
     }
 }
@@ -363,6 +366,7 @@ fun YourChatScreen(navController: NavHostController) {
     Column(
         modifier = Modifier
             .background(color = defaultColor)
+            .fillMaxHeight()
     ) {
         Header("YourChatScreen")
         if(showYourChatSearch.value) {

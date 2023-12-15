@@ -86,6 +86,7 @@ fun chatheader(){
             ) {
                 Row(
                     modifier = Modifier
+                        .requiredHeight(60.dp)
                         .padding(start = 20.dp, top = 10.dp, bottom = 10.dp, end = 10.dp)
                         .align(Alignment.CenterVertically)
                 ) {
@@ -127,28 +128,30 @@ fun chatheader(){
         ) {
             Column(
                 modifier = Modifier
-                    .background(color = Color.Transparent)
+                    .background(color = Color.Transparent),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 TextButton(onClick = { selectedPeerChats.value = true }) {
                     Text(text = "Personal", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = headText)
                 }
                 if(selectedPeerChats.value){
-                    Divider(modifier = Modifier.width(95.dp), color = Color(0xFFFFC600))
+                    Divider(modifier = Modifier.width(95.dp), color = Color(0xFFFFC600), thickness = 2.dp)
                 } else {
-                    Divider(modifier = Modifier.width(95.dp), color = Color.Transparent)
+                    Divider(modifier = Modifier.width(95.dp), color = Color.Transparent, thickness = 2.dp)
                 }
             }
             Column(
                 modifier = Modifier
-                    .background(color = Color.Transparent)
+                    .background(color = Color.Transparent),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 TextButton(onClick = { selectedPeerChats.value = false }) {
                     Text(text = "Group", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = headText)
                 }
                 if(!selectedPeerChats.value){
-                    Divider(modifier = Modifier.width(80.dp), color = Color(0xFFFFC600))
+                    Divider(modifier = Modifier.width(80.dp), color = Color(0xFFFFC600), thickness = 2.dp)
                 } else {
-                    Divider(modifier = Modifier.width(80.dp), color = Color.Transparent)
+                    Divider(modifier = Modifier.width(80.dp), color = Color.Transparent, thickness = 2.dp)
                 }
             }
 
@@ -163,18 +166,16 @@ fun dashboard(){
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = Color.White)
+            .background(defaultColor)
     ) {
         Column(modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 0.1.dp)
-            .background(color = Color.White)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .padding(bottom = 5.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -194,7 +195,7 @@ fun dashboard(){
                     Icon(
                         painter = painterResource(id = R.drawable.filtericon),
                         contentDescription = "",
-                        tint = Color.Black,
+                        tint = headText,
                         modifier = Modifier
                             .size(25.dp)
                     )
@@ -202,57 +203,38 @@ fun dashboard(){
             }
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp),
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                Column {
+                Column(
+                    modifier = Modifier
+                        .background(color = Color.Transparent),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     TextButton(onClick = { selectedPeerDashboard.value = true }) {
-                        Text(text = "Personal", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = Color.Black)
+                        Text(text = "Personal", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = headText)
                     }
                     if(selectedPeerDashboard.value){
-                        Divider(modifier = Modifier.width(95.dp), color = Color(0xFFFFC600))
+                        Divider(modifier = Modifier.width(95.dp), color = Color(0xFFFFC600), thickness = 2.dp)
+                    } else {
+                        Divider(modifier = Modifier.width(95.dp), color = Color.Transparent, thickness = 2.dp)
                     }
                 }
-                Column {
+                Column(
+                    modifier = Modifier
+                        .background(color = Color.Transparent),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     TextButton(onClick = { selectedPeerDashboard.value = false }) {
-                        Text(text = "Group", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = Color.Black)
+                        Text(text = "Group", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = headText)
                     }
                     if(!selectedPeerDashboard.value){
-                        Divider(modifier = Modifier.width(80.dp), color = Color(0xFFFFC600))
+                        Divider(modifier = Modifier.width(80.dp), color = Color(0xFFFFC600), thickness = 2.dp)
+                    } else {
+                        Divider(modifier = Modifier.width(80.dp), color = Color.Transparent, thickness = 2.dp)
                     }
                 }
-
             }
         }
     }
-}
-
-@Composable
-fun YourChatScreen(){
-//        Card(modifier = Modifier.fillMaxWidth().background(color = Color.White), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)) {
-//            Column(modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(vertical = 0.1.dp)
-//                .background(color = Color.White)
-//            ) {
-//                Row(modifier = Modifier
-//                    .fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
-//                    Row(modifier = Modifier.padding(10.dp)) {
-//                        Text(text = "Your ", modifier = Modifier.textBrush(brush1), fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
-//                        Text(text = "Chats", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.textBrush(brush2))
-//                    }
-//                    Row (modifier = Modifier.padding(end = 10.dp, top = 5.dp)) {
-//                        IconButton(
-//                            onClick = {
-//                                Toast.makeText(contextForToast, "Click!", Toast.LENGTH_SHORT).show()
-//                            }
-//                        ) {
-//                            Icon(imageVector = Icons.Outlined.Search, contentDescription = "", tint = Color.Black, modifier = Modifier.size(33.dp),)
-//                        }
-//
-//                    }
-//                }
-//            }
-//        }
 }

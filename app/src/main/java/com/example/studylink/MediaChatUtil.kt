@@ -17,8 +17,10 @@ class MediaChatUtil {
         fun uploadToStorage(uri: Uri, type: String,  context: Context, ChatId: String, isGroup:Boolean) {
             var anjay = ""
             val storage = Firebase.storage
-            val sdf = SimpleDateFormat("dd/M/yyyy HH:mm:ss")
+            val sdf = SimpleDateFormat("dd/M/yyyy")
             val currentDate = sdf.format(Date())
+            val sdft = SimpleDateFormat("HH:mm:ss")
+            val currentTime = sdft.format(Date())
 
             // Create a storage reference from our app
             var storageRef = storage.reference
@@ -52,7 +54,9 @@ class MediaChatUtil {
                                 "ContentMedia" to it.toString(),
                                 "MediaType" to type,
                                 "TheUser" to currUser.value.email,
-                                "TimeSent" to currentDate,
+                                "TimeSent" to currentTime,
+                                "TimeDate" to currentDate,
+                                "OrderNo" to ChatData.size + 1
                             )).addOnSuccessListener {
                                 Toast.makeText(context,"Image/Video Successfully sent",Toast.LENGTH_SHORT)
                             }.addOnFailureListener{
@@ -67,6 +71,9 @@ class MediaChatUtil {
                                 "MediaType" to type,
                                 "TheUser" to currUser.value.email,
                                 "TimeSent" to currentDate,
+                                "TimeSent" to currentTime,
+                                "TimeDate" to currentDate,
+                                "OrderNo" to ChatData.size + 1
                             )).addOnSuccessListener {
                                 Toast.makeText(context,"Image/Video Successfully sent",Toast.LENGTH_SHORT)
                             }.addOnFailureListener{

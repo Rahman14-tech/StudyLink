@@ -325,7 +325,7 @@ fun YourChatScreen(navController: NavHostController){
         groupChatsDashboard.removeAll(groupChatsDashboard)
         GetGroupChatData()
     }
-    Column {
+    Column() {
         Header("YourChatScreen")
         if(showYourChatSearch.value){
         Box(modifier = Modifier.padding(10.dp)) {

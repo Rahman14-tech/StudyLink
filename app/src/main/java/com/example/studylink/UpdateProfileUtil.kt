@@ -49,6 +49,7 @@ class UpdateProfileUtil{
                             Toast.makeText(cont, "Upload Failed", Toast.LENGTH_LONG).show()
                             tempUrl.value = TextFieldValue("")
                         }
+                        currUser.value.imageURL = it.toString()
                     }
                 }
             }

@@ -68,27 +68,53 @@ fun Header (headerId: String) {
 }
 @Composable
 fun chatheader(){
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .background(color = Color.White), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)) {
+    Card(
+        shape = RectangleShape,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = defaultColor)
+    ) {
         Column(modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 0.1.dp)
-            .background(color = Color.White)
+            .background(color = defaultColor)
         ) {
-            Row(modifier = Modifier
-                .fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
-                Row(modifier = Modifier.padding(10.dp)) {
-                    Text(text = "Your Chats", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(start = 20.dp, top = 10.dp, bottom = 10.dp, end = 10.dp)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Text(
+                        text = "Your Chats",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = headText,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                    )
                 }
-                Row (modifier = Modifier.padding(end = 5.dp, top = 5.dp)) {
+                Row (
+                    modifier = Modifier
+                        .padding(end = 5.dp, top = 5.dp)
+                        .align(Alignment.CenterVertically)
+                ) {
                     IconButton(
                         onClick = {
                             showYourChatSearch.value = !showYourChatSearch.value
                         }
                     ) {
-                        Icon(imageVector = Icons.Outlined.Search, contentDescription = "", tint = Color.Black, modifier = Modifier
-                            .size(30.dp))
+                        Icon(
+                            imageVector = Icons.Outlined.Search,
+                            contentDescription = "",
+                            tint = headText,
+                            modifier = Modifier
+                                .size(26.dp)
+                        )
                     }
                 }
             }
@@ -96,24 +122,33 @@ fun chatheader(){
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 4.dp)
-                .background(color = Color.White),
+                .background(color = defaultColor),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            Column {
+            Column(
+                modifier = Modifier
+                    .background(color = Color.Transparent)
+            ) {
                 TextButton(onClick = { selectedPeerChats.value = true }) {
-                    Text(text = "Personal", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = Color.Black)
+                    Text(text = "Personal", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = headText)
                 }
                 if(selectedPeerChats.value){
                     Divider(modifier = Modifier.width(95.dp), color = Color(0xFFFFC600))
+                } else {
+                    Divider(modifier = Modifier.width(95.dp), color = Color.Transparent)
                 }
             }
-            Column {
+            Column(
+                modifier = Modifier
+                    .background(color = Color.Transparent)
+            ) {
                 TextButton(onClick = { selectedPeerChats.value = false }) {
-                    Text(text = "Group", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = Color.Black)
+                    Text(text = "Group", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = headText)
                 }
                 if(!selectedPeerChats.value){
                     Divider(modifier = Modifier.width(80.dp), color = Color(0xFFFFC600))
+                } else {
+                    Divider(modifier = Modifier.width(80.dp), color = Color.Transparent)
                 }
             }
 

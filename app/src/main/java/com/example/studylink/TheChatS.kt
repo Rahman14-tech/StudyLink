@@ -52,7 +52,9 @@ import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import android.webkit.MimeTypeMap
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.focus.FocusRequester
@@ -95,7 +97,8 @@ fun CustomTextField(
     onValueChange: (String) -> Unit,
     maxChar: Int = 8,
     useCounter: Boolean = false,
-    counterPadding: Dp = 5.dp
+    counterPadding: Dp = 5.dp,
+    textColor: Color = headText
 ) {
     val focusRequester = remember { FocusRequester() }
     val maxLength = maxChar
@@ -125,7 +128,7 @@ fun CustomTextField(
         singleLine = singleLine,
         maxLines = maxLine,
         textStyle = LocalTextStyle.current.copy(
-            color = Color.Black,
+            color = textColor,
             fontSize = fontSize
         ),
         keyboardOptions = KeyboardOptions(
@@ -147,7 +150,7 @@ fun CustomTextField(
                         Text(
                             placeholderText,
                             style = LocalTextStyle.current.copy(
-                                color = Color(0xff767676),
+                                color = placeholderColor,
                                 fontSize = fontSize
                             )
                         )
@@ -165,7 +168,9 @@ fun CustomTextField(
                         Icon(
                             Icons.Rounded.Cancel,
                             null,
-                            tint = Color.DarkGray.copy(alpha = 0.8f)
+//                            tint = Color.DarkGray.copy(alpha = 0.8f)
+                            tint = placeholderColor
+
                         )
                     }
                 }
@@ -173,7 +178,7 @@ fun CustomTextField(
                     Text(
                         text = "${maxLength - value.value.length}",
                         fontSize = fontSize,
-                        color = Color(0xff4b4b4b),
+                        color = placeholderColor,
                         modifier = Modifier
                             .padding(start = counterPadding)
                     )
@@ -193,7 +198,7 @@ fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostContr
         modifier = modifier
             .fillMaxWidth()
             .requiredHeight(height = 60.dp)
-            .background(color = Color.White)
+            .background(color = defaultColor)
     ) {
         Box(
             modifier = Modifier
@@ -202,24 +207,28 @@ fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostContr
                 .padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp),
         ) {
             Row {
-                TextButton(
-                    onClick = {
-                        navController.navigate(Dashboard.route) {
-                            popUpTo(YourChats.route) {
-                                inclusive = true
-                            }
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                Box(
                     modifier = modifier
                         .size(20.dp)
                         .align(alignment = Alignment.CenterVertically)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = {
+                                navController.navigate(Dashboard.route) {
+                                    popUpTo(YourChats.route) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                        )
                 ) {
-                    Image(
+                    Icon(
                         painter = painterResource(id = R.drawable.backbutton),
                         contentDescription = "Back Button",
+                        tint = headText,
                         modifier = Modifier
-                            .align(alignment = Alignment.CenterVertically)
+                            .align(alignment = Alignment.Center)
                             .requiredWidth(width = 10.dp)
                             .requiredHeight(height = 18.dp)
                     )
@@ -238,9 +247,7 @@ fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostContr
                     )
                     Image(painter = rememberAsyncImagePainter(tempPartnerData.imageURL), contentScale = ContentScale.Crop, contentDescription = "Gambar Wong", modifier = Modifier
                         .size(42.dp)
-                        .clip(
-                            CircleShape
-                        )
+                        .clip(CircleShape)
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
@@ -252,21 +259,24 @@ fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostContr
                 ) {
                     Text(
                         text = tempPartnerData.fullName,
-                        color = Color(0xff202020),
+                        color = headText,
                         style = TextStyle(
-                            fontSize = 18.sp)
+                            fontSize = 18.sp
+                        )
                     )
                     Text(
                         text = "last seen 15:47",
-                        color = Color.DarkGray,
+                        color = subheadText,
                         style = TextStyle(
-                            fontSize = 13.sp)
+                            fontSize = 13.sp
+                        )
                     )
                 }
             }
-            Image(
+            Icon(
                 painter = painterResource(id = R.drawable.dotmenu),
                 contentDescription = "dot menu",
+                tint = headText,
                 modifier = Modifier
                     .align(alignment = Alignment.CenterEnd)
                     .requiredSize(size = 20.dp)
@@ -362,7 +372,8 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: Manag
                     imeAction = ImeAction.None,
                     singleLine = false,
                     maxLine = 5,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    textColor = Color.Black
                 )
             }
         }
@@ -393,7 +404,8 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: Manag
                     contentDescription = null,
                     modifier = Modifier
                         .align(alignment = Alignment.Center)
-                        .requiredSize(size = 22.dp))
+                        .requiredSize(size = 22.dp)
+                )
             }
         }
     }
@@ -429,17 +441,17 @@ fun LeftChat(modifier: Modifier = Modifier, message : String,timeSent: String) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 8.dp, top = 5.dp, bottom = 5.dp),
+                .padding(start = 8.dp, top = 3.dp, bottom = 3.dp),
             horizontalArrangement = Arrangement.Start,
         ) {
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White
+                    containerColor = leftChatColor
                 ),
                 content = {
                     Text(
                         text = message,
-                        color = Color(0xff202020),
+                        color = headText,
                         style = TextStyle(fontSize = 16.sp),
                         modifier = Modifier
                             .align(alignment = Alignment.Start)
@@ -457,11 +469,11 @@ fun LeftChat(modifier: Modifier = Modifier, message : String,timeSent: String) {
                             bottomEnd = 8.dp
                         )
                     )
-                    .background(color = Color.White)
+                    .background(color = leftChatColor)
             )
             Text(
                 text = hournmin.toString(),
-                color = Color.DarkGray,
+                color = subheadText,
                 style = TextStyle(fontSize = 12.sp),
                 modifier = Modifier
                     .align(Alignment.Bottom)
@@ -481,6 +493,10 @@ fun MediaLeftChat(ChatId:String, navController: NavHostController,modifier: Modi
     var screenWidthInDp = with(LocalDensity.current) {
         displayMetrics.widthPixels.dp / density
     }
+    var screenHeightInDp = with(LocalDensity.current) {
+        displayMetrics.heightPixels.dp / density
+    }
+    var fortyPercentOfScreenHeight = (screenHeightInDp * 0.4f)
     var eightyPercentOfScreenWidth = (screenWidthInDp * 0.8f)
     var splittedtime = timeSent.split(" ").toTypedArray()
     var thehour = splittedtime[1]
@@ -492,20 +508,29 @@ fun MediaLeftChat(ChatId:String, navController: NavHostController,modifier: Modi
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 5.dp, top = 5.dp, bottom = 5.dp),
+                    .padding(start = 8.dp, top = 3.dp, bottom = 3.dp),
                 horizontalArrangement = Arrangement.Start,
             ) {
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White
+                        containerColor = leftChatColor
                     ),
                     content = {
                         if (MediaType == "Video") {
-                            VideoPlayerScreen(ChatId = ChatId, navController = navController,MediaContent)
+                            VideoPlayerScreen(
+                                ChatId = ChatId,
+                                navController = navController,
+                                MediaContent
+                            )
                         } else if (MediaType == "Image") {
                             Image(
                                 painter = rememberAsyncImagePainter(MediaContent),
-                                contentDescription = "The Image", modifier = Modifier.size(250.dp)
+                                contentDescription = "The Image",
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .align(alignment = Alignment.Start)
+                                    .padding(5.dp)
+                                    .sizeIn(maxWidth = eightyPercentOfScreenWidth, maxHeight = fortyPercentOfScreenHeight)
                             )
                         }
                     },
@@ -519,11 +544,11 @@ fun MediaLeftChat(ChatId:String, navController: NavHostController,modifier: Modi
                                 bottomEnd = 8.dp
                             )
                         )
-                        .background(color = Color.White)
+                        .background(color = leftChatColor)
                 )
                 Text(
                     text = hournmin.toString(),
-                    color = Color.DarkGray,
+                    color = subheadText,
                     style = TextStyle(fontSize = 12.sp),
                     modifier = Modifier
                         .align(Alignment.Bottom)
@@ -553,12 +578,12 @@ fun RightChat(modifier: Modifier = Modifier, message : String,timeSent: String) 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(end = 8.dp, top = 5.dp, bottom = 5.dp),
+                .padding(end = 8.dp, top = 3.dp, bottom = 3.dp),
             horizontalArrangement = Arrangement.End,
         ) {
             Text(
                 text = hournmin.toString(),
-                color = Color.DarkGray,
+                color = subheadText,
                 style = TextStyle(fontSize = 12.sp),
                 modifier = Modifier
                     .align(Alignment.Bottom)
@@ -605,6 +630,10 @@ fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Mod
     var screenWidthInDp = with(LocalDensity.current) {
         displayMetrics.widthPixels.dp / density
     }
+    var screenHeightInDp = with(LocalDensity.current) {
+        displayMetrics.heightPixels.dp / density
+    }
+    var fortyPercentOfScreenHeight = (screenHeightInDp * 0.4f)
     var eightyPercentOfScreenWidth = (screenWidthInDp * 0.8f)
     var splittedtime = timeSent.split(" ").toTypedArray()
     var thehour = splittedtime[1]
@@ -616,12 +645,12 @@ fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Mod
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = 5.dp, top = 5.dp, bottom = 5.dp),
-                horizontalArrangement = Arrangement.End,
+                    .padding(end = 8.dp, top = 3.dp, bottom = 3.dp),
+                horizontalArrangement = Arrangement.End
             ) {
                 Text(
                     text = hournmin.toString(),
-                    color = Color.DarkGray,
+                    color = subheadText,
                     style = TextStyle(fontSize = 12.sp),
                     modifier = Modifier
                         .align(Alignment.Bottom)
@@ -632,12 +661,22 @@ fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Mod
                         containerColor = Color(0xff0066e4)
                     ),
                     content = {
-                        if(MediaType == "Video"){
-                            VideoPlayerScreen(ChatId = ChatId, navController = navController,mediaUrl = MediaContent)
-                        }else if(MediaType == "Image"){
-                            Image(painter = rememberAsyncImagePainter(MediaContent), contentDescription = "The Image", modifier = Modifier
-                                .size(250.dp)
-                                .fillMaxHeight())
+                        if(MediaType == "Video") {
+                            VideoPlayerScreen(
+                                ChatId = ChatId,
+                                navController = navController,
+                                mediaUrl = MediaContent
+                            )
+                        } else if(MediaType == "Image") {
+                            Image(
+                                painter = rememberAsyncImagePainter(MediaContent),
+                                contentDescription = "The Image",
+                                contentScale = ContentScale.Inside,
+                                modifier = Modifier
+                                    .align(alignment = Alignment.Start)
+                                    .padding(5.dp)
+                                    .sizeIn(maxWidth = eightyPercentOfScreenWidth, maxHeight = fortyPercentOfScreenHeight)
+                            )
                         }
                     },
                     modifier = Modifier
@@ -775,7 +814,7 @@ fun ChatSystem(navController: NavHostController, ChatId: String) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    color = Color(0xfff1f1f1)
+                    color = background
                 )
         ) {
             Box(

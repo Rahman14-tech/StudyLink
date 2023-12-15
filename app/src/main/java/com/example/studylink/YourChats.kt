@@ -53,10 +53,12 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.toLowerCase
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.firestore.ktx.toObject
 var searchYourChat:MutableState<String> =  mutableStateOf("")
@@ -82,55 +84,82 @@ fun GetChatData(){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun YourChatsCardPersonal(datum: YourChatsType, navController: NavHostController){
-        println("OHARANG2 ${datum.id}")
-        val tempPartnerEmail = datum.FkUsers.contains(currUser.value.email)
+fun YourChatsCardPersonal(datum: YourChatsType, navController: NavHostController) {
+    println("OHARANG2 ${datum.id}")
+    val tempPartnerEmail = datum.FkUsers.contains(currUser.value.email)
 
-    if(tempPartnerEmail){
+    if(tempPartnerEmail) {
         val tempNottheone = datum.FkUsers.firstOrNull { it != currUser.value.email }
         val tempPartnerProfile = Realusers.firstOrNull { it.email == tempNottheone }
-            Card(modifier = Modifier
+
+        Card(
+            modifier = Modifier
                 .fillMaxWidth()
-                .background(color = Color.White)
-                .height(80.dp), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
-                onClick = {
-                    navController?.navigate(TheChatS.route+"/${datum.id}")
-                }
-            ) {
-                Column(modifier = Modifier
+                .height(80.dp),
+            shape = RectangleShape,
+            colors = CardDefaults.cardColors(containerColor = background),
+            elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+            onClick = {
+                navController?.navigate(TheChatS.route+"/${datum.id}")
+            }
+        ) {
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 0.1.dp)
-                    .background(color = Color.White)
+            ) {
+                Spacer(modifier = Modifier.width(10.dp))
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .size(60.dp)
+                        .background(Color(0xFFFFC600))
                 ) {
-                    Row(modifier = Modifier
-                        .padding(vertical = 5.dp)
-                        .fillMaxWidth()) {
-                        Row(modifier = Modifier.padding(10.dp)) {
-                            Card(shape = CircleShape, modifier = Modifier
-                                .height(60.dp)
-                                .width(50.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFC600))) {
-                                Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Image(painter = rememberAsyncImagePainter(tempPartnerProfile!!.imageURL), contentScale = ContentScale.Crop, contentDescription = "Gambar Wong", modifier = Modifier
-                                        .size(60.dp)
-                                        .clip(
-                                            CircleShape
-                                        ))
-                                }
-                            }
-                            Row {
-                                Column {
-                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                        Text(text = "${tempPartnerProfile!!.fullName}", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                                        Text(text = "15:36", fontWeight = FontWeight.Normal,fontSize = 15.sp,)
-                                    }
-                                    Text(text = "This method should be the easiest, so the way is",
-                                        maxLines = 1,                                        overflow = TextOverflow.Ellipsis,fontSize = 15.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 5.dp))
-                                }
-                            }
-                        }
+                    Image(
+                        painter = rememberAsyncImagePainter(tempPartnerProfile!!.imageURL),
+                        contentScale = ContentScale.Crop,
+                        contentDescription = "Gambar Wong",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                            .align(Alignment.Center)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(end = 10.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "${tempPartnerProfile!!.fullName}",
+                            fontSize = 20.sp, fontWeight = FontWeight.Bold,
+                            color = headText
+                        )
+                        Text(
+                            text = "15:36",
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 15.sp,
+                            color = subheadText
+                        )
                     }
+                    Text(
+                        text = "This method should be the easiest, so the way is",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = subheadText,
+                        modifier = Modifier.padding(top = 5.dp)
+                    )
                 }
             }
+            Spacer(modifier = Modifier.height(10.dp))
+        }
     }
 }
 
@@ -140,44 +169,82 @@ fun YourChatsCardPersonalSearched(datum: YourChatsType, navController: NavHostCo
     println("OHARANG2 ${datum.id}")
     val tempPartnerEmail = datum.FkUsers.contains(currUser.value.email)
 
-    if(tempPartnerEmail){
+    if(tempPartnerEmail) {
         val tempNottheone = datum.FkUsers.firstOrNull { it != currUser.value.email }
         val tempPartnerProfile = Realusers.firstOrNull { it.email == tempNottheone }
-        if(tempPartnerProfile!!.fullName.lowercase().contains(searchYourChat.value.lowercase())){
-            Card(modifier = Modifier
-                .fillMaxWidth()
-                .background(color = Color.White)
-                .height(80.dp), shape = RectangleShape, elevation = CardDefaults.cardElevation(defaultElevation = 5.dp), onClick = {
-                println("OHARANG ${datum.id}")
-                navController?.navigate(TheChatS.route+"/${datum.id}")}) {
+        if(tempPartnerProfile!!.fullName.lowercase().contains(searchYourChat.value.lowercase())) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = background)
+                    .height(80.dp),
+                shape = RectangleShape,
+                colors = CardDefaults.cardColors(containerColor = background),
+                elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+                onClick = {
+                    println("OHARANG ${datum.id}")
+                    navController?.navigate(TheChatS.route+"/${datum.id}")
+                }
+            ) {
                 Column(modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 0.1.dp)
                     .background(color = Color.White)
                 ) {
-                    Row(modifier = Modifier
-                        .padding(vertical = 5.dp)
-                        .fillMaxWidth()) {
-                        Row(modifier = Modifier.padding(10.dp)) {
-                            Card(shape = CircleShape, modifier = Modifier
-                                .height(60.dp)
-                                .width(50.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFC600))) {
-                                Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Image(painter = rememberAsyncImagePainter(tempPartnerProfile!!.imageURL), contentScale = ContentScale.Crop, contentDescription = "Gambar Wong", modifier = Modifier
-                                        .size(60.dp)
-                                        .clip(
-                                            CircleShape
-                                        ))
+                    Row(
+                        modifier = Modifier
+                            .padding(vertical = 5.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(10.dp)
+                        ) {
+                            Card(
+                                shape = CircleShape,
+                                modifier = Modifier
+                                    .height(60.dp)
+                                    .width(50.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFC600))
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Image(
+                                        painter = rememberAsyncImagePainter(tempPartnerProfile!!.imageURL),
+                                        contentScale = ContentScale.Crop,
+                                        contentDescription = "Gambar Wong",
+                                        modifier = Modifier
+                                            .size(60.dp)
+                                            .clip(CircleShape)
+                                    )
                                 }
                             }
                             Row {
                                 Column {
-                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                        Text(text = "${tempPartnerProfile!!.fullName}", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                                        Text(text = "15:36", fontWeight = FontWeight.Normal,fontSize = 15.sp,)
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = "${tempPartnerProfile!!.fullName}",
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            text = "15:36",
+                                            fontWeight = FontWeight.Normal,
+                                            fontSize = 15.sp
+                                        )
                                     }
                                     Text(text = "This method should be the easiest, so the way is",
-                                        maxLines = 1,                                        overflow = TextOverflow.Ellipsis,fontSize = 15.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 5.dp))
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        modifier = Modifier.padding(top = 5.dp)
+                                    )
                                 }
                             }
                         }
@@ -185,7 +252,6 @@ fun YourChatsCardPersonalSearched(datum: YourChatsType, navController: NavHostCo
                 }
             }
         }
-
     }
 }
 
@@ -213,6 +279,7 @@ fun YourChatsCardGroup(datum: GroupChatType, navController: NavHostController){
         )
     }
 }
+
 @Composable
 fun CustomTextField2(
     modifier: Modifier = Modifier,
@@ -286,17 +353,24 @@ fun CustomTextField2(
     )
 }
 @Composable
-fun YourChatScreen(navController: NavHostController){
-    LaunchedEffect(Unit){
+fun YourChatScreen(navController: NavHostController) {
+    LaunchedEffect(Unit) {
         tempTheChat.removeAll(tempTheChat)
         GetChatData()
         groupChatsDashboard.removeAll(groupChatsDashboard)
         GetGroupChatData()
     }
-    Column {
+    Column(
+        modifier = Modifier
+            .background(color = defaultColor)
+    ) {
         Header("YourChatScreen")
-        if(showYourChatSearch.value){
-        Box(modifier = Modifier.padding(10.dp)) {
+        if(showYourChatSearch.value) {
+            Box(
+                modifier = Modifier
+                    .padding(10.dp)
+                    .background(color = defaultColor)
+            ) {
                 CustomTextField2(
                     onValueChange = {
                         inputText.value = it
@@ -319,35 +393,59 @@ fun YourChatScreen(navController: NavHostController){
                         .fillMaxWidth(),
                     placeholderText = "Search Chat",
                     useClear = true,
-                    imeAction = ImeAction.Search)
+                    imeAction = ImeAction.Search
+                )
             }
         }
         val tempChat = tempTheChat.filter { it.FkUsers.contains(currUser.value.email) }
         println("TEMPSS $tempChat")
-        if(tempTheChat.isEmpty() || tempChat.isEmpty()){
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color.White), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(painter = painterResource(id = R.drawable.nochats), contentDescription = "Loading or Empty Chats")
-                Text(text = "You haven't start any chat yet or refresh it", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp), textAlign = TextAlign.Center)
+        if(tempTheChat.isEmpty() || tempChat.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = defaultColor),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.nochats),
+                    contentDescription = "Loading or Empty Chats"
+                )
+                Text(
+                    text = "You haven't start any chat yet or refresh it",
+                    fontSize = 20.sp,
+                    color = headText,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(20.dp),
+                    textAlign = TextAlign.Center
+                )
             }
-        }else{
-            if(selectedPeerChats.value){
-                if(searchYourChat.value != ""){
-                    LazyColumn() {
+        } else {
+            if(selectedPeerChats.value) {
+                if(searchYourChat.value != "") {
+                    LazyColumn(
+                        modifier = Modifier
+                            .background(defaultColor)
+                    ) {
                         itemsIndexed(tempTheChat) { _, datum ->
                             YourChatsCardPersonalSearched(datum, navController)
                         }
                     }
-                }else if(searchYourChat.value == "") {
-                    LazyColumn() {
+                } else if(searchYourChat.value == "") {
+                    LazyColumn(
+                        modifier = Modifier
+                            .background(defaultColor)
+                    ) {
                         itemsIndexed(tempTheChat) { _, datum ->
                             YourChatsCardPersonal(datum, navController)
                         }
                     }
                 }
-            }else{
-                LazyColumn() {
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .background(defaultColor)
+                ) {
                     itemsIndexed(groupChatsDashboard) { _, datum ->
                         YourChatsCardGroup(datum, navController)
                     }
@@ -356,4 +454,10 @@ fun YourChatScreen(navController: NavHostController){
 
         }
     }
+}
+
+@Preview(widthDp = 393)
+@Composable
+fun chatscreenpv() {
+    YourChatScreen(navController = rememberNavController())
 }

@@ -35,6 +35,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -43,8 +44,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -53,7 +57,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberAsyncImagePainter
 import com.example.studylink.forum.ForumDetailScreen
 import com.example.studylink.forum.ForumScreen
@@ -122,7 +128,7 @@ fun BottomBar(navController: NavHostController){
 }
 
 @Composable
-fun BottomContent(navController: NavHostController){
+fun BottomContent(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val bottomBarState = rememberSaveable { (mutableStateOf(false)) }
     when (navBackStackEntry?.destination?.route) {
@@ -136,29 +142,32 @@ fun BottomContent(navController: NavHostController){
     }
     var destinationList = listOf(QNA,Dashboard, YourChats)
     AnimatedVisibility(visible = bottomBarState.value) {
+        Text(text = inRefresh.value.toString(), color = Color.Transparent)
         Card(
             modifier = Modifier
                 .fillMaxHeight(0.1f),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = defaultColor),
+            shape = RectangleShape
         ) {
             NavigationBar(
                 modifier = Modifier
                     .fillMaxWidth(),
-                containerColor = Color.White
+                containerColor = defaultColor
             ) {
                 destinationList.forEachIndexed{ index, destination ->
                     NavigationBarItem(
                         label = {
                             if(navBackStackEntry?.destination?.route == destination.route){
                                 Text(
-                                    text = destination.title, color = Color.Black
+                                    text = destination.title, color = headText
                                 )
                             } else {
                                 Text(
-                                    text = destination.title, color = Color.Gray
+                                    text = destination.title, color = placeholderColor
                                 )
                             }
                         },
+                        colors = NavigationBarItemDefaults.colors(Color.Transparent),
                         selected = navBackStackEntry?.destination?.route == destination.route,
                         onClick = {
                             navController.navigate(destination.route) {
@@ -170,13 +179,13 @@ fun BottomContent(navController: NavHostController){
                                 Icon(
                                     painter = painterResource(id = destination.icon),
                                     contentDescription = "",
-                                    tint = Color.Black,
+                                    tint = headText,
                                     modifier = Modifier.fillMaxSize(0.33f)
                                 )
                             } else {
                                 Icon(painter = painterResource(id = destination.icon),
                                     contentDescription = "",
-                                    tint = Color.Gray,
+                                    tint = placeholderColor,
                                     modifier = Modifier.fillMaxSize(0.33f)
                                 )
                             }
@@ -190,25 +199,53 @@ fun BottomContent(navController: NavHostController){
                             popUpTo(Setting.route) {inclusive = true }
                         }
                     },
+                    colors = NavigationBarItemDefaults.colors(selectedIconColor = Color.Transparent),
                     icon = {
                         Box(
                             modifier = Modifier
                                 .clip(CircleShape)
                                 .fillMaxSize(0.55f)
+                                .padding(0.dp)
                         ) {
-                            Image(
-                                painter = rememberAsyncImagePainter(model = currUser.value.imageURL),
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(shape = CircleShape)
-                                    .align(alignment = Alignment.Center)
-                            )
+                            if(navBackStackEntry?.destination?.route == "Setting") {
+                                Image(
+                                    painter = rememberAsyncImagePainter(model = currUser.value.imageURL),
+                                    contentDescription = "User Picture",
+                                    contentScale = ContentScale.Crop,
+                                    alpha = 1f,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(shape = CircleShape)
+                                        .align(alignment = Alignment.Center)
+                                )
+                            } else {
+                                Image(
+                                    painter = rememberAsyncImagePainter(model = currUser.value.imageURL),
+                                    contentDescription = "User Picture",
+                                    contentScale = ContentScale.Crop,
+                                    alpha = 0.6f,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(shape = CircleShape)
+                                        .align(alignment = Alignment.Center)
+                                )
+                            }
                         }
-                    }
+                    },
+                    modifier = Modifier
+                        .padding(0.dp)
+                        .clip(CircleShape)
                 )
             }
         }
 
     }
 }
+
+@Preview(widthDp = 393, heightDp = 100)
+@Composable
+fun bottompv() {
+    BottomContent(navController = rememberNavController())
+}
+
+var inRefresh: MutableState<Int> = mutableStateOf(0)

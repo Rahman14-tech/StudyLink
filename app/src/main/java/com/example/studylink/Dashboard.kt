@@ -179,12 +179,10 @@ fun CreatePersonalChat(peerEmail:String, navController: NavHostController){
                 val c: YourChatsType? = datum.toObject(YourChatsType::class.java)
                 c?.id = datum.id
                 if(c!= null){
-                    if(!c.isGroup){
                         if(c.FkUsers.containsAll(listOf(peerEmail, currUser.value.email))){
                             alreadyContacted = true
                             break
                         }
-                    }
                 }
             }
             if(alreadyContacted){
@@ -192,6 +190,7 @@ fun CreatePersonalChat(peerEmail:String, navController: NavHostController){
             }else{
                 db.collection("Chats").add(hashMapOf(
                     "FkUsers" to mutableListOf<String>(currUser.value.email, peerEmail),
+                    "theLast" to ""
                 )).addOnSuccessListener {
                     navController.navigate(TheChatS.route+"/${it.id}")
                 }.addOnFailureListener{

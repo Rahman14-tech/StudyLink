@@ -175,9 +175,7 @@ fun GroupLeftChat(modifier: Modifier = Modifier,timeSent:String, sender: String,
     }
 
     var seventyPercentOfScreenWidth = (screenWidthInDp * 0.7f)
-    var splittedtime = timeSent.split(" ").toTypedArray()
-    var thehour = splittedtime[1]
-    var hournmin = thehour.subSequence(0,5)
+    var hournmin = timeSent.subSequence(0,5)
     val theOtherUser = Realusers.firstOrNull{ it.email == sender }
     Box(
         modifier = modifier
@@ -277,7 +275,7 @@ fun GetTheGroupChats(GroupChatId: String){
                     println("Testing Anjay $c")
                 }
             }
-            ChatData.sortBy { it.TimeSent }
+            ChatData.sortBy { it.OrderNo }
         }
     }
 }
@@ -303,9 +301,7 @@ fun GroupMediaLeftChat(
     }
     var fortyPercentOfScreenHeight = (screenHeightInDp * 0.4f)
     var seventyPercentOfScreenWidth = (screenWidthInDp * 0.7f)
-    var splittedtime = timeSent.split(" ").toTypedArray()
-    var thehour = splittedtime[1]
-    var hournmin = thehour.subSequence(0,5)
+    var hournmin = timeSent.subSequence(0,5)
     val theOtherUser = Realusers.firstOrNull{ it.email == sender }
     Box(
         modifier = modifier
@@ -400,14 +396,18 @@ fun GroupMediaLeftChat(
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun SendMessageGroup(TheMessage: String, GroupChatId: String){
-    val sdf = SimpleDateFormat("dd/M/yyyy HH:mm:ss")
+    val sdf = SimpleDateFormat("dd/M/yyyy")
     val currentDate = sdf.format(Date())
+    val sdft = SimpleDateFormat("HH:mm:ss")
+    val currentTime = sdft.format(Date())
     db.collection("Chatgroup").document(GroupChatId).collection("ChatData").add(hashMapOf(
         "Content" to TheMessage,
         "TheUser" to currUser.value.email,
-        "TimeSent" to currentDate,
+        "DateSent" to currentDate,
+        "TimeSent" to currentTime,
         "MediaType" to "",
         "ContentMedia" to "",
+        "OrderNo" to ChatData.size + 1
     ))
 }
 @RequiresApi(Build.VERSION_CODES.O)

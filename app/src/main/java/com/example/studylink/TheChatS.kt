@@ -52,6 +52,7 @@ import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import android.webkit.MimeTypeMap
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -65,6 +66,7 @@ import com.google.mlkit.nl.smartreply.SmartReply
 import com.google.mlkit.nl.smartreply.SmartReplySuggestion
 import com.google.mlkit.nl.smartreply.SmartReplySuggestionResult
 import com.google.mlkit.nl.smartreply.TextMessage
+import kotlinx.coroutines.launch
 
 var inputText = mutableStateOf("")
 @RequiresApi(Build.VERSION_CODES.O)
@@ -80,6 +82,17 @@ fun SendMessage(TheMessage: String, ChatId: String){
     ))
 }
 
+fun updateTheLast(theLast: String, ChatId: String,context:Context){
+    db.collection("Chats")
+        .document(ChatId)
+        .update("theLast", theLast)
+        .addOnSuccessListener {
+            var temps = tempTheChat.first { it.id == ChatId }
+            temps.theLast = theLast
+        }.addOnFailureListener{
+            Toast.makeText(context,"There is error happen", Toast.LENGTH_SHORT)
+        }
+}
 
 
 @Composable
@@ -382,6 +395,7 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: Manag
                 if(inputText.value != ""){
                     if(!isGroup){
                         SendMessage(TheMessage = inputText.value, ChatId = ChatId)
+                        updateTheLast(theLast = inputText.value, ChatId = ChatId, context = context )
                     }else{
                         SendMessageGroup(TheMessage = inputText.value, GroupChatId = ChatId)
                     }
@@ -808,6 +822,8 @@ fun ChatSystem(navController: NavHostController, ChatId: String) {
             }
 
 
+    }else{
+        conversationML.clear()
     }
 
         Column(

@@ -148,7 +148,7 @@ fun YourChatsCardPersonal(datum: YourChatsType, navController: NavHostController
                         )
                     }
                     Text(
-                        text = "This method should be the easiest, so the way is",
+                        text = datum.theLast,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontSize = 15.sp,
@@ -273,9 +273,10 @@ fun YourChatsCardGroup(datum: GroupChatType, navController: NavHostController){
                 selectedPeople.value = people
             },
             onButtonClick = {
-                println("Wie Spiele ein spiel ${GroupChats.route+"/${datum.id}"}")
                 navController?.navigate(GroupChats.route+"/${datum.id}")
-            }
+            },
+            groupId = datum.id,
+            groupName = datum.groupName
         )
     }
 }
@@ -362,6 +363,7 @@ fun YourChatScreen(navController: NavHostController) {
     }
     Column(
         modifier = Modifier
+            .fillMaxSize()
             .background(color = defaultColor)
     ) {
         Header("YourChatScreen")

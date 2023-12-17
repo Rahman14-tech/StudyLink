@@ -17,8 +17,10 @@ class MediaChatUtil {
         fun uploadToStorage(uri: Uri, type: String,  context: Context, ChatId: String, isGroup:Boolean) {
             var anjay = ""
             val storage = Firebase.storage
-            val sdf = SimpleDateFormat("dd/M/yyyy HH:mm:ss")
+            val sdf = SimpleDateFormat("dd/M/yyyy")
             val currentDate = sdf.format(Date())
+            val sdft = SimpleDateFormat("HH:mm:ss")
+            val currentTime = sdft.format(Date())
 
             // Create a storage reference from our app
             var storageRef = storage.reference
@@ -46,13 +48,16 @@ class MediaChatUtil {
                     ).show()
                 }.addOnSuccessListener { taskSnapshot ->
                     if(isGroup){
+                        val totData = ChatData.size + 1
                         spaceRef.downloadUrl.addOnSuccessListener {
                             db.collection("Chatgroup").document(ChatId).collection("ChatData").add(hashMapOf(
                                 "Content" to "",
                                 "ContentMedia" to it.toString(),
                                 "MediaType" to type,
                                 "TheUser" to currUser.value.email,
-                                "TimeSent" to currentDate,
+                                "TimeSent" to currentTime,
+                                "TimeDate" to currentDate,
+                                "OrderNo" to totData
                             )).addOnSuccessListener {
                                 Toast.makeText(context,"Image/Video Successfully sent",Toast.LENGTH_SHORT)
                             }.addOnFailureListener{
@@ -60,6 +65,7 @@ class MediaChatUtil {
                             }
                         }
                     }else{
+                        val totData = ChatData.size + 1
                         spaceRef.downloadUrl.addOnSuccessListener {
                             db.collection("Chats").document(ChatId).collection("ChatData").add(hashMapOf(
                                 "Content" to "",
@@ -67,6 +73,9 @@ class MediaChatUtil {
                                 "MediaType" to type,
                                 "TheUser" to currUser.value.email,
                                 "TimeSent" to currentDate,
+                                "TimeSent" to currentTime,
+                                "TimeDate" to currentDate,
+                                "OrderNo" to totData
                             )).addOnSuccessListener {
                                 Toast.makeText(context,"Image/Video Successfully sent",Toast.LENGTH_SHORT)
                             }.addOnFailureListener{

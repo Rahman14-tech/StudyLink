@@ -79,6 +79,7 @@ fun SendMessage(TheMessage: String, ChatId: String){
     val currentDate = sdf.format(Date())
     val sdft = SimpleDateFormat("HH:mm:ss")
     val currentTime = sdft.format(Date())
+    val totData = ChatData.size + 1
     db.collection("Chats").document(ChatId).collection("ChatData").add(hashMapOf(
         "Content" to TheMessage,
         "TheUser" to currUser.value.email,
@@ -86,7 +87,7 @@ fun SendMessage(TheMessage: String, ChatId: String){
         "TimeSent" to currentTime,
         "MediaType" to "",
         "ContentMedia" to "",
-        "OrderNo" to ChatData.size + 1
+        "OrderNo" to totData
     ))
 }
 
@@ -518,9 +519,7 @@ fun MediaLeftChat(ChatId:String, navController: NavHostController,modifier: Modi
     }
     var fortyPercentOfScreenHeight = (screenHeightInDp * 0.4f)
     var eightyPercentOfScreenWidth = (screenWidthInDp * 0.8f)
-    var splittedtime = timeSent.split(" ").toTypedArray()
-    var thehour = splittedtime[1]
-    var hournmin = thehour.subSequence(0,5)
+    var hournmin = timeSent.subSequence(0,5)
         Box(
             modifier = modifier
                 .fillMaxWidth(),

@@ -19,6 +19,7 @@ import org.w3c.dom.Comment
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import kotlinx.coroutines.flow.isActive
+import okhttp3.internal.toImmutableList
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
@@ -45,7 +46,7 @@ data class ForumModel(
     val title: String = "",
     val timestamp: Timestamp? = null,
     val text: String = "",
-    val upvote: Int = 0,
+    val upvote: List<String> = listOf(),
     val tags: List<String> = listOf(),
 )
 
@@ -100,6 +101,70 @@ class ForumViewModel : ViewModel() {
             Log.e("ForumViewModel", "Error getting forums", exception)
         }
     }
+
+    fun setActiveForumList(forum: ForumModel) {
+        val activeForumList = mutableListOf<ForumModel>()
+        activeForumList.add(forum)
+        _uiState.update {currentState ->
+            currentState.copy(
+                forumList = activeForumList.toImmutableList()
+            )
+        }
+        Log.d("ACTIVEFORUMLIST", "${uiState.value.forumList[0]}")
+        Log.d("ACTIVEFORUMLIST", "${forum}")
+    }
+
+    fun voteForum(index: Int, userId: String) {
+        val forum = uiState.value.forumList[index]
+        val docForum = forumRef.document(forum.documentId)
+
+        val newUpvoteList = forum.upvote.toMutableList()
+        // Check if userExists
+        val userExists = userId in newUpvoteList
+        if (!userExists) {
+            newUpvoteList.add(userId)
+            // Send to firebase
+            docForum.update("upvote", FieldValue.arrayUnion(userId))
+                .addOnSuccessListener {
+                    Log.d("UPVOTE", "vote ${forum.documentId} user ${userId} success")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("UPVOTE", "vote ${forum.documentId} user ${userId} failed: $e")
+                }
+        } else {
+            newUpvoteList.remove(userId)
+            docForum.update("upvote", FieldValue.arrayRemove(userId))
+                .addOnSuccessListener {
+                    // Update successful
+                    Log.d("UPVOTE", "delete vote ${forum.documentId} user ${userId} success")
+                }
+                .addOnFailureListener { e ->
+                    // Handle errors here
+                    Log.e("UPVOTE", "delete vote ${forum.documentId} user ${userId} failed: $e")
+                }
+        }
+
+        // Updated Forum
+        val updatedForum = forum.copy(upvote = newUpvoteList.toList())
+
+        _uiState.update {currentState ->
+            val newForumList = currentState.forumList.toMutableList()
+            newForumList[index] = updatedForum
+            currentState.copy(
+                forumList = newForumList.toImmutableList()
+            )
+        }
+    }
+
+    fun isVoteForumByUserId(index: Int, userId: String): Boolean {
+        val currForum = uiState.value.forumList[index]
+        // Check if userExists
+        val userExists = userId in currForum.upvote
+
+        if(userExists) return true
+        return false
+    }
+
 
 
     fun getTimeFromNow(timestamp: Date): String {

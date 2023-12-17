@@ -48,6 +48,7 @@ class MediaChatUtil {
                     ).show()
                 }.addOnSuccessListener { taskSnapshot ->
                     if(isGroup){
+                        val totData = ChatData.size + 1
                         spaceRef.downloadUrl.addOnSuccessListener {
                             db.collection("Chatgroup").document(ChatId).collection("ChatData").add(hashMapOf(
                                 "Content" to "",
@@ -56,7 +57,7 @@ class MediaChatUtil {
                                 "TheUser" to currUser.value.email,
                                 "TimeSent" to currentTime,
                                 "TimeDate" to currentDate,
-                                "OrderNo" to ChatData.size + 1
+                                "OrderNo" to totData
                             )).addOnSuccessListener {
                                 Toast.makeText(context,"Image/Video Successfully sent",Toast.LENGTH_SHORT)
                             }.addOnFailureListener{
@@ -64,6 +65,7 @@ class MediaChatUtil {
                             }
                         }
                     }else{
+                        val totData = ChatData.size + 1
                         spaceRef.downloadUrl.addOnSuccessListener {
                             db.collection("Chats").document(ChatId).collection("ChatData").add(hashMapOf(
                                 "Content" to "",
@@ -73,7 +75,7 @@ class MediaChatUtil {
                                 "TimeSent" to currentDate,
                                 "TimeSent" to currentTime,
                                 "TimeDate" to currentDate,
-                                "OrderNo" to ChatData.size + 1
+                                "OrderNo" to totData
                             )).addOnSuccessListener {
                                 Toast.makeText(context,"Image/Video Successfully sent",Toast.LENGTH_SHORT)
                             }.addOnFailureListener{

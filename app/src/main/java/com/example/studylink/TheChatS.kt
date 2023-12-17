@@ -79,6 +79,7 @@ fun SendMessage(TheMessage: String, ChatId: String){
     val currentDate = sdf.format(Date())
     val sdft = SimpleDateFormat("HH:mm:ss")
     val currentTime = sdft.format(Date())
+    val totData = ChatData.size + 1
     db.collection("Chats").document(ChatId).collection("ChatData").add(hashMapOf(
         "Content" to TheMessage,
         "TheUser" to currUser.value.email,
@@ -86,7 +87,7 @@ fun SendMessage(TheMessage: String, ChatId: String){
         "TimeSent" to currentTime,
         "MediaType" to "",
         "ContentMedia" to "",
-        "OrderNo" to ChatData.size + 1
+        "OrderNo" to totData
     ))
 }
 

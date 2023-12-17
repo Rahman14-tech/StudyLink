@@ -619,39 +619,8 @@ fun testViewGroup(navController: NavHostController) {
                 GroupSplash()
                 SearchBar(Modifier.padding(bottom = 3.dp))
                 if(inputTextDashGroup.value == ""){
-                    groupChatsDashboard.map {
-                        groupcard(
-                            people = it.members,
-                            groupName = it.groupName,
-                            scope = it.hashTag,
-                            personcount = it.maxMember,
-                            onCardClick = { people ->
-                                showOverlay.value = true
-                                selectedPeople.value = people
-                            },
-                            groupId = it.id,
-                            onButtonClick = {
-                                if(it.members.size >= it.maxMember){
-                                    Toast.makeText(context, "The group is full.", Toast.LENGTH_LONG).show()
-                                }else{
-                                    if(it.members.contains(currUser.value.email)){
-                                        Toast.makeText(context,"You've enrolled to this group", Toast.LENGTH_LONG).show()
-                                    }else{
-                                        val damember = it.members
-                                        damember.add(currUser.value.email)
-                                        db.collection("Chatgroup").document(it.id).update("members",damember).addOnSuccessListener {sucIt ->
-                                            Toast.makeText(context,"Successfully join group", Toast.LENGTH_LONG)
-                                            navController.navigate(GroupChats.route+"/{${it.id}}")
-                                        }
-                                    }
-
-                                }
-                            }
-                        )
-                    }
-                }else if (inputTextDashGroup.value != ""){
-                    groupChatsDashboard.map {
-                        if(it.groupName.lowercase().contains(inputTextDashGroup.value.lowercase())){
+                    if(selectedOption.value == "All Posts"){
+                        groupChatsDashboard.map {
                             groupcard(
                                 people = it.members,
                                 groupName = it.groupName,
@@ -681,7 +650,113 @@ fun testViewGroup(navController: NavHostController) {
                                 }
                             )
                         }
+                    }else{
+                        groupChatsDashboard.map {
+                            if(it.groupFocus == selectedOption.value){
+                                groupcard(
+                                    people = it.members,
+                                    groupName = it.groupName,
+                                    scope = it.hashTag,
+                                    personcount = it.maxMember,
+                                    onCardClick = { people ->
+                                        showOverlay.value = true
+                                        selectedPeople.value = people
+                                    },
+                                    groupId = it.id,
+                                    onButtonClick = {
+                                        if(it.members.size >= it.maxMember){
+                                            Toast.makeText(context, "The group is full.", Toast.LENGTH_LONG).show()
+                                        }else{
+                                            if(it.members.contains(currUser.value.email)){
+                                                Toast.makeText(context,"You've enrolled to this group", Toast.LENGTH_LONG).show()
+                                            }else{
+                                                val damember = it.members
+                                                damember.add(currUser.value.email)
+                                                db.collection("Chatgroup").document(it.id).update("members",damember).addOnSuccessListener {sucIt ->
+                                                    Toast.makeText(context,"Successfully join group", Toast.LENGTH_LONG)
+                                                    navController.navigate(GroupChats.route+"/{${it.id}}")
+                                                }
+                                            }
+
+                                        }
+                                    }
+                                )
+                            }
+                        }
                     }
+
+                }else if (inputTextDashGroup.value != ""){
+                    if(selectedOption.value == "All Posts"){
+                        groupChatsDashboard.map {
+                            if(it.groupName.lowercase().contains(inputTextDashGroup.value.lowercase())||it.id.lowercase().contains(inputTextDashGroup.value.lowercase())){
+                                groupcard(
+                                    people = it.members,
+                                    groupName = it.groupName,
+                                    scope = it.hashTag,
+                                    personcount = it.maxMember,
+                                    onCardClick = { people ->
+                                        showOverlay.value = true
+                                        selectedPeople.value = people
+                                    },
+                                    groupId = it.id,
+                                    onButtonClick = {
+                                        if(it.members.size >= it.maxMember){
+                                            Toast.makeText(context, "The group is full.", Toast.LENGTH_LONG).show()
+                                        }else{
+                                            if(it.members.contains(currUser.value.email)){
+                                                Toast.makeText(context,"You've enrolled to this group", Toast.LENGTH_LONG).show()
+                                            }else{
+                                                val damember = it.members
+                                                damember.add(currUser.value.email)
+                                                db.collection("Chatgroup").document(it.id).update("members",damember).addOnSuccessListener {sucIt ->
+                                                    Toast.makeText(context,"Successfully join group", Toast.LENGTH_LONG)
+                                                    navController.navigate(GroupChats.route+"/{${it.id}}")
+                                                }
+                                            }
+
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }else{
+                        groupChatsDashboard.map {
+                            if(it.groupFocus == selectedOption.value){
+                                if(it.groupName.lowercase().contains(inputTextDashGroup.value.lowercase()) ||it.id.lowercase().contains(inputTextDashGroup.value.lowercase())){
+                                    groupcard(
+                                        people = it.members,
+                                        groupName = it.groupName,
+                                        scope = it.hashTag,
+                                        personcount = it.maxMember,
+                                        onCardClick = { people ->
+                                            showOverlay.value = true
+                                            selectedPeople.value = people
+                                        },
+                                        groupId = it.id,
+                                        onButtonClick = {
+                                            if(it.members.size >= it.maxMember){
+                                                Toast.makeText(context, "The group is full.", Toast.LENGTH_LONG).show()
+                                            }else{
+                                                if(it.members.contains(currUser.value.email)){
+                                                    Toast.makeText(context,"You've enrolled to this group", Toast.LENGTH_LONG).show()
+                                                }else{
+                                                    val damember = it.members
+                                                    damember.add(currUser.value.email)
+                                                    db.collection("Chatgroup").document(it.id).update("members",damember).addOnSuccessListener {sucIt ->
+                                                        Toast.makeText(context,"Successfully join group", Toast.LENGTH_LONG)
+                                                        navController.navigate(GroupChats.route+"/{${it.id}}")
+                                                    }
+                                                }
+
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+
+                        }
+                    }
+
                 }
 
             }

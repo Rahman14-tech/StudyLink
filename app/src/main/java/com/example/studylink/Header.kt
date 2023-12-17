@@ -186,7 +186,12 @@ fun dashboard(){
                 }
                 IconButton(
                     onClick = {
-                        showDashfilterPersonal.value = true
+                        if( selectedPeerDashboard.value == true){
+                            showDashfilterPersonal.value = true
+                        }else{
+                            showDashGroupfilter.value = true
+                        }
+
                     },
                     modifier = Modifier
                         .padding(end = 15.dp, top = 7.dp)

@@ -1,6 +1,7 @@
 package com.example.studylink.forum
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -24,16 +25,22 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -48,7 +55,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -69,7 +78,10 @@ import com.example.studylink.CustomTextField
 import com.example.studylink.R
 import com.example.studylink.background
 import com.example.studylink.cardsColor
+import com.example.studylink.coloringSchema
+import com.example.studylink.currUser
 import com.example.studylink.defaultColor
+import com.example.studylink.groupButtonColor
 import com.example.studylink.headText
 import com.example.studylink.inRefresh
 import com.example.studylink.placeholderColor
@@ -112,7 +124,7 @@ fun ForumScreen(
                     .padding(paddingValues = paddingValue)
             ) {
                 // Display data forum
-                items(forumUiState.forumList) { forum ->
+                itemsIndexed(forumUiState.forumList) { index, forum ->
                     ForumCard(
                         title = forum.title,
                         author = forum.authorId,
@@ -122,12 +134,15 @@ fun ForumScreen(
                         },
                         text = forum.text,
                         tags = forum.tags.toSet(),
+                        voteClick = { forumViewModel.voteForum(index, currUser.value.email) } ,
                         onClick = {
                             forumViewModel.goForumDetail(
                                 forumDocID = forum.documentId,
                                 navController = navController
                             )
                         },
+                        upvote = forum.upvote.size,
+                        isVoted = forumViewModel.isVoteForumByUserId(index, currUser.value.email),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 10.dp, end = 10.dp, top = 3.dp, bottom = 3.dp)
@@ -277,8 +292,11 @@ fun ForumCard(
     author: String,
     timestamp: () -> String,
     onClick: () -> Unit,
+    voteClick: () -> Unit,
     text: String,
     tags: Set<String>,
+    upvote: Int,
+    isVoted: Boolean,
     modifier: Modifier = Modifier ){
 
     val orderedTags = tags.sorted()
@@ -353,42 +371,106 @@ fun ForumCard(
                 overflow = TextOverflow.Ellipsis,
                 color = subheadText
             )
+
+            // Dashline
+            val pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+            Canvas(Modifier.fillMaxWidth().height(1.dp)) {
+
+                drawLine(
+                    color = Color.Red,
+                    start = Offset(0f, 0f),
+                    end = Offset(size.width, 0f),
+                    pathEffect = pathEffect
+                )
+            }
             // Vote
+
+            VoteButton(
+                upvote = upvote,
+                voteClick = voteClick,
+                isVoted = isVoted
+                )
         }
     }
 }
 
-@Composable
-fun VoteButton(){
-    Row() {
-
-    }
-
-    Button(
-        onClick = { /*TODO*/ },
-        modifier = Modifier
-            .padding(8.dp),
-        shape = RoundedCornerShape(20.dp),
-    ) {
-        Text(text = "Rounded")
-    }
-}
-//
-//@Preview
 //@Composable
-//fun ForumCardPreview(){
-//    ForumCard(
-//        title = "About Palindrome Algorithm",
-//        timestamp = {"19 August 2020 19:20"},
-//        author = "James Cameron",
-//        text = "I still confused as hell about this programming algorithm I still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithm",
-//        tags = setOf<String>("C", "Algorithm","Computer Science"),
+//fun VoteButton(upvote: Int, voteClick: () -> Unit, isVoted: Boolean){
+//    Row(
+//        horizontalArrangement = Arrangement.End,
+//        verticalAlignment = Alignment.CenterVertically,
 //        modifier = Modifier
-//            .fillMaxWidth())
+//            .fillMaxWidth()
+//    ) {
+//        Text(upvote.toString(), Modifier.padding(end = 10.dp), color = headText)
+//        Button(
+//            onClick = voteClick,
+//            shape = RoundedCornerShape(20.dp),
+//            colors = ButtonDefaults.buttonColors(groupButtonColor),
+//        ) {
+//            Text(text = "Rounded")
+//        }
+//    }
 //}
 
+@Composable
+fun VoteButton(upvote: Int, voteClick: () -> Unit, isVoted: Boolean) {
+    Row(
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Text(upvote.toString(), Modifier.padding(end = 10.dp), color = headText)
+        IconButton(
+            onClick = voteClick,
+            modifier = Modifier.size(48.dp)
+        ) {
+            val icon = if (isVoted) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp
+            val tint = if (isVoted) Color(44, 145, 72, 255) else headText
+            Icon(icon, contentDescription = "Upvote", tint = tint)
+        }
+    }
+}
+
+
+//
 @Preview
 @Composable
-fun VoteButtonPreview() {
-    VoteButton()
+fun ForumCardPreview(){
+    Column() {
+        ForumCard(
+            title = "About Palindrome Algorithm",
+            timestamp = {"19 August 2020 19:20"},
+            author = "James Cameron",
+            text = "I still confused as hell about this programming algorithm I still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithm",
+            tags = setOf<String>("C", "Algorithm","Computer Science"),
+            onClick = {},
+            isVoted = true,
+            upvote = 1,
+            voteClick = {}
+            ,
+            modifier = Modifier
+                .fillMaxWidth())
+        ForumCard(
+            title = "About Palindrome Algorithm",
+            timestamp = {"19 August 2020 19:20"},
+            author = "James Cameron",
+            text = "I still confused as hell about this programming algorithm I still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithm",
+            tags = setOf<String>("C", "Algorithm","Computer Science"),
+            onClick = {},
+            isVoted = false,
+            upvote = 21,
+            voteClick = {}
+            ,
+            modifier = Modifier
+                .fillMaxWidth())
+    }
+
 }
+
+//@Preview
+//@Composable
+//fun VoteButtonPreview() {
+//    VoteButton()
+//}

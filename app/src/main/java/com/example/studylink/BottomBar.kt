@@ -70,12 +70,22 @@ import com.example.studylink.forum.ForumViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomBar(navController: NavHostController){
+    val currentUser = auth.currentUser
     Scaffold(bottomBar = {BottomContent(navController = navController)}) {
         Box(modifier = Modifier
             .padding(it)
             .fillMaxWidth()
         ) {
-            NavHost(navController = navController, startDestination = Login.route){
+            var beginningRoute = Login.route
+            if(currentUser != null){
+                val jetztUser = Realusers.firstOrNull { it.email == currentUser.email }
+                if(jetztUser != null){
+                    currUser.value = jetztUser
+                    beginningRoute = Dashboard.route
+                }
+
+            }
+            NavHost(navController = navController, startDestination = beginningRoute){
                 composable(Login.route){
                     LoginScreen(navController = navController)
                 }

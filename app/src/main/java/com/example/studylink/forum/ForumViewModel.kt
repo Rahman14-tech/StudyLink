@@ -4,7 +4,13 @@ import android.content.ContentValues
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.studylink.QNA
 import com.example.studylink.currUser
@@ -18,7 +24,10 @@ import kotlinx.coroutines.flow.update
 import org.w3c.dom.Comment
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.isActive
+import kotlinx.coroutines.flow.stateIn
 import okhttp3.internal.toImmutableList
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -48,7 +57,19 @@ data class ForumModel(
     val text: String = "",
     val upvote: List<String> = listOf(),
     val tags: List<String> = listOf(),
-)
+) {
+    fun doesMatchSearchQuery(query: String): Boolean {
+        val matchingCombination = listOf(
+            "$title",
+            "${title.first()}",
+            "${tags.any { it.contains(query, ignoreCase = true)}}"
+        )
+
+        return matchingCombination.any {
+            it.contains(query, ignoreCase = true)
+        }
+    }
+}
 
 data class CommentModel(
     val documentId: String = "",
@@ -265,7 +286,34 @@ class ForumViewModel : ViewModel() {
             commentValue
         )
     }
-
+//
+//    private val _searchForumText = MutableStateFlow("")
+//    val searchForumText = _searchForumText.asStateFlow()
+//
+//    private val _isSearching = MutableStateFlow(false)
+//    val isSearching = _isSearching.asStateFlow()
+//
+////    private val _forumListSearch = MutableStateFlow(listOf<ForumModel>())
+//    private val _forumListSearch = _uiState.value.forumList.asState
+//
+//    val forumListSearch = searchForumText
+//        .combine(_forumListSearch) { text, forumList ->
+//            if (text.isBlank()) {
+//                forumList
+//            } else {
+//                forumList.filter {
+//                    it.doesMatchSearchQuery(text)
+//                }
+//            }
+//        }
+//        .stateIn(
+//            viewModelScope,
+//            SharingStarted.WhileSubscribed(5000),
+//            _forumListSearch
+//        )
+//    fun onSearchForumList(text: String) {
+//        _searchForumList.value = text
+//    }
 
 
 

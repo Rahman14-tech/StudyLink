@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
@@ -43,6 +44,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -97,7 +99,9 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.times
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -332,6 +336,17 @@ fun userNameBox(
 fun userBioBox(
     contentSpace: Dp
 ) {
+    var context = LocalContext.current
+    var displayMetrics = context.resources.displayMetrics
+
+    var screenWidthInDp = with(LocalDensity.current) {
+        displayMetrics.widthPixels.dp / density
+    }
+
+    var zerozeropointfive = (screenWidthInDp * 0.05f)
+
+    var textBoxSize = screenWidthInDp - ((2*contentSpace) + (2*zerozeropointfive) + 25.dp)
+
     Button(
         onClick = {
             showOverlayBioProfile.value = true
@@ -376,7 +391,11 @@ fun userBioBox(
                                 text = currUser.value.bio,
                                 color = subheadText,
                                 style = TextStyle(
-                                    fontSize = 13.sp)
+                                    fontSize = 13.sp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier
+                                    .width(textBoxSize)
                             )
                         }
                         Text(
@@ -971,8 +990,84 @@ fun ThemeSwitch(
 }
 
 @Composable
+fun signOutBtn(
+    contentSpace: Dp,
+    navController: NavHostController
+) {
+    Button(
+        onClick = {
+            auth.signOut()
+            navController.navigate(Login.route) {
+                popUpTo(Login.route) {
+                    inclusive = true
+                }
+            }
+        },
+        contentPadding = PaddingValues(0.dp),
+        shape = RectangleShape,
+        colors = ButtonDefaults.buttonColors(Color.Transparent),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .align(alignment = Alignment.CenterStart)
+            ) {
+                Spacer(modifier = Modifier.width(contentSpace))
+                Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+                Column(
+                    modifier = Modifier
+                        .wrapContentSize()
+                ) {
+                    Row {
+                        Text(
+                            text = "Logout",
+                            color = Color.Red,
+                            style = TextStyle(
+                                fontSize = 18.sp
+                            )
+                        )
+                        Text(
+                            text = inRefresh.value.toString(),
+                            color = Color.Transparent,
+                            style = TextStyle(
+                                fontSize = 13.sp)
+                        )
+                    }
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .align(alignment = Alignment.CenterEnd)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(alignment = Alignment.CenterVertically)
+                        .requiredSize(size = 20.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Logout,
+                        contentDescription = "logout icon",
+                        tint = Color.Red,
+                        modifier = Modifier
+                            .align(alignment = Alignment.Center)
+                    )
+                }
+                Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+                Spacer(modifier = Modifier.width(contentSpace))
+            }
+        }
+    }
+}
+
+@Composable
 fun SettingFrag(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavHostController
 ) {
     var context = LocalContext.current
     var displayMetrics = context.resources.displayMetrics
@@ -1010,8 +1105,10 @@ fun SettingFrag(
 
                 ThemeSwitch(contentSpace = contentSpace)
 
-                // Future Content
-
+                signOutBtn(
+                    contentSpace = contentSpace,
+                    navController = navController
+                )
             }
             Spacer(modifier = Modifier.height(20.dp))
         }
@@ -1059,7 +1156,7 @@ fun ProfileScreen(navController: NavHostController) {
                 userStatus(launchers = launcher)
                 Account()
                 Spacer(modifier = Modifier.height(15.dp))
-                SettingFrag()
+                SettingFrag(navController = navController)
             }
         }
 

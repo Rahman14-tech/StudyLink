@@ -63,7 +63,6 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.firestore.ktx.toObject
 var searchYourChat:MutableState<String> =  mutableStateOf("")
-
 fun GetChatData(){
     db.collection("Chats").addSnapshotListener{snapshot, e ->
         if (e != null) {
@@ -281,6 +280,34 @@ fun YourChatsCardGroup(datum: GroupChatType, navController: NavHostController){
         )
     }
 }
+@Composable
+fun YourChatsCardGroupSearched(datum: GroupChatType, navController: NavHostController){
+    println("OHARANG2 ${datum.id}")
+    val tempPartnerEmail = datum.members.contains(currUser.value.email)
+    var showOverlay = remember { mutableStateOf(false) }
+    var selectedPeople = remember { mutableStateOf<List<String>>(listOf()) }
+    val context = LocalContext.current
+    println("JSM 23 ${searchYourChat.value}")
+    if(tempPartnerEmail){
+        if(datum.id.lowercase().contains(searchYourChat.value.lowercase()) || datum.groupName.lowercase().contains(searchYourChat.value.lowercase())) {
+            groupcard(
+                people = datum.members,
+                scope = datum.hashTag,
+                personcount = datum.maxMember,
+                onCardClick = { people ->
+                    showOverlay.value = true
+                    selectedPeople.value = people
+                },
+                onButtonClick = {
+                    navController?.navigate(GroupChats.route+"/${datum.id}")
+                },
+                groupId = datum.id,
+                groupName = datum.groupName
+            )
+        }
+
+    }
+}
 
 @Composable
 fun CustomTextField2(
@@ -377,7 +404,7 @@ fun YourChatScreen(navController: NavHostController) {
             ) {
                 CustomTextField2(
                     onValueChange = {
-                        inputText.value = it
+                        searchYourChat.value = it
                     },
                     leadingIcon = {
                         Icon(
@@ -446,14 +473,28 @@ fun YourChatScreen(navController: NavHostController) {
                     }
                 }
             } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .background(defaultColor)
-                ) {
-                    itemsIndexed(groupChatsDashboard) { _, datum ->
-                        YourChatsCardGroup(datum, navController)
+
+                if(searchYourChat.value != ""){
+                    LazyColumn(
+                        modifier = Modifier
+                            .background(defaultColor)
+                    ) {
+                        itemsIndexed(groupChatsDashboard) { _, datum ->
+                            YourChatsCardGroupSearched(datum, navController)
+                        }
+                    }
+
+                }else{
+                    LazyColumn(
+                        modifier = Modifier
+                            .background(defaultColor)
+                    ) {
+                        itemsIndexed(groupChatsDashboard) { _, datum ->
+                            YourChatsCardGroup(datum, navController)
+                        }
                     }
                 }
+
             }
 
         }

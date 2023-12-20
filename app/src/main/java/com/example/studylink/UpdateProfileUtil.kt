@@ -1,13 +1,16 @@
 package com.example.studylink
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.compose.ui.text.input.TextFieldValue
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.storage
+import java.io.ByteArrayOutputStream
 import java.util.UUID
 class UpdateProfileUtil{
 
@@ -27,10 +30,13 @@ class UpdateProfileUtil{
             var spaceRef: StorageReference
 
             spaceRef = storageRef.child("UsersPhoto/$uniqueimagename.jpg")
-
-            val byteArray: ByteArray? = context.contentResolver
-                .openInputStream(uri)
-                ?.use { it.readBytes() }
+            val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+            val outputStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+            val byteArray = outputStream.toByteArray()
+//            val byteArray: ByteArray? = context.contentResolver
+//                .openInputStream(uri)
+//                ?.use { it.readBytes() }
 
             byteArray?.let{
 

@@ -25,7 +25,7 @@ object Dashboard: Destinations{
 }
 
 object YourChats: Destinations{
-    override val route: String = "Chats"
+    override val route: String = "ChatsPage"
     override val icon: Int = R.drawable.chaticon
     override val title: String = "Chats"
 }
@@ -67,5 +67,6 @@ object MediaViewer:Destinations{
     override val title: String = "MediaViewer"
     const val ChatId = "ChatId"
     const val MediaUri = "MediaUri"
+    const val isGroup = "isGroup"
 }
 

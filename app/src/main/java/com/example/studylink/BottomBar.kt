@@ -113,12 +113,13 @@ fun BottomBar(navController: NavHostController){
                     val id = requireNotNull(currIt.arguments?.getString(TheChatS.ChatId))
                     ChatSystem(navController = navController,id)
                 }
-                composable(MediaViewer.route+"/{${MediaViewer.ChatId}}"+"/{${MediaViewer.MediaUri}}", arguments = listOf(
-                    navArgument(MediaViewer.ChatId){type = NavType.StringType}, navArgument(MediaViewer.MediaUri){type = NavType.StringType}
+                composable(MediaViewer.route+"/{${MediaViewer.ChatId}}"+"/{${MediaViewer.MediaUri}}"+"/{${MediaViewer.isGroup}}", arguments = listOf(
+                    navArgument(MediaViewer.ChatId){type = NavType.StringType}, navArgument(MediaViewer.MediaUri){type = NavType.StringType}, navArgument(MediaViewer.isGroup){type = NavType.BoolType}
                 )){currIt ->
                     val id = requireNotNull(currIt.arguments?.getString(MediaViewer.ChatId))
                     val mediaUri = requireNotNull(currIt.arguments?.getString(MediaViewer.MediaUri))
-                    MediaViewer(navController = navController, Id = id, MediaUri = mediaUri)
+                    val isGroup = requireNotNull(currIt.arguments?. getBoolean(MediaViewer.isGroup))
+                    MediaViewer(navController = navController, Id = id, MediaUri = mediaUri, isGroup = isGroup)
                 }
                 composable(Setting.route){
                     ProfileScreen(navController = navController)
@@ -144,7 +145,7 @@ fun BottomContent(navController: NavHostController) {
         "Register"->bottomBarState.value = false
         GroupChats.route+"/{${GroupChats.GroupChatId}}" ->bottomBarState.value = false
         TheChatS.route+"/{${TheChatS.ChatId}}"-> bottomBarState.value = false
-        MediaViewer.route+"/{${MediaViewer.ChatId}}"+"/{${MediaViewer.MediaUri}}" -> false
+        MediaViewer.route+"/{${MediaViewer.ChatId}}"+"/{${MediaViewer.MediaUri}}"+"/{${MediaViewer.isGroup}}" -> false
         else -> bottomBarState.value = true
 
     }

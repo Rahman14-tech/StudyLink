@@ -87,7 +87,7 @@ import com.example.studylink.inRefresh
 import com.example.studylink.placeholderColor
 import com.example.studylink.subheadText
 import com.google.common.io.Files.append
-
+var inputText = mutableStateOf("")
 @Composable
 fun ForumScreen(
     navController: NavHostController,
@@ -116,39 +116,79 @@ fun ForumScreen(
             ForumProfileTopNavbar()
             ForumSplash()
             SearchBarForum()
-            LazyColumn(
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues = paddingValue)
-            ) {
-                // Display data forum
-                itemsIndexed(forumUiState.forumList) { index, forum ->
-                    ForumCard(
-                        title = forum.title,
-                        author = forum.authorId,
-                        timestamp = {
-                            forum.timestamp?.let { forumViewModel.getTimeFromNow(it.toDate()) }
-                                ?: ""
-                        },
-                        text = forum.text,
-                        tags = forum.tags.toSet(),
-                        voteClick = { forumViewModel.voteForum(index, currUser.value.email) } ,
-                        onClick = {
-                            forumViewModel.goForumDetail(
-                                forumDocID = forum.documentId,
-                                navController = navController
+            if(inputText.value == ""){
+                LazyColumn(
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues = paddingValue)
+                ) {
+                    // Display data forum
+                    itemsIndexed(forumUiState.forumList) { index, forum ->
+                        ForumCard(
+                            title = forum.title,
+                            author = forum.authorId,
+                            timestamp = {
+                                forum.timestamp?.let { forumViewModel.getTimeFromNow(it.toDate()) }
+                                    ?: ""
+                            },
+                            text = forum.text,
+                            tags = forum.tags.toSet(),
+                            voteClick = { forumViewModel.voteForum(index, currUser.value.email) } ,
+                            onClick = {
+                                forumViewModel.goForumDetail(
+                                    forumDocID = forum.documentId,
+                                    navController = navController
+                                )
+                            },
+                            upvote = forum.upvote.size,
+                            isVoted = forumViewModel.isVoteForumByUserId(index, currUser.value.email),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 10.dp, end = 10.dp, top = 3.dp, bottom = 3.dp)
+                        )
+                    }
+                }
+            }else{
+                LazyColumn(
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues = paddingValue)
+                ) {
+                    // Display data forum
+                    itemsIndexed(forumUiState.forumList) { index, forum ->
+                        if(forum.title.lowercase().contains(inputText.value.lowercase())){
+                            ForumCard(
+                                title = forum.title,
+                                author = forum.authorId,
+                                timestamp = {
+                                    forum.timestamp?.let { forumViewModel.getTimeFromNow(it.toDate()) }
+                                        ?: ""
+                                },
+                                text = forum.text,
+                                tags = forum.tags.toSet(),
+                                voteClick = { forumViewModel.voteForum(index, currUser.value.email) } ,
+                                onClick = {
+                                    forumViewModel.goForumDetail(
+                                        forumDocID = forum.documentId,
+                                        navController = navController
+                                    )
+                                },
+                                upvote = forum.upvote.size,
+                                isVoted = forumViewModel.isVoteForumByUserId(index, currUser.value.email),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 10.dp, end = 10.dp, top = 3.dp, bottom = 3.dp)
                             )
-                        },
-                        upvote = forum.upvote.size,
-                        isVoted = forumViewModel.isVoteForumByUserId(index, currUser.value.email),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 10.dp, end = 10.dp, top = 3.dp, bottom = 3.dp)
-                    )
+                        }
+
+                    }
                 }
             }
+
         }
     }
 }
@@ -243,7 +283,7 @@ fun ForumSplash(modifier: Modifier = Modifier) {
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun SearchBarForum(modifier: Modifier = Modifier) {
-    var inputText = rememberSaveable { mutableStateOf("") }
+
     Box(
         modifier = modifier
             .fillMaxWidth()

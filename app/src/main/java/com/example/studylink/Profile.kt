@@ -485,6 +485,7 @@ fun userStuFiBox(
                     Text(
                         text = currUser.value.studyField,
                         color = headText,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = TextStyle(
                             fontSize = 16.sp),
@@ -883,8 +884,6 @@ fun overlayNameChange() {
                                             showOverlayNameProfile.value = false
                                         }
                                     }
-
-                                    inRefresh.value++
                                 }.addOnFailureListener{
                                     Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
                                 }
@@ -1034,8 +1033,6 @@ fun overlayBioChange() {
                                             showOverlayBioProfile.value = false
                                         }
                                     }
-
-                                    inRefresh.value++
                                 }.addOnFailureListener{
                                     Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
                                 }
@@ -1190,8 +1187,6 @@ fun overlayStuFiChange() {
                                             showOverlayStuFiProfile.value = false
                                         }
                                     }
-
-                                    inRefresh.value++
                                 }.addOnFailureListener{
                                     Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
                                 }
@@ -1472,7 +1467,6 @@ fun ThemeSwitch(
                 onClick = {
                     isDark.value = !isDark.value
                     coloringSchema()
-                    inRefresh.value++
                 }
             )
     ) {
@@ -1522,7 +1516,6 @@ fun ThemeSwitch(
                     onCheckedChange = {
                         isDark.value = it
                         coloringSchema()
-                        inRefresh.value++
                     },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = switchColor,

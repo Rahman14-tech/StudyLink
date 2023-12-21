@@ -70,13 +70,22 @@ import com.example.studylink.forum.ForumViewModel
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomBar(navController: NavHostController){
+fun BottomBar(navController: NavHostController) {
+    val currentUser = auth.currentUser
     Scaffold(bottomBar = {BottomContent(navController = navController)}) {
         Box(modifier = Modifier
             .padding(it)
             .fillMaxWidth()
         ) {
-            NavHost(navController = navController, startDestination = Login.route){
+            var beginningRoute = Login.route
+            if(currentUser != null) {
+                val jetztUser = Realusers.firstOrNull { it.email == currentUser.email }
+                if(jetztUser != null){
+                    currUser.value = jetztUser
+                    beginningRoute = Dashboard.route
+                }
+            }
+            NavHost(navController = navController, startDestination = beginningRoute){
                 composable(Login.route){
                     LoginScreen(navController = navController)
                 }
@@ -107,12 +116,13 @@ fun BottomBar(navController: NavHostController){
                     val id = requireNotNull(currIt.arguments?.getString(TheChatS.ChatId))
                     ChatSystem(navController = navController,id)
                 }
-                composable(MediaViewer.route+"/{${MediaViewer.ChatId}}"+"/{${MediaViewer.MediaUri}}", arguments = listOf(
-                    navArgument(MediaViewer.ChatId){type = NavType.StringType}, navArgument(MediaViewer.MediaUri){type = NavType.StringType}
+                composable(MediaViewer.route+"/{${MediaViewer.ChatId}}"+"/{${MediaViewer.MediaUri}}"+"/{${MediaViewer.isGroup}}", arguments = listOf(
+                    navArgument(MediaViewer.ChatId){type = NavType.StringType}, navArgument(MediaViewer.MediaUri){type = NavType.StringType}, navArgument(MediaViewer.isGroup){type = NavType.BoolType}
                 )){currIt ->
                     val id = requireNotNull(currIt.arguments?.getString(MediaViewer.ChatId))
                     val mediaUri = requireNotNull(currIt.arguments?.getString(MediaViewer.MediaUri))
-                    MediaViewer(navController = navController, Id = id, MediaUri = mediaUri)
+                    val isGroup = requireNotNull(currIt.arguments?. getBoolean(MediaViewer.isGroup))
+                    MediaViewer(navController = navController, Id = id, MediaUri = mediaUri, isGroup = isGroup)
                 }
                 composable(Setting.route){
                     ProfileScreen(navController = navController)
@@ -138,7 +148,7 @@ fun BottomContent(navController: NavHostController) {
         "Register"->bottomBarState.value = false
         GroupChats.route+"/{${GroupChats.GroupChatId}}" ->bottomBarState.value = false
         TheChatS.route+"/{${TheChatS.ChatId}}"-> bottomBarState.value = false
-        MediaViewer.route+"/{${MediaViewer.ChatId}}"+"/{${MediaViewer.MediaUri}}" -> false
+        MediaViewer.route+"/{${MediaViewer.ChatId}}"+"/{${MediaViewer.MediaUri}}"+"/{${MediaViewer.isGroup}}" -> false
         else -> bottomBarState.value = true
 
     }

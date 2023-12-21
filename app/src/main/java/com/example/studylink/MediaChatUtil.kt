@@ -1,12 +1,15 @@
 package com.example.studylink
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.compose.ui.text.input.TextFieldValue
 import com.google.firebase.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.storage
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.UUID
@@ -33,9 +36,17 @@ class MediaChatUtil {
             }else{
                 spaceRef = storageRef.child("ChatMedia/$uniqueimagename.mp4")
             }
-            val byteArray: ByteArray? = context.contentResolver
+            val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+            var byteArray: ByteArray? = context.contentResolver
                 .openInputStream(uri)
                 ?.use { it.readBytes() }
+
+            if(type == "Image"){
+                val outputStream = ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+                byteArray = outputStream.toByteArray()
+            }
+
 
             byteArray?.let{
 

@@ -233,6 +233,11 @@ fun groupDashboard(navController: NavHostController){
     LaunchedEffect(Unit){
         groupChatsDashboard.removeAll(groupChatsDashboard)
         GetGroupChatData()
+        selectedOption.value = "All Posts"
+    }
+    showDashGroupfilter
+    if(showDashGroupfilter.value){
+        dashDialog(onDismissRequest = {showDashGroupfilter.value = it})
     }
     Column(modifier = Modifier
         .fillMaxSize()
@@ -249,6 +254,7 @@ fun peerDashboard(navController: NavHostController){
     LaunchedEffect(Unit){
         Filteredusers.removeAll(Filteredusers)
         GetUsersData()
+        selectedOption.value = "All Posts"
     }
     var finfilt by remember { mutableStateOf(false) }
     val context = LocalContext.current

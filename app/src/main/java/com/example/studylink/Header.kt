@@ -131,7 +131,8 @@ fun chatheader(){
                     .background(color = Color.Transparent),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TextButton(onClick = { selectedPeerChats.value = true }) {
+                TextButton(onClick = { selectedPeerChats.value = true
+                    searchYourChat.value = "" }) {
                     Text(text = "Personal", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = headText)
                 }
                 if(selectedPeerChats.value){
@@ -145,7 +146,8 @@ fun chatheader(){
                     .background(color = Color.Transparent),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TextButton(onClick = { selectedPeerChats.value = false }) {
+                TextButton(onClick = { selectedPeerChats.value = false
+                    searchYourChat.value = "" }) {
                     Text(text = "Group", fontSize = 17.sp, fontWeight = FontWeight.Medium, color = headText)
                 }
                 if(!selectedPeerChats.value){
@@ -186,7 +188,12 @@ fun dashboard(){
                 }
                 IconButton(
                     onClick = {
-                        showDashfilterPersonal.value = true
+                        if( selectedPeerDashboard.value == true){
+                            showDashfilterPersonal.value = true
+                        }else{
+                            showDashGroupfilter.value = true
+                        }
+
                     },
                     modifier = Modifier
                         .padding(end = 15.dp, top = 7.dp)

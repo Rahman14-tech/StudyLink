@@ -10,6 +10,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -69,6 +70,7 @@ import com.google.mlkit.nl.smartreply.SmartReplySuggestionResult
 import com.google.mlkit.nl.smartreply.TextMessage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDateTime
 import kotlin.time.Duration.Companion.seconds
 
@@ -237,11 +239,15 @@ fun TopNavbarPersonal(modifier: Modifier = Modifier, navController: NavHostContr
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() },
                             onClick = {
-                                navController.navigate(Dashboard.route) {
-                                    popUpTo(YourChats.route) {
-                                        inclusive = true
-                                    }
-                                }
+                                Handler().postDelayed({
+                                    navController.navigate(YourChats.route)
+                                },1000)
+                                        navController.navigate(Dashboard.route)
+//                                {
+//                                    popUpTo(YourChats.route) {
+//                                        inclusive = true
+//                                    }
+//                                }
                             }
                         )
                 ) {
@@ -539,7 +545,8 @@ fun MediaLeftChat(ChatId:String, navController: NavHostController,modifier: Modi
                             VideoPlayerScreen(
                                 ChatId = ChatId,
                                 navController = navController,
-                                MediaContent
+                                MediaContent,
+                                isGroup = false
                             )
                         } else if (MediaType == "Image") {
                             Image(
@@ -644,7 +651,7 @@ fun RightChat(modifier: Modifier = Modifier, message : String,timeSent: String) 
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
-fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Modifier = Modifier, MediaContent : String,MediaType:String,timeSent: String) {
+fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Modifier = Modifier, MediaContent : String,MediaType:String,timeSent: String, isGroup: Boolean) {
     var context = LocalContext.current
     var displayMetrics = context.resources.displayMetrics
 
@@ -684,7 +691,8 @@ fun MediaRightChat(ChatId:String, navController: NavHostController,modifier: Mod
                             VideoPlayerScreen(
                                 ChatId = ChatId,
                                 navController = navController,
-                                mediaUrl = MediaContent
+                                mediaUrl = MediaContent,
+                                isGroup = isGroup
                             )
                         } else if(MediaType == "Image") {
                             Image(
@@ -929,7 +937,9 @@ fun ChatSystem(navController: NavHostController, ChatId: String) {
                                         navController = navController,
                                         MediaContent = it.ContentMedia,
                                         MediaType = it.MediaType,
-                                        timeSent = it.TimeSent
+                                        timeSent = it.TimeSent,
+                                        isGroup = false
+
                                     )
 
                                 }

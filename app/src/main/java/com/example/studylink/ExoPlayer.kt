@@ -42,7 +42,7 @@ import com.google.android.exoplayer2.upstream.HttpDataSource
 import java.net.URLEncoder
 
 @Composable
-fun VideoPlayerScreen(ChatId: String, navController: NavHostController,mediaUrl: String,hideFullscreen:Boolean = false) {
+fun VideoPlayerScreen(ChatId: String, navController: NavHostController,mediaUrl: String,hideFullscreen:Boolean = false,isGroup: Boolean) {
 
     val context = LocalContext.current
     var isFullScreen by remember { mutableStateOf(false) }
@@ -89,7 +89,7 @@ fun VideoPlayerScreen(ChatId: String, navController: NavHostController,mediaUrl:
             IconButton(
                 onClick = {
                     val encodedUrl = URLEncoder.encode(mediaUrl)
-                    navController.navigate(MediaViewer.route + "/$ChatId"+"/$encodedUrl") },
+                    navController.navigate(MediaViewer.route + "/$ChatId"+"/$encodedUrl"+"/$isGroup") },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(bottom = 30.dp)

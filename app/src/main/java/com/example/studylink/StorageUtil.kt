@@ -1,13 +1,17 @@
 package com.example.studylink
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.compose.ui.text.input.TextFieldValue
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.storage
+import java.io.ByteArrayOutputStream
 import java.util.UUID
 class StorageUtil{
 
@@ -29,10 +33,16 @@ class StorageUtil{
             }else{
                 spaceRef = storageRef.child("videos/$uniqueimagename.mp4")
             }
-            val byteArray: ByteArray? = context.contentResolver
+            val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+            var byteArray: ByteArray? = context.contentResolver
                 .openInputStream(uri)
                 ?.use { it.readBytes() }
 
+            if(type == "Image"){
+                val outputStream = ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+                byteArray = outputStream.toByteArray()
+            }
             byteArray?.let{
 
                 var uploadTask = spaceRef.putBytes(byteArray)
@@ -51,7 +61,8 @@ class StorageUtil{
                                 "imageURL" to it.toString(),
                                 "strongAt" to mutableListOf<String>(),
                                 "wantStudy" to mutableListOf<String>(),
-                                "bio" to ""
+                                "bio" to "",
+                                "studyField" to studyField
                             )).addOnSuccessListener {
                                 Toast.makeText(cont, "Registration Success", Toast.LENGTH_LONG).show()
                                 tempUrl.value = TextFieldValue("")

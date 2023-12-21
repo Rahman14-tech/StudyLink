@@ -5,6 +5,7 @@ import android.content.ContentResolver
 import android.content.ContentValues
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -96,11 +97,10 @@ fun TopNavbarGroup(modifier: Modifier = Modifier, navController: NavHostControll
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() },
                             onClick = {
-                                navController.navigate(Dashboard.route) {
-                                    popUpTo(YourChats.route) {
-                                        inclusive = true
-                                    }
-                                }
+                                Handler().postDelayed({
+                                    navController.navigate(YourChats.route)
+                                },1000)
+                                navController.navigate(Dashboard.route)
                             }
                         )
                 ) {
@@ -365,7 +365,8 @@ fun GroupMediaLeftChat(
                             VideoPlayerScreen(
                                 ChatId = ChatId,
                                 navController = navController,
-                                MediaContent
+                                MediaContent,
+                                isGroup = true
                             )
                         } else if (MediaType == "Image") {
                             Image(
@@ -547,7 +548,8 @@ fun GroupChatSystem(navController: NavHostController, GroupChatId: String){
                                 navController = navController,
                                 MediaContent = it.ContentMedia,
                                 MediaType = it.MediaType,
-                                timeSent = it.TimeSent
+                                timeSent = it.TimeSent,
+                                isGroup = true
                             )
 
                         }

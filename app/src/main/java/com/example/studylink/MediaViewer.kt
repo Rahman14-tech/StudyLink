@@ -18,16 +18,23 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 
 @Composable
-fun MediaViewer(navController: NavHostController,Id:String, MediaUri: String){
+fun MediaViewer(navController: NavHostController,Id:String, MediaUri: String, isGroup: Boolean){
     Column(modifier = Modifier
         .fillMaxSize()
         .background(color = Color.Black)) {
-        TextButton(onClick = { navController.navigate(TheChatS.route+"/${Id}") }, modifier = Modifier.padding(bottom = 20.dp)) {
-            Icon(imageVector = Icons.Outlined.ArrowBackIosNew, contentDescription = "Icon Back", tint = Color.White)
+        if(!isGroup){
+            TextButton(onClick = { navController.navigate(TheChatS.route+"/${Id}") }, modifier = Modifier.padding(bottom = 20.dp)) {
+                Icon(imageVector = Icons.Outlined.ArrowBackIosNew, contentDescription = "Icon Back", tint = Color.White)
+            }
+        }else{
+            println("YTNKTS ${GroupChats.route+"/${Id}"}")
+            TextButton(onClick = { navController.navigate(GroupChats.route+"/${Id}") }, modifier = Modifier.padding(bottom = 20.dp)) {
+                Icon(imageVector = Icons.Outlined.ArrowBackIosNew, contentDescription = "Icon Back", tint = Color.White)
+            }
         }
         Column(modifier = Modifier
             .fillMaxSize(),verticalArrangement = Arrangement.Center) {
-            VideoPlayerScreen(navController = navController, ChatId = Id, mediaUrl = MediaUri, hideFullscreen = true)
+            VideoPlayerScreen(navController = navController, ChatId = Id, mediaUrl = MediaUri, hideFullscreen = true, isGroup = isGroup)
         }
     }
 }

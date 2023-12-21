@@ -75,7 +75,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 @Composable
-fun TopNavbarGroup(modifier: Modifier = Modifier, navController: NavHostController, ChatId: String) {
+fun TopNavbarGroup(modifier: Modifier = Modifier, navController: NavHostController, ChatId: String,groupName:String?) {
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -140,12 +140,22 @@ fun TopNavbarGroup(modifier: Modifier = Modifier, navController: NavHostControll
                         .requiredWidth(width = 146.dp)
                         .requiredHeight(height = 40.dp)
                 ) {
-                    Text(
-                        text = "Anjay Group",
-                        color = headText,
-                        style = TextStyle(
-                            fontSize = 18.sp)
-                    )
+                    if(groupName != null){
+                        Text(
+                            text = "$groupName ${ChatId.substring(0,10)}",
+                            color = headText,
+                            style = TextStyle(
+                                fontSize = 18.sp)
+                        )
+                    }else{
+                        Text(
+                            text = "Group Learning",
+                            color = headText,
+                            style = TextStyle(
+                                fontSize = 18.sp)
+                        )
+                    }
+
                     Text(
                         text = "last seen 15:47",
                         color = subheadText,
@@ -201,6 +211,7 @@ fun GroupLeftChat(modifier: Modifier = Modifier,timeSent:String, sender: String,
                 Image(
                     painter = rememberAsyncImagePainter(model = theOtherUser!!.imageURL),
                     contentDescription = "user image",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .align(alignment = Alignment.Center)
                         .clip(shape = CircleShape)
@@ -327,6 +338,7 @@ fun GroupMediaLeftChat(
                 Image(
                     painter = rememberAsyncImagePainter(model = theOtherUser!!.imageURL),
                     contentDescription = "user image",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .align(alignment = Alignment.Center)
                         .clip(shape = CircleShape)
@@ -420,6 +432,7 @@ fun GroupChatSystem(navController: NavHostController, GroupChatId: String){
         ChatData.clear()
         GetTheGroupChats(GroupChatId)
     }
+    val groupName = groupChatsDashboard.firstOrNull{ it.id == GroupChatId}
     val context = LocalContext.current
     val displayMetrics = context.resources.displayMetrics
 
@@ -519,7 +532,7 @@ fun GroupChatSystem(navController: NavHostController, GroupChatId: String){
                 .fillMaxWidth()
                 .padding(top = 2.dp)
         ) {
-            TopNavbarGroup(navController = navController, ChatId = GroupChatId)
+            TopNavbarGroup(navController = navController, ChatId = GroupChatId, groupName = groupName?.groupName)
         }
         Box(
             modifier = Modifier

@@ -141,7 +141,7 @@ fun YourChatsCardPersonal(datum: YourChatsType, navController: NavHostController
                             color = headText
                         )
                         Text(
-                            text = "15:36",
+                            text = datum.theLastTime,
                             fontWeight = FontWeight.Normal,
                             fontSize = 15.sp,
                             color = subheadText

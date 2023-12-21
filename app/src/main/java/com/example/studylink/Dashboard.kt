@@ -387,39 +387,44 @@ fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, navControll
                                         fontWeight = FontWeight.Medium,
                                         modifier = Modifier.padding(start = 25.dp)
                                     )
-                                    prof.strongAt.map {
-                                        Text(
-                                            text = "$it",
-                                            color = subheadText,
-                                            fontSize = 20.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            modifier = Modifier.padding(start = 5.dp)
-                                        )
-                                    }
-                                }
-                                Row(
-                                    modifier = Modifier
-                                        .padding(bottom = 15.dp), horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Row {
-                                        Text(
-                                            text = "-",
-                                            color = subheadText,
-                                            fontSize = 20.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            modifier = Modifier.padding(start = 25.dp)
-                                        )
-                                        prof.wantStudy.map {
-                                            Text(
-                                                text = "$it",
-                                                color = subheadText,
-                                                fontSize = 20.sp,
-                                                fontWeight = FontWeight.Medium,
-                                                modifier = Modifier.padding(start = 5.dp)
-                                            )
+                                    Column {
+                                        prof.strongAt.map {
+
+                                                Text(
+                                                    text = "$it",
+                                                    color = subheadText,
+                                                    fontSize = 20.sp,
+                                                    fontWeight = FontWeight.Medium,
+                                                    modifier = Modifier.padding(start = 5.dp)
+                                                )
+
+
                                         }
                                     }
                                 }
+//                                Row(
+//                                    modifier = Modifier
+//                                        .padding(bottom = 15.dp), horizontalArrangement = Arrangement.SpaceBetween
+//                                ) {
+//                                    Row {
+//                                        Text(
+//                                            text = "-",
+//                                            color = subheadText,
+//                                            fontSize = 20.sp,
+//                                            fontWeight = FontWeight.Medium,
+//                                            modifier = Modifier.padding(start = 25.dp)
+//                                        )
+//                                        prof.wantStudy.map {
+//                                            Text(
+//                                                text = "$it",
+//                                                color = subheadText,
+//                                                fontSize = 20.sp,
+//                                                fontWeight = FontWeight.Medium,
+//                                                modifier = Modifier.padding(start = 5.dp)
+//                                            )
+//                                        }
+//                                    }
+//                                }
                             }
                         }
                     }

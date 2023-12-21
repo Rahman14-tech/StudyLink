@@ -104,6 +104,19 @@ fun updateTheLast(theLast: String, ChatId: String,context:Context){
             Toast.makeText(context,"There is error happen", Toast.LENGTH_SHORT)
         }
 }
+fun updateTheLastTime(ChatId: String,context:Context){
+    val sdft = SimpleDateFormat("HH:mm")
+    val currentTime = sdft.format(Date())
+    db.collection("Chats")
+        .document(ChatId)
+        .update("theLastTime", currentTime)
+        .addOnSuccessListener {
+            var temps = tempTheChat.first { it.id == ChatId }
+            temps.theLastTime = currentTime
+        }.addOnFailureListener{
+            Toast.makeText(context,"There is error happen", Toast.LENGTH_SHORT)
+        }
+}
 
 
 @Composable
@@ -411,6 +424,7 @@ fun MessageInput(modifier: Modifier = Modifier, ChatId:String , launchers: Manag
                     if(!isGroup){
                         SendMessage(TheMessage = inputText.value, ChatId = ChatId)
                         updateTheLast(theLast = inputText.value, ChatId = ChatId, context = context )
+                        updateTheLastTime(ChatId = ChatId, context = context )
                     }else{
                         SendMessageGroup(TheMessage = inputText.value, GroupChatId = ChatId)
                     }

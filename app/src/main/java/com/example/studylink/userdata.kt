@@ -27,7 +27,8 @@ data class ProfileFirestore(
 data class YourChatsType(
     val FkUsers: MutableList<String> = mutableListOf(),
     var id: String = "",
-    var theLast : String = ""
+    var theLast : String = "",
+    var theLastTime: String = "",
 )
 data class GroupChatType(
     var id: String = "",

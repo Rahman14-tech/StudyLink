@@ -91,32 +91,27 @@ class ForumViewModel : ViewModel() {
     private val forumRef = FirebaseFirestore.getInstance().collection(forumCollectionPath)
 
     fun getAllForum() {
-        println("GET ALLFORUM STARTED")
         val forumList = mutableListOf<ForumModel>()
-        val documentIdMap: MutableMap<String,ForumModel> = mutableMapOf()
 
+        forumRef.addSnapshotListener { querySnapshot, exception ->
+            if (exception != null) {
+                // Handle any errors
+                Log.e("ForumViewModel", "Error getting forums", exception)
+                return@addSnapshotListener
+            }
 
-        Log.d("GETALLFORUM", "GET ALL FORUM STARTED")
-        forumRef.get().addOnSuccessListener { querySnapshot ->
-            for (document in querySnapshot) {
+            querySnapshot?.documents?.forEach { document ->
                 val forum = document.toObject(ForumModel::class.java)
-                val forumWithID = forum.copy(documentId = document.id)
-                forumList.add(forumWithID)
-//                documentIdMap[document.id] = forum
+                val forumWithID = forum?.copy(documentId = document.id)
+                forumWithID?.let { forumList.add(it) }
             }
+
             _uiState.update { currentState ->
-                currentState.copy(
-                    forumList = forumList
-                )
+                currentState.copy(forumList = forumList)
             }
-            Log.d("TEST", forumList.toString())
+
+            Log.d("GETALLFORUM", forumList.toString())
             println("THIS IS THE FORUM LIST:: $forumList")
-            documentIdMap.forEach { (key, value) ->
-                Log.d("TESTMAP", "Key: $key, Value: $value")
-            }
-        }.addOnFailureListener { exception ->
-            // Handle the failure
-            Log.e("ForumViewModel", "Error getting forums", exception)
         }
     }
 

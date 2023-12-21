@@ -61,6 +61,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberAsyncImagePainter
+import com.example.studylink.forum.CreateForumScreen
 import com.example.studylink.forum.ForumDetailScreen
 import com.example.studylink.forum.ForumScreen
 import com.example.studylink.forum.ForumViewModel
@@ -97,6 +98,9 @@ fun BottomBar(navController: NavHostController){
                     })){backStackEntry ->
 
                     ForumDetailScreen(forumId = requireNotNull(backStackEntry.arguments?.getString("detail")))
+                }
+                composable("${QNA.route}/create"){
+                    CreateForumScreen(navController = navController)
                 }
 
                 composable(TheChatS.route+"/{${TheChatS.ChatId}}", arguments = listOf(navArgument(TheChatS.ChatId){type = NavType.StringType})){ currIt ->

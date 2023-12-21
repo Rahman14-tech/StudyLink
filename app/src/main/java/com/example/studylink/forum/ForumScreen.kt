@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.outlined.ThumbUp
@@ -38,6 +39,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -75,6 +77,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.studylink.BottomBar
 import com.example.studylink.BottomContent
 import com.example.studylink.CustomTextField
+import com.example.studylink.QNA
 import com.example.studylink.R
 import com.example.studylink.background
 import com.example.studylink.cardsColor
@@ -110,7 +113,15 @@ fun ForumScreen(
         modifier = Modifier
             .background(background),
         containerColor = background,
-        contentColor = background
+        contentColor = background,
+        floatingActionButton = {
+            FloatingActionButton(onClick = { navController.navigate("${QNA.route}/create")}) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add"
+                )
+            }
+        }
     ) { paddingValue ->
         Column {
             ForumProfileTopNavbar()
@@ -242,7 +253,9 @@ fun ForumSplash(modifier: Modifier = Modifier) {
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun SearchBarForum(modifier: Modifier = Modifier) {
+fun SearchBarForum(
+//    inputText: () -> Unit,
+    modifier: Modifier = Modifier) {
     var inputText = rememberSaveable { mutableStateOf("") }
     Box(
         modifier = modifier
@@ -277,7 +290,7 @@ fun SearchBarForum(modifier: Modifier = Modifier) {
                     .clip(shape = RoundedCornerShape(16.dp))
                     .height(30.dp)
                     .fillMaxWidth(),
-                placeholderText = "Search Forum",
+                placeholderText = "Search Forum,",
                 useClear = true,
                 imeAction = ImeAction.Search
             )
@@ -374,7 +387,10 @@ fun ForumCard(
 
             // Dashline
             val pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
-            Canvas(Modifier.fillMaxWidth().height(1.dp)) {
+            Canvas(
+                Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)) {
 
                 drawLine(
                     color = Color.Red,

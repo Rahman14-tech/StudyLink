@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.studylink.currUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -70,13 +71,8 @@ fun ForumDetailScreen(
 
     LaunchedEffect(isLoading) {
         // Perform operations serially
-        val forumDetail = withContext(Dispatchers.IO) {
-            forumViewModel.getForumDetail(forumId)
-        }
-
-        val forumComments = withContext(Dispatchers.IO) {
+        forumViewModel.getForumDetail(forumId)
             forumViewModel.getForumCommentByForumID(forumId)
-        }
         // Update isLoading after both operations are completed
         isLoading = false
     }
@@ -115,29 +111,29 @@ fun ForumDetailScreen(
                 item {
                     // Forum Title
                     ForumTitle(forum)
+//                    VoteButton(
+//                        upvote = forum.upvote.size,
+//                        isVoted = forumViewModel.isVoteForumByUserId(0, currUser.value.email),
+//                        voteClick = { forumViewModel.voteForum(0, currUser.value.email) }
+//                    )
                 }
                 // Display comment here
                 items(forumUiState.commentList) { item ->
                     CommentItem(item)
                 }
 
-
-
-                item {
-                    if (isSheetExpanded) {
-                        ForumSheet(
-                            commentText = commentText,
-                            onCommentTextChanged = { commentText = it },
-                            onSendComment = {
-                                forumViewModel.addForumComment(commentText)
-                                isSheetExpanded = false // Close the sheet after sending
-                                isLoading = true
-                            },
-                            onDismiss = { isSheetExpanded = false }
-                        )
-                    }
-                }
-
+            }
+            if (isSheetExpanded) {
+                ForumSheet(
+                    commentText = commentText,
+                    onCommentTextChanged = { commentText = it },
+                    onSendComment = {
+                        forumViewModel.addForumComment(commentText)
+                        isSheetExpanded = false // Close the sheet after sending
+                        isLoading = true
+                    },
+                    onDismiss = { isSheetExpanded = false }
+                )
             }
         }
     }

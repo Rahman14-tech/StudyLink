@@ -88,6 +88,7 @@ data class ForumUiState(
 class ForumViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ForumUiState())
     val uiState: StateFlow<ForumUiState> = _uiState.asStateFlow()
+    /*val ForumListSearch = _uiState.value.forumList.*/
 
     private val forumCollectionPath = "ForumTest"
     private val commentCollectionPath = "CommentList"
@@ -311,10 +312,10 @@ class ForumViewModel : ViewModel() {
 //            SharingStarted.WhileSubscribed(5000),
 //            _forumListSearch
 //        )
-//    fun onSearchForumList(text: String) {
-//        _searchForumList.value = text
-//    }
-
+////    fun onSearchForumList(text: String) {
+////        _searchForumList.value = text
+////    }
+//
 
 
 }

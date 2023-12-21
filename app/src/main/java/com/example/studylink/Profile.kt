@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -38,16 +39,23 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -55,6 +63,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -102,6 +112,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.times
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -432,12 +443,23 @@ fun userBioBox(
 }
 
 @Composable
-fun userExpBox(
+fun userStuFiBox(
     contentSpace: Dp
 ) {
+    var context = LocalContext.current
+    var displayMetrics = context.resources.displayMetrics
+
+    var screenWidthInDp = with(LocalDensity.current) {
+        displayMetrics.widthPixels.dp / density
+    }
+
+    var zerozeropointfive = (screenWidthInDp * 0.05f)
+
+    var textBoxSize = screenWidthInDp - ((2*contentSpace) + (2*zerozeropointfive) + 25.dp)
+
     Button(
         onClick = {
-            showOverlayBioProfile.value = true
+            showOverlayStuFiProfile.value = true
         },
         contentPadding = PaddingValues(0.dp),
         shape = RectangleShape,
@@ -460,15 +482,18 @@ fun userExpBox(
                         .wrapContentSize()
                 ) {
                     Text(
-                        text = "Experience",
+                        text = currUser.value.studyField,
                         color = headText,
+                        overflow = TextOverflow.Ellipsis,
                         style = TextStyle(
-                            fontSize = 16.sp)
+                            fontSize = 16.sp),
+                        modifier = Modifier
+                            .width(textBoxSize)
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Row {
                         Text(
-                            text = "Your Experience",
+                            text = "Study Field",
                             color = subheadText,
                             style = TextStyle(
                                 fontSize = 13.sp)
@@ -480,6 +505,121 @@ fun userExpBox(
                                 fontSize = 13.sp)
                         )
                     }
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .align(alignment = Alignment.CenterEnd)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(alignment = Alignment.CenterVertically)
+                        .requiredSize(size = 20.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "edit",
+                        tint = subheadText,
+                        modifier = Modifier
+                            .align(alignment = Alignment.Center)
+                    )
+                }
+                Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+                Spacer(modifier = Modifier.width(contentSpace))
+            }
+        }
+    }
+}
+
+@Composable
+fun userExpBox(
+    contentSpace: Dp
+) {
+    var context = LocalContext.current
+    var displayMetrics = context.resources.displayMetrics
+
+    var screenWidthInDp = with(LocalDensity.current) {
+        displayMetrics.widthPixels.dp / density
+    }
+
+    var zerozeropointfive = (screenWidthInDp * 0.05f)
+
+    var textBoxSize = screenWidthInDp - ((2*contentSpace) + (2*zerozeropointfive) + 45.dp)
+
+    Button(
+        onClick = {
+            showOverlayExpProfile.value = true
+        },
+        contentPadding = PaddingValues(0.dp),
+        shape = RectangleShape,
+        colors = ButtonDefaults.buttonColors(Color.Transparent),
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .align(alignment = Alignment.CenterStart)
+            ) {
+                Spacer(modifier = Modifier.width(contentSpace))
+                Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+                Column(
+                    modifier = Modifier
+                        .wrapContentSize()
+                ) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row {
+                        Text(
+                            text = "Experience",
+                            color = headText,
+                            style = TextStyle(
+                                fontSize = 16.sp)
+                        )
+                        Text(
+                            text = inRefresh.value.toString(),
+                            color = Color.Transparent,
+                            style = TextStyle(
+                                fontSize = 13.sp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Column {
+                        if (currUser.value.strongAt.isEmpty()) {
+                            Text(
+                                text = "Add a few of your experience",
+                                color = subheadText,
+                                style = TextStyle(
+                                    fontSize = 13.sp)
+                            )
+                        } else {
+                            currUser.value.strongAt.forEach { item ->
+                                Row {
+                                    Icon(
+                                        imageVector = Icons.Default.ChevronRight,
+                                        contentDescription = null,
+                                        tint = headText,
+                                        modifier = Modifier
+                                            .size(14.dp)
+                                            .align(Alignment.CenterVertically)
+                                    )
+                                    Spacer(modifier = Modifier.width(5.dp))
+                                    Text(
+                                        text = item,
+                                        color = subheadText,
+                                        style = TextStyle(
+                                            fontSize = 13.sp),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier
+                                            .width(textBoxSize)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
             Row(
@@ -586,6 +726,17 @@ fun Account(
                     )
                 }
 
+                userStuFiBox(contentSpace = contentSpace)
+
+                Row {
+                    Spacer(modifier = Modifier.width(contentSpace))
+                    Divider(
+                        color = dividerColor,
+                        modifier = Modifier
+                            .width(contentSize)
+                    )
+                }
+
                 userExpBox(contentSpace = contentSpace)
 
                 Row {
@@ -651,7 +802,7 @@ fun overlayNameChange() {
                     modifier = Modifier
                         .background(color = cardsColor)
                         .fillMaxWidth()
-                        .height(58.dp)
+                        .height(60.dp)
                 ) {
                     Text(
                         text = "Enter your name",
@@ -751,7 +902,7 @@ fun overlayNameChange() {
             }
             Spacer(modifier = Modifier.width(20.dp))
         }
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(25.dp))
     }
 }
 
@@ -767,11 +918,10 @@ fun overlayBioChange() {
     ModalBottomSheet(
         onDismissRequest = {
             showOverlayBioProfile.value = false
-            inputText.value = ""
         },
         shape = RoundedCornerShape(
-            topStart = 8.dp,
-            topEnd = 8.dp,
+            topStart = 10.dp,
+            topEnd = 10.dp,
             bottomStart = 0.dp,
             bottomEnd = 0.dp
         ),
@@ -802,7 +952,7 @@ fun overlayBioChange() {
                     modifier = Modifier
                         .background(color = cardsColor)
                         .fillMaxWidth()
-                        .height(58.dp)
+                        .height(60.dp)
                 ) {
                     Text(
                         text = "Enter your bio",
@@ -903,7 +1053,370 @@ fun overlayBioChange() {
             }
             Spacer(modifier = Modifier.width(20.dp))
         }
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(25.dp))
+    }
+}
+
+@SuppressLint("UnrememberedMutableState")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun overlayStuFiChange() {
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var dasBio = remember { mutableStateOf(currUser.value.studyField) }
+
+    ModalBottomSheet(
+        onDismissRequest = {
+            showOverlayStuFiProfile.value = false
+        },
+        shape = RoundedCornerShape(
+            topStart = 10.dp,
+            topEnd = 10.dp,
+            bottomStart = 0.dp,
+            bottomEnd = 0.dp
+        ),
+        sheetState = sheetState,
+        containerColor = cardsColor,
+        contentColor = Color.Transparent,
+        dragHandle = { },
+        windowInsets = WindowInsets.ime,
+        modifier = Modifier
+            .background(Color.Transparent)
+    ) {
+        val context = LocalContext.current
+        val displayMetrics = context.resources.displayMetrics
+
+        val screenWidthInDp = with(LocalDensity.current) {
+            displayMetrics.widthPixels.dp / density
+        }
+
+        Row {
+            Spacer(modifier = Modifier.width(20.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(color = cardsColor)
+                        .fillMaxWidth()
+                        .height(58.dp)
+                ) {
+                    Text(
+                        text = "Select Your Study Field",
+                        color = headText,
+                        style = TextStyle(
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterStart)
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Column(
+                    modifier = Modifier
+                        .heightIn(max = 200.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    listOfMajors.forEach() { item ->
+                        Row(
+                            modifier = Modifier
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    onClick = {
+                                        dasBio.value = item
+                                    }
+                                )
+                                .fillMaxWidth()
+                        ) {
+                            RadioButton(
+                                selected = (item == dasBio.value),
+                                modifier = Modifier.padding(all = Dp(value = 8F)),
+                                onClick = {
+                                    dasBio.value = item
+                                },
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = Color(0xFF00B0FF),
+                                    unselectedColor = Color(0xFF986DF2),
+                                )
+                            )
+                            Text(
+                                text = item,
+                                color = headText,
+                                modifier = Modifier.padding(start = 16.dp, top = 20.dp)
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.End)
+                ) {
+                    TextButton(
+                        onClick = {
+                            dasBio.value = ""
+
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showOverlayStuFiProfile.value = false
+                                }
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            color = Color(0xffffc600),
+                            style = TextStyle(
+                                fontSize = 16.sp
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(5.dp))
+                    TextButton(
+                        onClick = {
+                            db.collection("Users")
+                                .document(currUser.value.id)
+                                .update("studyField", dasBio.value)
+                                .addOnSuccessListener {
+                                    currUser.value.studyField = dasBio.value
+                                    dasBio.value = ""
+
+                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                        if (!sheetState.isVisible) {
+                                            showOverlayStuFiProfile.value = false
+                                        }
+                                    }
+
+                                    inRefresh.value++
+                                }.addOnFailureListener{
+                                    Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
+                                }
+                        }
+                    ) {
+                        Text(
+                            text = "Save",
+                            color = Color(0xffffc600),
+                            style = TextStyle(
+                                fontSize = 16.sp
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                }
+            }
+            Spacer(modifier = Modifier.width(20.dp))
+        }
+        Spacer(modifier = Modifier.height(25.dp))
+    }
+}
+
+@SuppressLint("UnrememberedMutableState")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun overlayExpChange() {
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var dasBio = remember { mutableStateOf("") }
+    val color = remember { mutableStateOf(subheadText) }
+
+    ModalBottomSheet(
+        onDismissRequest = {
+            showOverlayExpProfile.value = false
+        },
+        shape = RoundedCornerShape(
+            topStart = 10.dp,
+            topEnd = 10.dp,
+            bottomStart = 0.dp,
+            bottomEnd = 0.dp
+        ),
+        sheetState = sheetState,
+        containerColor = cardsColor,
+        contentColor = Color.Transparent,
+        dragHandle = { },
+        windowInsets = WindowInsets.ime,
+        modifier = Modifier
+            .background(Color.Transparent)
+    ) {
+        val context = LocalContext.current
+        val displayMetrics = context.resources.displayMetrics
+
+        val screenWidthInDp = with(LocalDensity.current) {
+            displayMetrics.widthPixels.dp / density
+        }
+
+        val maxWidthTextField = (screenWidthInDp - 40.dp)
+
+        Row {
+            Spacer(modifier = Modifier.width(20.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(color = cardsColor)
+                        .fillMaxWidth()
+                        .height(58.dp)
+                ) {
+                    Text(
+                        text = "Experience",
+                        color = headText,
+                        style = TextStyle(
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterStart)
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(130.dp)
+                ) {
+                    currUser.value.strongAt.forEach() { item ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(35.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                            ) {
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    tint = headText,
+                                    modifier = Modifier
+                                        .size(18.dp)
+                                        .align(Alignment.CenterVertically)
+                                )
+                                Spacer(modifier = Modifier.width(5.dp))
+                                Text(
+                                    text = item,
+                                    color = subheadText,
+                                    style = TextStyle(
+                                        fontSize = 16.sp),
+                                    maxLines = 1,
+                                    modifier = Modifier
+                                        .align(Alignment.CenterVertically)
+                                )
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        // Delete The Experience from List
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.CenterVertically)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = null,
+                                        tint = Color.Red
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(5.dp))
+                    }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                CustomTextField(
+                    value = mutableStateOf(dasBio.value),
+                    onValueChange = { dasBio.value = it },
+                    modifier = Modifier
+                        .width(maxWidthTextField)
+                        .background(Color.Transparent)
+                        .onFocusChanged { focusState ->
+                            when (focusState.isFocused) {
+                                true -> color.value = Color(0xFFFFC600)
+                                false -> color.value = dividerColor
+                            }
+                        },
+                    useClear = false,
+                    fontSize = 17.sp,
+                    singleLine = false,
+                    maxLine = 3,
+                    placeholderText = "Ex: Kotlin / Canva / Figma / Unity",
+                    imeAction = ImeAction.Done,
+                    useCounter = true,
+                    maxChar = 20,
+                    counterPadding = 14.dp
+                )
+                Spacer(modifier = Modifier.height(1.dp))
+                Divider(
+                    color = color.value,
+                    modifier = Modifier
+                        .width(maxWidthTextField-24.dp)
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.End)
+                ) {
+                    TextButton(
+                        onClick = {
+                            dasBio.value = ""
+
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showOverlayExpProfile.value = false
+                                }
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = "Close",
+                            color = subheadText,
+                            style = TextStyle(
+                                fontSize = 16.sp
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(5.dp))
+                    TextButton(
+                        onClick = {
+                            currUser.value.strongAt.add(dasBio.value)
+                            dasBio.value = ""
+                            inRefresh.value++
+//                            db.collection("Users")
+//                                .document(currUser.value.id)
+//                                .update("bio", dasBio.value)
+//                                .addOnSuccessListener {
+//                                    currUser.value.bio = dasBio.value
+//                                    dasBio.value = ""
+//
+//                                    inRefresh.value++
+//                                }.addOnFailureListener{
+//                                    Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
+//                                }
+                        }
+                    ) {
+                        Text(
+                            text = "Add",
+                            color = Color(0xffffc600),
+                            style = TextStyle(
+                                fontSize = 16.sp
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                }
+            }
+            Spacer(modifier = Modifier.width(20.dp))
+        }
+        Spacer(modifier = Modifier.height(25.dp))
     }
 }
 
@@ -1105,6 +1618,15 @@ fun SettingFrag(
 
                 ThemeSwitch(contentSpace = contentSpace)
 
+                Row {
+                    Spacer(modifier = Modifier.width(contentSpace))
+                    Divider(
+                        color = dividerColor,
+                        modifier = Modifier
+                            .width(contentSize)
+                    )
+                }
+
                 signOutBtn(
                     contentSpace = contentSpace,
                     navController = navController
@@ -1149,10 +1671,12 @@ fun ProfileScreen(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = background)
-                .verticalScroll(rememberScrollState())
         ) {
             ProfileTopNavbar()
-            Column {
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+            ) {
                 userStatus(launchers = launcher)
                 Account()
                 Spacer(modifier = Modifier.height(15.dp))
@@ -1165,6 +1689,12 @@ fun ProfileScreen(navController: NavHostController) {
         }
         if (showOverlayBioProfile.value) {
             overlayBioChange()
+        }
+        if (showOverlayStuFiProfile.value) {
+            overlayStuFiChange()
+        }
+        if (showOverlayExpProfile.value) {
+            overlayExpChange()
         }
     }
 }

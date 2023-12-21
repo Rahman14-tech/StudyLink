@@ -201,6 +201,7 @@ fun GroupLeftChat(modifier: Modifier = Modifier,timeSent:String, sender: String,
                 Image(
                     painter = rememberAsyncImagePainter(model = theOtherUser!!.imageURL),
                     contentDescription = "user image",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .align(alignment = Alignment.Center)
                         .clip(shape = CircleShape)
@@ -327,6 +328,7 @@ fun GroupMediaLeftChat(
                 Image(
                     painter = rememberAsyncImagePainter(model = theOtherUser!!.imageURL),
                     contentDescription = "user image",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .align(alignment = Alignment.Center)
                         .clip(shape = CircleShape)

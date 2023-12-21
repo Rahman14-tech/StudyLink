@@ -220,28 +220,22 @@ fun BottomContent(navController: NavHostController) {
                                 .padding(0.dp)
                         ) {
                             if(navBackStackEntry?.destination?.route == "Setting") {
-                                Image(
-                                    painter = rememberAsyncImagePainter(model = currUser.value.imageURL),
-                                    contentDescription = "User Picture",
-                                    contentScale = ContentScale.Crop,
-                                    alpha = 1f,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clip(shape = CircleShape)
-                                        .align(alignment = Alignment.Center)
-                                )
+                                alphaSettingSelected.value = 1f
+                                inRefresh.value++
                             } else {
-                                Image(
-                                    painter = rememberAsyncImagePainter(model = currUser.value.imageURL),
-                                    contentDescription = "User Picture",
-                                    contentScale = ContentScale.Crop,
-                                    alpha = 0.6f,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clip(shape = CircleShape)
-                                        .align(alignment = Alignment.Center)
-                                )
+                                alphaSettingSelected.value = 0.6f
+                                inRefresh.value++
                             }
+                            Image(
+                                painter = rememberAsyncImagePainter(model = currUser.value.imageURL),
+                                contentDescription = "User Picture",
+                                contentScale = ContentScale.Crop,
+                                alpha = alphaSettingSelected.value,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(shape = CircleShape)
+                                    .align(alignment = Alignment.Center)
+                            )
                         }
                     },
                     modifier = Modifier

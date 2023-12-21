@@ -57,19 +57,15 @@ data class ForumModel(
     val text: String = "",
     val upvote: List<String> = listOf(),
     val tags: List<String> = listOf(),
-) {
-    fun doesMatchSearchQuery(query: String): Boolean {
-        val matchingCombination = listOf(
-            "$title",
-            "${title.first()}",
-            "${tags.any { it.contains(query, ignoreCase = true)}}"
-        )
-
-        return matchingCombination.any {
-            it.contains(query, ignoreCase = true)
-        }
-    }
-}
+)
+data class ForumModelnoDocId(
+    val authorId: String = "",
+    val title: String = "",
+    val timestamp: Timestamp? = null,
+    val text: String = "",
+    val upvote: List<String> = listOf(),
+    val tags: List<String> = listOf(),
+)
 
 data class CommentModel(
     val documentId: String = "",

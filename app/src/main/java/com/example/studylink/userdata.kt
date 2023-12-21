@@ -18,7 +18,7 @@ data class ProfileFirestore(
     val email: String = "",
     var fullName: String = "",
     var imageURL: String = "",
-    val strongAt: MutableList<String> = mutableListOf(),
+    var strongAt: MutableList<String> = mutableListOf(),
     val wantStudy: MutableList<String> = mutableListOf(),
     var studyField: String = "",
     var bio: String = ""

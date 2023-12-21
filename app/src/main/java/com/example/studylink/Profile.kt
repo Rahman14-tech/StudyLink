@@ -3,6 +3,7 @@ package com.example.studylink
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.net.Uri
+import android.os.Handler
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -1315,6 +1316,22 @@ fun overlayExpChange() {
                                 IconButton(
                                     onClick = {
                                         // Delete The Experience from List
+                                            val tempStrongtemp = currUser.value.strongAt.filter { it != item }
+                                            val tempStrong = tempStrongtemp.toMutableList()
+                                        db.collection("Users")
+                                            .document(currUser.value.id)
+                                            .update("strongAt", tempStrong)
+                                            .addOnSuccessListener {
+                                                currUser.value.strongAt = tempStrong
+                                                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                                    if (!sheetState.isVisible) {
+                                                        showOverlayExpProfile.value = false
+                                                    }
+                                                }
+
+                                            }.addOnFailureListener{
+                                                Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
+                                            }
                                     },
                                     modifier = Modifier
                                         .align(Alignment.CenterVertically)
@@ -1387,20 +1404,37 @@ fun overlayExpChange() {
                     Spacer(modifier = Modifier.width(5.dp))
                     TextButton(
                         onClick = {
-                            currUser.value.strongAt.add(dasBio.value)
+                            val tempSize = currUser.value.strongAt.size
+                            if(tempSize < 3){
+                                val tempStrong = currUser.value.strongAt
+                                tempStrong.add(dasBio.value)
+                                currUser.value.strongAt = tempStrong
+                                db.collection("Users")
+                                    .document(currUser.value.id)
+                                    .update("strongAt", tempStrong)
+                                    .addOnSuccessListener {
+                                        currUser.value.strongAt = tempStrong
+                                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                            if (!sheetState.isVisible) {
+                                                showOverlayExpProfile.value = false
+                                            }
+                                        }
+
+                                    }.addOnFailureListener{
+                                        Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
+                                    }
+
+                            }else{
+                                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                    if (!sheetState.isVisible) {
+                                        showOverlayExpProfile.value = false
+                                    }
+                                }
+                                Toast.makeText(context,"Experience max is 3",Toast.LENGTH_LONG).show()
+                            }
                             dasBio.value = ""
                             inRefresh.value++
-//                            db.collection("Users")
-//                                .document(currUser.value.id)
-//                                .update("bio", dasBio.value)
-//                                .addOnSuccessListener {
-//                                    currUser.value.bio = dasBio.value
-//                                    dasBio.value = ""
-//
-//                                    inRefresh.value++
-//                                }.addOnFailureListener{
-//                                    Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
-//                                }
+
                         }
                     ) {
                         Text(

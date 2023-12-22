@@ -57,19 +57,15 @@ data class ForumModel(
     val text: String = "",
     val upvote: List<String> = listOf(),
     val tags: List<String> = listOf(),
-) {
-    fun doesMatchSearchQuery(query: String): Boolean {
-        val matchingCombination = listOf(
-            "$title",
-            "${title.first()}",
-            "${tags.any { it.contains(query, ignoreCase = true)}}"
-        )
-
-        return matchingCombination.any {
-            it.contains(query, ignoreCase = true)
-        }
-    }
-}
+)
+data class ForumModelnoDocId(
+    val authorId: String = "",
+    val title: String = "",
+    val timestamp: Timestamp? = null,
+    val text: String = "",
+    val upvote: List<String> = listOf(),
+    val tags: List<String> = listOf(),
+)
 
 data class CommentModel(
     val documentId: String = "",
@@ -123,6 +119,31 @@ class ForumViewModel : ViewModel() {
             Log.e("ForumViewModel", "Error getting forums", exception)
         }
     }
+
+//    fun getAllForum() {
+//        val forumList = mutableListOf<ForumModel>()
+//
+//        forumRef.addSnapshotListener { querySnapshot, exception ->
+//            if (exception != null) {
+//                // Handle any errors
+//                Log.e("ForumViewModel", "Error getting forums", exception)
+//                return@addSnapshotListener
+//            }
+//
+//            querySnapshot?.documents?.forEach { document ->
+//                val forum = document.toObject(ForumModel::class.java)
+//                val forumWithID = forum?.copy(documentId = document.id)
+//                forumWithID?.let { forumList.add(it) }
+//            }
+//
+//            _uiState.update { currentState ->
+//                currentState.copy(forumList = forumList)
+//            }
+//
+//            Log.d("GETALLFORUM", forumList.toString())
+//            println("THIS IS THE FORUM LIST:: $forumList")
+//        }
+//    }
 
     fun setActiveForumList(forum: ForumModel) {
         val activeForumList = mutableListOf<ForumModel>()

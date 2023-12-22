@@ -3,6 +3,8 @@ package com.example.studylink.forum
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,8 +14,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -25,6 +31,8 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -48,19 +56,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.studylink.QNA
+import com.example.studylink.R
 import com.example.studylink.background
 import com.example.studylink.currUser
+import com.example.studylink.defaultColor
+import com.example.studylink.groupButtonColor
 import com.example.studylink.headText
 import com.example.studylink.inRefresh
+import com.example.studylink.subheadText
 import com.example.studylink.ui.theme.StudyLinkTheme
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
@@ -73,37 +88,24 @@ fun CreateForumScreen(navController: NavController) {
     var text by remember { mutableStateOf("") }
     var tags by remember { mutableStateOf("") }
     var appliedTags by remember { mutableStateOf(mutableSetOf<String>()) }
+    val context = LocalContext.current
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val changeIsLoadingCallback = navBackStackEntry?.arguments?.getString("changeIsLoading") as? () -> Unit
 
-
-    Scaffold (
+    Box(
         modifier = Modifier
-            .background(background),
-        containerColor = background,
-        contentColor = background,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Create New Forum",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
-            )
-        }
-    ){ paddingValue ->
-        val context = LocalContext.current
+            .background(color = defaultColor)
+    ) {
         Column(
             modifier = Modifier
-                .padding(paddingValue)
+                .padding(5.dp)
                 .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ){
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ForumCreateTopBar {
+                navController.popBackStack()
+            }
             Column (
                 modifier = Modifier
                     .padding(16.dp)
@@ -111,7 +113,10 @@ fun CreateForumScreen(navController: NavController) {
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Title") },
+                    textStyle = TextStyle(
+                        color = headText,
+                    ),
+                    label = { Text(text = "Title", color = headText) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
@@ -123,7 +128,10 @@ fun CreateForumScreen(navController: NavController) {
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it },
-                    label = { Text("Text") },
+                    textStyle = TextStyle(
+                        color = headText,
+                    ),
+                    label = { Text("Text", color = headText) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
@@ -136,7 +144,10 @@ fun CreateForumScreen(navController: NavController) {
                             tags = it
                         }
                     },
-                    label = { Text("Tags (comma-separated)") },
+                    textStyle = TextStyle(
+                        color = headText,
+                    ),
+                    label = { Text("Tags (comma-separated)", color = headText) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
@@ -161,6 +172,10 @@ fun CreateForumScreen(navController: NavController) {
                 } else {
                     OutlinedButton(
                         onClick = { /* Optional click action */ },
+                        colors = ButtonDefaults.buttonColors(
+                            disabledContainerColor = subheadText,
+                            disabledContentColor = Color.White
+                        ),
                         enabled = false // To make the button disabled
                     ) {
                         Text("Apply tag")
@@ -172,46 +187,46 @@ fun CreateForumScreen(navController: NavController) {
                 val orderedTags = appliedTags.sorted()
                 // Tags
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+//                    verticalArrangement = Arrangement.spacedBy(5.dp),
                     horizontalAlignment = Alignment.Start,
                     modifier = Modifier
-                        .padding(bottom = 5.dp)
                         .fillMaxWidth()
+                        .fillMaxHeight(0.8f)
                 ){
                     itemsIndexed(orderedTags) { index, tag ->
                         val coroutineScope = rememberCoroutineScope()
                         Row (
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
-                        ){
-                            Row {
-                                Icon(
-                                    painter = rememberVectorPainter(Icons.Default.ChevronRight) ,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(24.dp) // Set the size of the icon
-                                        .padding(4.dp), // Add padding if necessary
-                                    tint = Color.Black // Set the color of the icon
-                                )
-                                Text(
-                                    modifier = Modifier
-                                        .clip(MaterialTheme.shapes.medium)
-                                        .background(color = Color(0xFFFFC600))
-                                        .padding(horizontal = 10.dp, vertical = 4.dp)
-                                        .height(20.dp),
-                                    text = tag,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = headText,
-                                )
-                            }
+                        ) {
+                            Icon(
+                                painter = rememberVectorPainter(Icons.Default.ChevronRight) ,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(24.dp) // Set the size of the icon
+                                    .padding(4.dp), // Add padding if necessary
+                                tint = subheadText // Set the color of the icon
+                            )
+                            Text(
+                                modifier = Modifier
+                                    .clip(MaterialTheme.shapes.medium)
+                                    .background(color = Color(0xFFFFC600))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                                    .height(20.dp),
+                                text = tag,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = headText,
+                            )
 
                             // Delete applied tags
-                            IconButton(onClick = {
-                                // Delete applied tags
-                                val deleteTag = orderedTags[index]
-                                appliedTags.remove(deleteTag)
-                                inRefresh.value++
-                            }) {
+                            IconButton(
+                                onClick = {
+                                    // Delete applied tags
+                                    val deleteTag = orderedTags[index]
+                                    appliedTags.remove(deleteTag)
+                                    inRefresh.value++
+                                }
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Close",
@@ -225,40 +240,83 @@ fun CreateForumScreen(navController: NavController) {
                 }
                 Text(text = inRefresh.value.toString(), color = Color.Transparent )
             }
+        }
+        Button(
+            onClick = {
+                val forumModel = ForumModelnoDocId(
+                    authorId = currUser.value.email ?: "",
+                    title = title,
+                    text = text,
+                    tags = appliedTags.toList(),
+                    upvote = listOf(),
+                    timestamp = Timestamp.now()
+                )
+                changeIsLoadingCallback?.invoke()
+                addForumToFirebase(
+                    forumModel = forumModel,
+                    context = context,
+                    navController = navController)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+                .padding(start = 10.dp, end = 10.dp)
+                .align(Alignment.BottomCenter)
+                .offset(x = 0.dp, y = (-5).dp)
+        ) {
+            Text(text = "Create Forum", style = TextStyle(fontSize = 17.sp))
+        }
+    }
+}
 
-            Column (
+@Composable
+fun ForumCreateTopBar(
+    modifier: Modifier = Modifier,
+    onClickBack: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .requiredHeight(height = 60.dp)
+            .background(color = defaultColor)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 20.dp, end = 20.dp)
+        ) {
+            Row(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .fillMaxHeight(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(
-                    onClick = {
-                        val forumModel = ForumModelnoDocId(
-                            authorId = currUser.value.email ?: "",
-                            title = title,
-                            text = text,
-                            tags = appliedTags.toList(),
-                            upvote = listOf(),
-                            timestamp = Timestamp.now()
-                        )
-                        changeIsLoadingCallback?.invoke()
-                        addForumToFirebase(
-                            forumModel = forumModel,
-                            context = context,
-                            navController = navController)
-                    },
+                Icon(
+                    painter = painterResource(id = R.drawable.backbutton),
+                    contentDescription = "Back Button",
+                    tint = headText,
                     modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Text("Create Forum")
-                }
+                        .requiredWidth(width = 10.dp)
+                        .requiredHeight(height = 18.dp)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = {
+                                onClickBack.invoke()
+                            }
+                        )
+                )
+                Spacer(modifier = Modifier.width(15.dp))
+                Text(
+                    text = "Back",
+                    color = headText,
+                    style = TextStyle(
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Normal)
+                )
+                Text(text = inRefresh.value.toString(), color = Color.Transparent)
             }
         }
     }
-
-
-
-
-
 }
 
 @Preview

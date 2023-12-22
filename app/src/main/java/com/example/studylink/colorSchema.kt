@@ -30,7 +30,7 @@ fun coloringSchema() {
         leftChatColor = Color(0xff1C1C24)
         dividerColor = Color(0xff4a4a4a)
         cardsColor = Color(0xff1e1e24)
-        groupButtonColor = Color(0xffffc600)
+        groupButtonColor = Color(0xff16161c)
     } else {
         schemaCond.value = "Light"
         background = Color(0xfff1f1f1)

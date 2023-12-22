@@ -825,14 +825,16 @@ fun testViewGroup(navController: NavHostController) {
                         Row(
                             modifier = Modifier.padding(2.dp)
                         ) {
+                            Spacer(modifier = Modifier.width(4.dp))
                             Icon(
                                 painter = painterResource(id = R.drawable.searchicon),
                                 contentDescription = null,
-                                tint = headText,
+                                tint = Color.Black,
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(5.dp))
                             Text(text = "Auto Match")
+                            Spacer(modifier = Modifier.width(4.dp))
                         }
                     }
                 }

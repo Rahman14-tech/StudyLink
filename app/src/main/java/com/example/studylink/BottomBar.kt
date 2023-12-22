@@ -73,19 +73,18 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomBar(navController: NavHostController) {
-    val currentUser = auth.currentUser
+
     var beginningRoute = SplashScreen.route
-    Handler().postDelayed({
-        if(currentUser != null) {
-            val jetztUser = Realusers.firstOrNull { it.email == currentUser.email }
-            if(jetztUser != null) {
-                currUser.value = jetztUser
-                beginningRoute = Dashboard.route
-            }
-        }else{
-            beginningRoute = Login.route
+    val currentUser = auth.currentUser
+    if(currentUser != null) {
+        val jetztUser = Realusers.firstOrNull { it.email == currentUser.email }
+        if(jetztUser != null) {
+            currUser.value = jetztUser
+            beginningRoute = Dashboard.route
         }
-    },1000)
+    }else{
+        beginningRoute = Login.route
+    }
 
     Scaffold(bottomBar = {BottomContent(navController = navController)}) {
         Box(modifier = Modifier

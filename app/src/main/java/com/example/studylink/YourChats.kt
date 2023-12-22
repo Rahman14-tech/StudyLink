@@ -176,80 +176,70 @@ fun YourChatsCardPersonalSearched(datum: YourChatsType, navController: NavHostCo
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(color = background)
                     .height(80.dp),
                 shape = RectangleShape,
                 colors = CardDefaults.cardColors(containerColor = background),
                 elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
                 onClick = {
-                    println("OHARANG ${datum.id}")
                     navController?.navigate(TheChatS.route+"/${datum.id}")
                 }
             ) {
-                Column(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 0.1.dp)
-                    .background(color = Color.White)
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
                 ) {
-                    Row(
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Box(
                         modifier = Modifier
-                            .padding(vertical = 5.dp)
-                            .fillMaxWidth()
+                            .clip(CircleShape)
+                            .size(60.dp)
+                            .background(Color(0xFFFFC600))
+                    ) {
+                        Image(
+                            painter = rememberAsyncImagePainter(tempPartnerProfile!!.imageURL),
+                            contentScale = ContentScale.Crop,
+                            contentDescription = "Gambar Wong",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                                .align(Alignment.Center)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(end = 10.dp)
                     ) {
                         Row(
-                            modifier = Modifier.padding(10.dp)
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Card(
-                                shape = CircleShape,
-                                modifier = Modifier
-                                    .height(60.dp)
-                                    .width(50.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFC600))
-                            ) {
-                                Column(
-                                    modifier = Modifier.fillMaxSize(),
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Image(
-                                        painter = rememberAsyncImagePainter(tempPartnerProfile!!.imageURL),
-                                        contentScale = ContentScale.Crop,
-                                        contentDescription = "Gambar Wong",
-                                        modifier = Modifier
-                                            .size(60.dp)
-                                            .clip(CircleShape)
-                                    )
-                                }
-                            }
-                            Row {
-                                Column {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text(
-                                            text = "${tempPartnerProfile!!.fullName}",
-                                            fontSize = 20.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                        Text(
-                                            text = "15:36",
-                                            fontWeight = FontWeight.Normal,
-                                            fontSize = 15.sp
-                                        )
-                                    }
-                                    Text(text = "This method should be the easiest, so the way is",
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        modifier = Modifier.padding(top = 5.dp)
-                                    )
-                                }
-                            }
+                            Text(
+                                text = "${tempPartnerProfile!!.fullName}",
+                                fontSize = 20.sp, fontWeight = FontWeight.Bold,
+                                color = headText
+                            )
+                            Text(
+                                text = datum.theLastTime,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 15.sp,
+                                color = subheadText
+                            )
                         }
+                        Text(
+                            text = datum.theLast,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = subheadText,
+                            modifier = Modifier.padding(top = 5.dp)
+                        )
                     }
                 }
+                Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }

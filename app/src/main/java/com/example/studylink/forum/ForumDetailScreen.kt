@@ -120,7 +120,7 @@ fun ForumDetailScreen(
     LaunchedEffect(isLoading) {
         // Perform operations serially
         forumViewModel.getForumDetail(forumId)
-            forumViewModel.getForumCommentByForumID(forumId)
+        forumViewModel.getForumCommentByForumID(forumId)
         // Update isLoading after both operations are completed
         isLoading = false
     }

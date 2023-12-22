@@ -86,7 +86,7 @@ class ForumViewModel : ViewModel() {
     val uiState: StateFlow<ForumUiState> = _uiState.asStateFlow()
     /*val ForumListSearch = _uiState.value.forumList.*/
 
-    private val forumCollectionPath = "ForumTest2"
+    private val forumCollectionPath = "ForumTest"
     private val commentCollectionPath = "CommentList"
     private val forumRef = FirebaseFirestore.getInstance().collection(forumCollectionPath)
 

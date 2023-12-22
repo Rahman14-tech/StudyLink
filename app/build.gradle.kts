@@ -84,4 +84,5 @@ dependencies {
     implementation ("com.google.android.exoplayer:exoplayer:2.18.7")
     implementation ("com.google.mlkit:smart-reply:17.0.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

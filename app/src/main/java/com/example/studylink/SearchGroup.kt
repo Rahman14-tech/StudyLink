@@ -5,6 +5,9 @@ import android.content.ContentValues
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +16,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -32,7 +36,9 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
@@ -46,21 +52,28 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -79,6 +92,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.UUID
@@ -249,13 +265,14 @@ fun groupcard(
 @Composable
 fun PersonBox(
     name: String,
-    onPersonClick: () -> Unit
+    onPersonClick: () -> Unit,
+    userImage: String
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .background(color = Color.White)
+            .background(color = Color.Transparent)
             .padding(top = 5.dp, bottom = 5.dp)
             .clickable(
                 indication = null,
@@ -276,17 +293,18 @@ fun PersonBox(
                     .size(38.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.personicon2),
+                    painter = rememberAsyncImagePainter(model = userImage),
                     contentDescription = null,
                     modifier = Modifier
                         .align(alignment = Alignment.Center)
-                        .size(22.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
                 )
             }
             Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = name,
-                color = Color.Black,
+                color = headText,
                 style = TextStyle(
                     fontSize = 20.sp
                 ),
@@ -315,17 +333,17 @@ fun overlayGroupInfo(
 
     var overlayHeight = (screenHeightInDp * 0.6f)
     var overlayWidth = (screenWidthInDp * 0.85f)
-    val peopleName = mutableListOf<String>()
+    val peopleName = mutableListOf<ProfileFirestore>()
     for (datum in people){
         val tempName = Realusers.firstOrNull{it.email == datum}
         if(tempName != null){
-            peopleName.add(tempName.fullName)
+            peopleName.add(tempName)
         }
     }
 
     Dialog(onDismissRequest = { onDismissRequest(false) }) {
         Card(
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = cardsColor),
             modifier = Modifier
                 .width(overlayWidth)
                 .height(overlayHeight)
@@ -334,13 +352,13 @@ fun overlayGroupInfo(
         ) {
             Box(
                 modifier = Modifier
-                    .background(color = Color.White)
+                    .background(color = Color.Transparent)
                     .fillMaxWidth()
                     .height(58.dp)
             ) {
                 Text(
                     text = "Group Info",
-                    color = Color.Black,
+                    color = headText,
                     style = TextStyle(
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold
@@ -353,12 +371,9 @@ fun overlayGroupInfo(
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
-                    .background(
-                        color = Color(0xfff1f1f1)
-                    )
             ) {
                 peopleName.forEach { person ->
-                    PersonBox(name = person, onPersonClick = { })
+                    PersonBox(name = person.fullName,userImage = person.imageURL, onPersonClick = { })
                 }
             }
         }
@@ -585,8 +600,248 @@ fun butDialog(onDismissRequest: (Boolean) -> Unit, cont: Context) {
         }
     }
 }
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun testViewGroup(navController: NavHostController) {
+    var showOverlay = remember { mutableStateOf(false) }
+    var selectedPeople = remember { mutableStateOf<List<String>>(listOf()) }
+    var context = LocalContext.current
+
+    val coroutineScope = rememberCoroutineScope()
+    val isScrolling = remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }.collect { scrollInProgress ->
+            if (scrollInProgress && !isScrolling.value) {
+                isScrolling.value = true
+            } else if (!scrollInProgress && isScrolling.value) {
+                coroutineScope.launch {
+                    delay(300)
+                    isScrolling.value = false
+                }
+            }
+        }
+    }
+
+    if (showOverlay.value) {
+        overlayGroupInfo(
+            people = selectedPeople.value,
+            onDismissRequest = { showOverlay.value = it }
+        )
+    }
+    if(Filteredusers.isEmpty()){
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color(0xfff1f1f1)), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = "Loading...", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(20.dp))
+            Text(text = "Stuck at loading? Then there is no group", fontSize = 20.sp, color = Color.Black, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp))
+        }
+    } else {
+        if (showAutoMatch.value) {
+            butDialog(
+                onDismissRequest = { showAutoMatch.value = it },
+                cont = context
+            )
+        }
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = background,
+            content = {
+                Column {
+                    GroupSplash()
+                    SearchBar()
+                    LazyColumn(
+                        contentPadding = PaddingValues(bottom = 5.dp),
+                        state = listState,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        if (inputTextDashGroup.value == "") {
+                            if (selectedOption.value == "All Posts") {
+                                items(groupChatsDashboard) { it ->
+                                    groupcard(
+                                        people = it.members,
+                                        groupName = it.groupName,
+                                        scope = it.hashTag,
+                                        personcount = it.maxMember,
+                                        onCardClick = { people ->
+                                            showOverlay.value = true
+                                            selectedPeople.value = people
+                                        },
+                                        groupId = it.id,
+                                        onButtonClick = {
+                                            if(it.members.size >= it.maxMember){
+                                                Toast.makeText(context, "The group is full.", Toast.LENGTH_LONG).show()
+                                            }else{
+                                                if(it.members.contains(currUser.value.email)){
+                                                    Toast.makeText(context,"You've enrolled to this group", Toast.LENGTH_LONG).show()
+                                                }else{
+                                                    val damember = it.members
+                                                    damember.add(currUser.value.email)
+                                                    db.collection("Chatgroup").document(it.id).update("members",damember).addOnSuccessListener {sucIt ->
+                                                        Toast.makeText(context,"Successfully join group", Toast.LENGTH_LONG)
+                                                        navController.navigate(GroupChats.route+"/{${it.id}}")
+                                                    }
+                                                }
+
+                                            }
+                                        }
+                                    )
+                                }
+                            } else {
+                                items(groupChatsDashboard) {
+                                    if (it.groupFocus == selectedOption.value) {
+                                        groupcard(
+                                            people = it.members,
+                                            groupName = it.groupName,
+                                            scope = it.hashTag,
+                                            personcount = it.maxMember,
+                                            onCardClick = { people ->
+                                                showOverlay.value = true
+                                                selectedPeople.value = people
+                                            },
+                                            groupId = it.id,
+                                            onButtonClick = {
+                                                if(it.members.size >= it.maxMember){
+                                                    Toast.makeText(context, "The group is full.", Toast.LENGTH_LONG).show()
+                                                }else{
+                                                    if(it.members.contains(currUser.value.email)){
+                                                        Toast.makeText(context,"You've enrolled to this group", Toast.LENGTH_LONG).show()
+                                                    }else{
+                                                        val damember = it.members
+                                                        damember.add(currUser.value.email)
+                                                        db.collection("Chatgroup").document(it.id).update("members",damember).addOnSuccessListener {sucIt ->
+                                                            Toast.makeText(context,"Successfully join group", Toast.LENGTH_LONG)
+                                                            navController.navigate(GroupChats.route+"/{${it.id}}")
+                                                        }
+                                                    }
+
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        } else if (inputTextDashGroup.value != "") {
+                            if (selectedOption.value == "All Posts") {
+                                items(groupChatsDashboard) {
+                                    if (it.groupName.lowercase()
+                                            .contains(inputTextDashGroup.value.lowercase()) || it.id.lowercase()
+                                            .contains(inputTextDashGroup.value.lowercase())
+                                    ) {
+                                        groupcard(
+                                            people = it.members,
+                                            groupName = it.groupName,
+                                            scope = it.hashTag,
+                                            personcount = it.maxMember,
+                                            onCardClick = { people ->
+                                                showOverlay.value = true
+                                                selectedPeople.value = people
+                                            },
+                                            groupId = it.id,
+                                            onButtonClick = {
+                                                if(it.members.size >= it.maxMember){
+                                                    Toast.makeText(context, "The group is full.", Toast.LENGTH_LONG).show()
+                                                } else {
+                                                    if(it.members.contains(currUser.value.email)){
+                                                        Toast.makeText(context,"You've enrolled to this group", Toast.LENGTH_LONG).show()
+                                                    }else{
+                                                        val damember = it.members
+                                                        damember.add(currUser.value.email)
+                                                        db.collection("Chatgroup").document(it.id).update("members",damember).addOnSuccessListener {sucIt ->
+                                                            Toast.makeText(context,"Successfully join group", Toast.LENGTH_LONG)
+                                                            navController.navigate(GroupChats.route+"/{${it.id}}")
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                            } else {
+                                items(groupChatsDashboard) {
+                                    if (it.groupFocus == selectedOption.value) {
+                                        if (it.groupName.lowercase()
+                                                .contains(inputTextDashGroup.value.lowercase()) || it.id.lowercase()
+                                                .contains(inputTextDashGroup.value.lowercase())
+                                        ) {
+                                            groupcard(
+                                                people = it.members,
+                                                groupName = it.groupName,
+                                                scope = it.hashTag,
+                                                personcount = it.maxMember,
+                                                onCardClick = { people ->
+                                                    showOverlay.value = true
+                                                    selectedPeople.value = people
+                                                },
+                                                groupId = it.id,
+                                                onButtonClick = {
+                                                    if(it.members.size >= it.maxMember){
+                                                        Toast.makeText(context, "The group is full.", Toast.LENGTH_LONG).show()
+                                                    }else{
+                                                        if(it.members.contains(currUser.value.email)){
+                                                            Toast.makeText(context,"You've enrolled to this group", Toast.LENGTH_LONG).show()
+                                                        }else{
+                                                            val damember = it.members
+                                                            damember.add(currUser.value.email)
+                                                            db.collection("Chatgroup").document(it.id).update("members",damember).addOnSuccessListener {sucIt ->
+                                                                Toast.makeText(context,"Successfully join group", Toast.LENGTH_LONG)
+                                                                navController.navigate(GroupChats.route+"/{${it.id}}")
+                                                            }
+                                                        }
+
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            floatingActionButton = {
+                AnimatedVisibility(
+                    visible = !isScrolling.value,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    modifier = Modifier
+                        .height(40.dp)
+                ) {
+                    FloatingActionButton(
+                        onClick = {
+                            // Handle FAB click
+                            showAutoMatch.value = true
+                        },
+                        elevation = FloatingActionButtonDefaults.elevation(
+                            defaultElevation = 0.dp,
+                            pressedElevation = 0.dp,
+                            hoveredElevation = 0.dp
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(2.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.searchicon),
+                                contentDescription = null,
+                                tint = headText,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(text = "Auto Match")
+                        }
+                    }
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun testViewGroups(navController: NavHostController) {
     var showOverlay = remember { mutableStateOf(false) }
     var selectedPeople = remember { mutableStateOf<List<String>>(listOf()) }
     var context = LocalContext.current
@@ -618,8 +873,8 @@ fun testViewGroup(navController: NavHostController) {
             ) {
                 GroupSplash()
                 SearchBar(Modifier.padding(bottom = 3.dp))
-                if(inputTextDashGroup.value == ""){
-                    if(selectedOption.value == "All Posts"){
+                if (inputTextDashGroup.value == "") {
+                    if (selectedOption.value == "All Posts") {
                         groupChatsDashboard.map {
                             groupcard(
                                 people = it.members,
@@ -650,7 +905,7 @@ fun testViewGroup(navController: NavHostController) {
                                 }
                             )
                         }
-                    }else{
+                    } else {
                         groupChatsDashboard.map {
                             if(it.groupFocus == selectedOption.value){
                                 groupcard(
@@ -684,9 +939,8 @@ fun testViewGroup(navController: NavHostController) {
                             }
                         }
                     }
-
-                }else if (inputTextDashGroup.value != ""){
-                    if(selectedOption.value == "All Posts"){
+                } else if (inputTextDashGroup.value != "") {
+                    if (selectedOption.value == "All Posts") {
                         groupChatsDashboard.map {
                             if(it.groupName.lowercase().contains(inputTextDashGroup.value.lowercase())||it.id.lowercase().contains(inputTextDashGroup.value.lowercase())){
                                 groupcard(
@@ -719,10 +973,10 @@ fun testViewGroup(navController: NavHostController) {
                                 )
                             }
                         }
-                    }else{
+                    } else {
                         groupChatsDashboard.map {
-                            if(it.groupFocus == selectedOption.value){
-                                if(it.groupName.lowercase().contains(inputTextDashGroup.value.lowercase()) ||it.id.lowercase().contains(inputTextDashGroup.value.lowercase())){
+                            if (it.groupFocus == selectedOption.value) {
+                                if (it.groupName.lowercase().contains(inputTextDashGroup.value.lowercase()) ||it.id.lowercase().contains(inputTextDashGroup.value.lowercase())) {
                                     groupcard(
                                         people = it.members,
                                         groupName = it.groupName,
@@ -760,25 +1014,36 @@ fun testViewGroup(navController: NavHostController) {
                 }
 
             }
-            Button(
+
+            FloatingActionButton(
                 onClick = {
                     showAutoMatch.value = true
                 },
+                elevation = FloatingActionButtonDefaults.elevation(
+                    defaultElevation = 0.dp,
+                    pressedElevation = 0.dp,
+                    hoveredElevation = 0.dp
+                ),
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .wrapContentWidth()
                     .height(40.dp)
                     .offset(x = (-5).dp, y = (-8).dp)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.searchicon),
-                    contentDescription = null,
+                Row(
                     modifier = Modifier
-                        .size(30.dp)
-                        .align(Alignment.CenterVertically)
-                )
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = "Auto Match")
+                        .padding(2.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.searchicon),
+                        contentDescription = null,
+                        tint = headText,
+                        modifier = Modifier
+                            .size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(text = "Auto Match")
+                }
             }
             if (showOverlay.value) {
                 overlayGroupInfo(

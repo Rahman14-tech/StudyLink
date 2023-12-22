@@ -152,7 +152,7 @@ fun ForumDetailScreen(
                     isScrolling.value = true
                 } else if (!scrollInProgress && isScrolling.value) {
                     coroutineScope.launch {
-                        delay(400) // delay before FAB appears again
+                        delay(300)
                         isScrolling.value = false
                     }
                 }
@@ -169,7 +169,11 @@ fun ForumDetailScreen(
                 ) {
                     FloatingActionButton(
                         onClick = { isSheetExpanded = true },
-                        elevation = FloatingActionButtonDefaults.elevation(0.dp)
+                        elevation = FloatingActionButtonDefaults.elevation(
+                            defaultElevation = 0.dp,
+                            pressedElevation = 0.dp,
+                            hoveredElevation = 0.dp
+                        )
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,

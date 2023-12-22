@@ -7,6 +7,7 @@ import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -31,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.example.studylink.ui.theme.StudyLinkTheme
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
@@ -81,6 +83,7 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         var tempAccess = false
         auth = Firebase.auth
         db = FirebaseFirestore.getInstance()
@@ -130,10 +133,11 @@ class MainActivity : ComponentActivity() {
 //                // do nothing and continue presenting the signed-out UI.
 //                Log.d(TAG, e.localizedMessage)
 //            }
-
+        installSplashScreen()
         setContent {
             val navController = rememberNavController()
             BottomBar(navController = navController)
+
         }
     }
 //    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

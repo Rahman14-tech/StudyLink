@@ -22,7 +22,7 @@ var schemaCond = mutableStateOf("Light")
 fun coloringSchema() {
     if (isDark.value) {
         schemaCond.value = "Dark"
-        background = Color(0xff15141C)
+        background = Color(0xff141418)
         defaultColor = Color(0xff0A090F)
         headText = Color(0xffffffff)
         subheadText = Color(0xff8f8f8f)

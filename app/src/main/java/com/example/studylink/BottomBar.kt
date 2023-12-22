@@ -78,7 +78,7 @@ fun BottomBar(navController: NavHostController) {
     Handler().postDelayed({
         if(currentUser != null) {
             val jetztUser = Realusers.firstOrNull { it.email == currentUser.email }
-            if(jetztUser != null){
+            if(jetztUser != null) {
                 currUser.value = jetztUser
                 beginningRoute = Dashboard.route
             }

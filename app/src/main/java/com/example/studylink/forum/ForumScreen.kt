@@ -384,6 +384,7 @@ fun SearchBarForum(
                     .height(30.dp)
                     .fillMaxWidth(),
                 placeholderText = "Search Forum",
+                textColor = Color.Black,
                 useClear = true,
                 imeAction = ImeAction.Search
             )

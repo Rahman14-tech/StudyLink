@@ -87,6 +87,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.studylink.R
 import com.example.studylink.Realusers
+import com.example.studylink.cardsColor
 import com.example.studylink.currUser
 import com.example.studylink.defaultColor
 import com.example.studylink.dividerColor
@@ -129,115 +130,119 @@ fun ForumDetailScreen(
         Log.d("TAMPILANFORUM", forum.toString())
     }
 
-    if  (isLoading) {
-        CircularProgressIndicator(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .wrapContentSize(Alignment.Center)
-        )
-    } else {
-        BackHandler(
-            enabled = isSheetExpanded,
-            onBack = {
-                isSheetExpanded = false
-            }
-        )
+    Box(modifier = Modifier.background(defaultColor)) {
+        if  (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .wrapContentSize(Alignment.Center)
+                    .background(defaultColor)
+            )
+        } else {
+            BackHandler(
+                enabled = isSheetExpanded,
+                onBack = {
+                    isSheetExpanded = false
+                }
+            )
 
-        val coroutineScope = rememberCoroutineScope()
-        val isScrolling = remember { mutableStateOf(false) }
-        val listState = rememberLazyListState()
+            val coroutineScope = rememberCoroutineScope()
+            val isScrolling = remember { mutableStateOf(false) }
+            val listState = rememberLazyListState()
 
-        LaunchedEffect(listState) {
-            snapshotFlow { listState.isScrollInProgress }.collect { scrollInProgress ->
-                if (scrollInProgress && !isScrolling.value) {
-                    isScrolling.value = true
-                } else if (!scrollInProgress && isScrolling.value) {
-                    coroutineScope.launch {
-                        delay(300)
-                        isScrolling.value = false
+            LaunchedEffect(listState) {
+                snapshotFlow { listState.isScrollInProgress }.collect { scrollInProgress ->
+                    if (scrollInProgress && !isScrolling.value) {
+                        isScrolling.value = true
+                    } else if (!scrollInProgress && isScrolling.value) {
+                        coroutineScope.launch {
+                            delay(300)
+                            isScrolling.value = false
+                        }
                     }
                 }
             }
-        }
 
-        Scaffold(
-            containerColor = defaultColor,
-            floatingActionButton = {
-                AnimatedVisibility(
-                    visible = !isScrolling.value,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    FloatingActionButton(
-                        onClick = { isSheetExpanded = true },
-                        elevation = FloatingActionButtonDefaults.elevation(
-                            defaultElevation = 0.dp,
-                            pressedElevation = 0.dp,
-                            hoveredElevation = 0.dp
-                        )
+            Scaffold(
+                containerColor = defaultColor,
+                floatingActionButton = {
+                    AnimatedVisibility(
+                        visible = !isScrolling.value,
+                        enter = fadeIn(),
+                        exit = fadeOut()
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add"
-                        )
+                        FloatingActionButton(
+                            onClick = { isSheetExpanded = true },
+                            elevation = FloatingActionButtonDefaults.elevation(
+                                defaultElevation = 0.dp,
+                                pressedElevation = 0.dp,
+                                hoveredElevation = 0.dp
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add"
+                            )
+                        }
                     }
                 }
-            }
-        ) { paddingValue ->
-            Column {
-                ForumDetailTopBar(
-                    onClickBack = {
-                        forumViewModel.goAllForum(navController)
-                    }
-                )
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
+            ) { paddingValue ->
+                Column {
+                    ForumDetailTopBar(
+                        onClickBack = {
+                            forumViewModel.goAllForum(navController)
+                        }
+                    )
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
 //                    .padding(16.dp)
-                        .padding(paddingValue),
-                    state = listState,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    item {
-                        ForumTitle(
-                            forum,
-                            forumUiState,
-                            onClickComment = {
-                                isSheetExpanded = true
-                            },
-                            onClickLike = {
+                            .padding(paddingValue),
+                        state = listState,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        item {
+                            ForumTitle(
+                                forum,
+                                forumUiState,
+                                onClickComment = {
+                                    isSheetExpanded = true
+                                },
+                                onClickLike = {
 
-                            }
-                        )
-                        //                    VoteButton(
+                                }
+                            )
+                            //                    VoteButton(
 //                        upvote = forum.upvote.size,
 //                        isVoted = forumViewModel.isVoteForumByUserId(0, currUser.value.email),
 //                        voteClick = { forumViewModel.voteForum(0, currUser.value.email) }
 //                    )
-                    }
-                    // Display comment here
-                    itemsIndexed(forumUiState.commentList) { index, item ->
-                        CommentItem(
-                            comment = item,
-                            onVoteClick = { forumViewModel.voteComment(index, currUser.value.email , forum.documentId) },
-                            isVoted = forumViewModel.isVoteCommentByUserId(index,currUser.value.email ),
-                            upvote = item.upvote.size)
-                        Divider(modifier = Modifier.fillMaxWidth(0.95f), color = dividerColor)
+                        }
+                        // Display comment here
+                        itemsIndexed(forumUiState.commentList) { index, item ->
+                            CommentItem(
+                                comment = item,
+                                onVoteClick = { forumViewModel.voteComment(index, currUser.value.email , forum.documentId) },
+                                isVoted = forumViewModel.isVoteCommentByUserId(index,currUser.value.email ),
+                                upvote = item.upvote.size)
+                            Divider(modifier = Modifier.fillMaxWidth(0.95f), color = dividerColor)
+                        }
                     }
                 }
-            }
-            if (isSheetExpanded) {
-                ForumSheet(
-                    commentText = commentText,
-                    onCommentTextChanged = { commentText = it },
-                    onSendComment = {
-                        forumViewModel.addForumComment(commentText)
-                        isSheetExpanded = false // Close the sheet after sending
-                        isLoading = true
-                    },
-                    onDismiss = { isSheetExpanded = false }
-                )
+                if (isSheetExpanded) {
+                    ForumSheet(
+                        commentText = commentText,
+                        onCommentTextChanged = { commentText = it },
+                        onSendComment = {
+                            forumViewModel.addForumComment(commentText)
+                            isSheetExpanded = false // Close the sheet after sending
+                            isLoading = true
+                            commentText = ""
+                        },
+                        onDismiss = { isSheetExpanded = false }
+                    )
+                }
             }
         }
     }
@@ -617,6 +622,7 @@ fun ForumSheet(
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
+        containerColor = cardsColor,
         windowInsets = WindowInsets.ime,
     ) {
         Column(
@@ -626,15 +632,21 @@ fun ForumSheet(
         ) {
             OutlinedTextField(
                 value = commentText,
+                textStyle = TextStyle(
+                    color = headText,
+                    fontSize = 15.sp
+                ),
                 onValueChange = { onCommentTextChanged(it) },
-                label = { Text("Enter your comment") },
+                label = { Text("Enter your comment", color = headText) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = onSendComment,
+                onClick = {
+                    onSendComment
+                },
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text("Send Comment")

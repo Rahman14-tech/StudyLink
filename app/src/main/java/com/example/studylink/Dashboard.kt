@@ -253,6 +253,7 @@ fun peerDashboard(navController: NavHostController){
     removeCurrUser()
     LaunchedEffect(Unit){
         Filteredusers.removeAll(Filteredusers)
+        Filteredusers.removeAll(Filteredusers)
         GetUsersData()
         selectedOption.value = "All Posts"
     }

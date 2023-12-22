@@ -1,6 +1,7 @@
 package com.example.studylink
 
 import android.os.Build
+import android.os.Handler
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -65,6 +66,7 @@ import com.example.studylink.forum.CreateForumScreen
 import com.example.studylink.forum.ForumDetailScreen
 import com.example.studylink.forum.ForumScreen
 import com.example.studylink.forum.ForumViewModel
+import kotlinx.coroutines.delay
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -72,20 +74,28 @@ import com.example.studylink.forum.ForumViewModel
 @Composable
 fun BottomBar(navController: NavHostController) {
     val currentUser = auth.currentUser
+    var beginningRoute = SplashScreen.route
+    Handler().postDelayed({
+        if(currentUser != null) {
+            val jetztUser = Realusers.firstOrNull { it.email == currentUser.email }
+            if(jetztUser != null){
+                currUser.value = jetztUser
+                beginningRoute = Dashboard.route
+            }
+        }else{
+            beginningRoute = Login.route
+        }
+    },1000)
+
     Scaffold(bottomBar = {BottomContent(navController = navController)}) {
         Box(modifier = Modifier
             .padding(it)
             .fillMaxWidth()
         ) {
-            var beginningRoute = Login.route
-            if(currentUser != null) {
-                val jetztUser = Realusers.firstOrNull { it.email == currentUser.email }
-                if(jetztUser != null){
-                    currUser.value = jetztUser
-                    beginningRoute = Dashboard.route
-                }
-            }
             NavHost(navController = navController, startDestination = beginningRoute){
+                composable(SplashScreen.route){
+                    SplashScreen(navController = navController)
+                }
                 composable(Login.route){
                     LoginScreen(navController = navController)
                 }
@@ -145,12 +155,12 @@ fun BottomContent(navController: NavHostController) {
     val bottomBarState = rememberSaveable { (mutableStateOf(false)) }
     when (navBackStackEntry?.destination?.route) {
         "Login"->bottomBarState.value = false
+        SplashScreen.route -> bottomBarState.value = false
         "Register"->bottomBarState.value = false
         GroupChats.route+"/{${GroupChats.GroupChatId}}" ->bottomBarState.value = false
         TheChatS.route+"/{${TheChatS.ChatId}}"-> bottomBarState.value = false
         MediaViewer.route+"/{${MediaViewer.ChatId}}"+"/{${MediaViewer.MediaUri}}"+"/{${MediaViewer.isGroup}}" -> false
         else -> bottomBarState.value = true
-
     }
     var destinationList = listOf(QNA,Dashboard, YourChats)
     AnimatedVisibility(visible = bottomBarState.value) {

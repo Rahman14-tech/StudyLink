@@ -350,7 +350,6 @@ fun ForumSplash(modifier: Modifier = Modifier) {
 fun SearchBarForum(
 //    inputText: () -> Unit,
     modifier: Modifier = Modifier) {
-    var inputText = rememberSaveable { mutableStateOf("") }
     Box(
         modifier = modifier
             .fillMaxWidth()

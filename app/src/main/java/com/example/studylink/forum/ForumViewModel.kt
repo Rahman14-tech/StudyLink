@@ -353,15 +353,20 @@ class ForumViewModel : ViewModel() {
     fun addForumComment(Input: String) {
         Log.d("ADDFORUM", "adding forum ${uiState.value.activeForum?.documentId}");
         val activeForumDocumentId : String = checkNotNull(uiState.value.activeForum?.documentId)
+        val tempTime = FieldValue.serverTimestamp()
         val commentValue = hashMapOf(
             "text" to Input,
-            "timestamp" to  FieldValue.serverTimestamp(),
+            "timestamp" to  tempTime,
             "upvote" to listOf<CommentModel>(),
             "userId" to currUser.value.email
         )
         forumRef.document(activeForumDocumentId).collection(commentCollectionPath).add(
             commentValue
-        )
+        ).addOnSuccessListener {
+            println("Sucess bang")
+        }.addOnFailureListener{
+            println("Mboh Lah")
+        }
     }
 //
 //    private val _searchForumText = MutableStateFlow("")

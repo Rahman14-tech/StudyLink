@@ -73,6 +73,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -91,6 +92,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -263,7 +265,8 @@ fun groupcard(
 @Composable
 fun PersonBox(
     name: String,
-    onPersonClick: () -> Unit
+    onPersonClick: () -> Unit,
+    userImage: String
 ) {
     Box(
         modifier = Modifier
@@ -290,11 +293,12 @@ fun PersonBox(
                     .size(38.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.personicon2),
+                    painter = rememberAsyncImagePainter(model = userImage),
                     contentDescription = null,
                     modifier = Modifier
                         .align(alignment = Alignment.Center)
-                        .size(22.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
                 )
             }
             Spacer(modifier = Modifier.width(10.dp))
@@ -329,11 +333,11 @@ fun overlayGroupInfo(
 
     var overlayHeight = (screenHeightInDp * 0.6f)
     var overlayWidth = (screenWidthInDp * 0.85f)
-    val peopleName = mutableListOf<String>()
+    val peopleName = mutableListOf<ProfileFirestore>()
     for (datum in people){
         val tempName = Realusers.firstOrNull{it.email == datum}
         if(tempName != null){
-            peopleName.add(tempName.fullName)
+            peopleName.add(tempName)
         }
     }
 
@@ -369,7 +373,7 @@ fun overlayGroupInfo(
                     .verticalScroll(rememberScrollState())
             ) {
                 peopleName.forEach { person ->
-                    PersonBox(name = person, onPersonClick = { })
+                    PersonBox(name = person.fullName,userImage = person.imageURL, onPersonClick = { })
                 }
             }
         }

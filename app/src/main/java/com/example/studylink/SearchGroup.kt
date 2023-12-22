@@ -467,6 +467,7 @@ fun SearchBar(modifier: Modifier = Modifier) {
                     .height(30.dp)
                     .fillMaxWidth(),
                 placeholderText = "Search Group",
+                textColor = Color.Black,
                 useClear = true,
                 imeAction = ImeAction.Search
             )

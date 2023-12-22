@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -152,6 +153,7 @@ fun ForumScreen(
                             },
                             text = forum.text,
                             tags = forum.tags.toSet(),
+                            commentCount = forumUiState.commentList.size,
                             voteClick = { forumViewModel.voteForum(index, currUser.value.email) } ,
                             onClick = {
                                 forumViewModel.goForumDetail(
@@ -187,6 +189,7 @@ fun ForumScreen(
                                 },
                                 text = forum.text,
                                 tags = forum.tags.toSet(),
+                                commentCount = forumUiState.commentList.size,
                                 voteClick = { forumViewModel.voteForum(index, currUser.value.email) } ,
                                 onClick = {
                                     forumViewModel.goForumDetail(
@@ -353,6 +356,7 @@ fun ForumCard(
     voteClick: () -> Unit,
     text: String,
     tags: Set<String>,
+    commentCount: Int,
     upvote: Int,
     isVoted: Boolean,
     modifier: Modifier = Modifier ){
@@ -446,11 +450,25 @@ fun ForumCard(
             }
             // Vote
 
-            VoteButton(
-                upvote = upvote,
-                voteClick = voteClick,
-                isVoted = isVoted
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                ) {
+                    CommentCountDisplay(commentCount = commentCount)
+
+                    Spacer(modifier = Modifier.width(15.dp))
+                    
+                    VoteButton(
+                        upvote = upvote,
+                        voteClick = voteClick,
+                        isVoted = isVoted
+                    )
+                }
+            }
         }
     }
 }
@@ -475,60 +493,101 @@ fun ForumCard(
 //}
 
 @Composable
+fun CommentCountDisplay(
+    commentCount: Int
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(42.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.chaticon),
+                contentDescription = "Comment",
+                tint = subheadText,
+                modifier = Modifier
+                    .size(22.dp)
+                    .align(Alignment.Center)
+            )
+        }
+        Spacer(modifier = Modifier.width(2.dp))
+        Text(
+            text = commentCount.toString(),
+            color = subheadText,
+            style = TextStyle(
+                fontSize = 16.sp
+            )
+        )
+    }
+}
+
+@Composable
 fun VoteButton(upvote: Int, voteClick: () -> Unit, isVoted: Boolean) {
     Row(
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(upvote.toString(), Modifier.padding(end = 10.dp), color = headText)
         IconButton(
             onClick = voteClick,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(42.dp)
         ) {
             val icon = if (isVoted) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp
-            val tint = if (isVoted) Color(44, 145, 72, 255) else headText
-            Icon(icon, contentDescription = "Upvote", tint = tint)
+            val tint = if (isVoted) Color(44, 145, 72, 255) else subheadText
+            Icon(
+                icon,
+                contentDescription = "Upvote",
+                tint = tint,
+                modifier = Modifier
+                    .size(22.dp)
+            )
         }
+        Spacer(modifier = Modifier.width(2.dp))
+        Text(
+            text = upvote.toString(),
+            color = subheadText,
+            style = TextStyle(
+                fontSize = 16.sp
+            )
+        )
     }
 }
 
 
 //
-@Preview
-@Composable
-fun ForumCardPreview(){
-    Column() {
-        ForumCard(
-            title = "About Palindrome Algorithm",
-            timestamp = {"19 August 2020 19:20"},
-            author = "James Cameron",
-            text = "I still confused as hell about this programming algorithm I still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithm",
-            tags = setOf<String>("C", "Algorithm","Computer Science"),
-            onClick = {},
-            isVoted = true,
-            upvote = 1,
-            voteClick = {}
-            ,
-            modifier = Modifier
-                .fillMaxWidth())
-        ForumCard(
-            title = "About Palindrome Algorithm",
-            timestamp = {"19 August 2020 19:20"},
-            author = "James Cameron",
-            text = "I still confused as hell about this programming algorithm I still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithm",
-            tags = setOf<String>("C", "Algorithm","Computer Science"),
-            onClick = {},
-            isVoted = false,
-            upvote = 21,
-            voteClick = {}
-            ,
-            modifier = Modifier
-                .fillMaxWidth())
-    }
-
-}
+//@Preview
+//@Composable
+//fun ForumCardPreview(){
+//    Column() {
+//        ForumCard(
+//            title = "About Palindrome Algorithm",
+//            timestamp = {"19 August 2020 19:20"},
+//            author = "James Cameron",
+//            text = "I still confused as hell about this programming algorithm I still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithm",
+//            tags = setOf<String>("C", "Algorithm","Computer Science"),
+//            onClick = {},
+//            isVoted = true,
+//            upvote = 1,
+//            voteClick = {}
+//            ,
+//            modifier = Modifier
+//                .fillMaxWidth())
+//        ForumCard(
+//            title = "About Palindrome Algorithm",
+//            timestamp = {"19 August 2020 19:20"},
+//            author = "James Cameron",
+//            text = "I still confused as hell about this programming algorithm I still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithm",
+//            tags = setOf<String>("C", "Algorithm","Computer Science"),
+//            onClick = {},
+//            isVoted = false,
+//            upvote = 21,
+//            voteClick = {}
+//            ,
+//            modifier = Modifier
+//                .fillMaxWidth())
+//    }
+//
+//}
 
 //@Preview
 //@Composable

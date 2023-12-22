@@ -1267,6 +1267,11 @@ fun overlayExpChange() {
                         modifier = Modifier
                             .align(alignment = Alignment.CenterStart)
                     )
+                    Text(
+                        text = inRefresh.value.toString(),
+                        color = Color.Transparent,
+                        style = TextStyle(fontSize = 1.sp)
+                    )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Column(
@@ -1318,11 +1323,6 @@ fun overlayExpChange() {
                                             .update("strongAt", tempStrong)
                                             .addOnSuccessListener {
                                                 currUser.value.strongAt = tempStrong
-                                                scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                                    if (!sheetState.isVisible) {
-                                                        showOverlayExpProfile.value = false
-                                                    }
-                                                }
 
                                             }.addOnFailureListener{
                                                 Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
@@ -1409,22 +1409,12 @@ fun overlayExpChange() {
                                     .update("strongAt", tempStrong)
                                     .addOnSuccessListener {
                                         currUser.value.strongAt = tempStrong
-                                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                            if (!sheetState.isVisible) {
-                                                showOverlayExpProfile.value = false
-                                            }
-                                        }
 
                                     }.addOnFailureListener{
                                         Toast.makeText(context,"There is error happen",Toast.LENGTH_SHORT)
                                     }
 
-                            }else{
-                                scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                    if (!sheetState.isVisible) {
-                                        showOverlayExpProfile.value = false
-                                    }
-                                }
+                            } else {
                                 Toast.makeText(context,"Experience max is 3",Toast.LENGTH_LONG).show()
                             }
                             dasBio.value = ""

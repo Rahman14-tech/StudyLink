@@ -6,18 +6,22 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -42,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -49,6 +54,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.studylink.QNA
 import com.example.studylink.background
@@ -67,6 +73,10 @@ fun CreateForumScreen(navController: NavController) {
     var text by remember { mutableStateOf("") }
     var tags by remember { mutableStateOf("") }
     var appliedTags by remember { mutableStateOf(mutableSetOf<String>()) }
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val changeIsLoadingCallback = navBackStackEntry?.arguments?.getString("changeIsLoading") as? () -> Unit
+
 
     Scaffold (
         modifier = Modifier
@@ -161,39 +171,55 @@ fun CreateForumScreen(navController: NavController) {
                 // ==========================================
                 val orderedTags = appliedTags.sorted()
                 // Tags
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.Start,
                     modifier = Modifier
                         .padding(bottom = 5.dp)
+                        .fillMaxWidth()
                 ){
                     itemsIndexed(orderedTags) { index, tag ->
                         val coroutineScope = rememberCoroutineScope()
-                        Text(
-                            modifier = Modifier
-                                .clip(MaterialTheme.shapes.medium)
-                                .background(color = Color(0xFFFFC600))
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
-                                .align(alignment = Alignment.Start)
-                                .height(20.dp),
-                            text = tag,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = headText,
-                        )
+                        Row (
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ){
+                            Row {
+                                Icon(
+                                    painter = rememberVectorPainter(Icons.Default.ChevronRight) ,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(24.dp) // Set the size of the icon
+                                        .padding(4.dp), // Add padding if necessary
+                                    tint = Color.Black // Set the color of the icon
+                                )
+                                Text(
+                                    modifier = Modifier
+                                        .clip(MaterialTheme.shapes.medium)
+                                        .background(color = Color(0xFFFFC600))
+                                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                                        .height(20.dp),
+                                    text = tag,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = headText,
+                                )
+                            }
 
-                        // Delete applied tags
-                        IconButton(onClick = {
                             // Delete applied tags
-                            val deleteTag = orderedTags[index]
-                            appliedTags.remove(deleteTag)
-                            inRefresh.value++
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Close",
-                                tint = Color.Black // Add tint color if needed
-                            )
+                            IconButton(onClick = {
+                                // Delete applied tags
+                                val deleteTag = orderedTags[index]
+                                appliedTags.remove(deleteTag)
+                                inRefresh.value++
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Close",
+                                    tint = Color.Red // Add tint color if needed
+                                )
+                            }
                         }
+
                     }
 
                 }
@@ -214,6 +240,7 @@ fun CreateForumScreen(navController: NavController) {
                             upvote = listOf(),
                             timestamp = Timestamp.now()
                         )
+                        changeIsLoadingCallback?.invoke()
                         addForumToFirebase(
                             forumModel = forumModel,
                             context = context,
@@ -247,6 +274,7 @@ private fun addForumToFirebase(forumModel: ForumModelnoDocId, context: Context, 
     forumRef
         .add(forumModel)
         .addOnSuccessListener { documentReference ->
+
             Toast.makeText(context,"Forum Berhasil dibuat!", Toast.LENGTH_LONG ).show()
             navController.popBackStack()
         }

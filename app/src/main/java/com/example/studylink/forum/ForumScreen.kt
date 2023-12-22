@@ -1,6 +1,10 @@
 package com.example.studylink.forum
 
 import android.annotation.SuppressLint
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,13 +24,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -40,6 +47,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -52,14 +60,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -74,11 +85,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
 import com.example.studylink.BottomBar
 import com.example.studylink.BottomContent
 import com.example.studylink.CustomTextField
 import com.example.studylink.QNA
 import com.example.studylink.R
+import com.example.studylink.Realusers
 import com.example.studylink.background
 import com.example.studylink.cardsColor
 import com.example.studylink.coloringSchema
@@ -90,6 +103,9 @@ import com.example.studylink.inRefresh
 import com.example.studylink.placeholderColor
 import com.example.studylink.subheadText
 import com.google.common.io.Files.append
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 var inputText = mutableStateOf("")
 @Composable
 fun ForumScreen(
@@ -107,6 +123,28 @@ fun ForumScreen(
             forumViewModel.getAllForum()
             initialLoadFinished = true
         }
+        Log.d("LE_FORUMSCREEN", "Launched Effect Forum Screen Dijalankan")
+    }
+
+    val changeIsLoading: () -> Unit = {
+        initialLoadFinished = false
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+    val isScrolling = remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }.collect { scrollInProgress ->
+            if (scrollInProgress && !isScrolling.value) {
+                isScrolling.value = true
+            } else if (!scrollInProgress && isScrolling.value) {
+                coroutineScope.launch {
+                    delay(300)
+                    isScrolling.value = false
+                }
+            }
+        }
     }
 
     Scaffold(
@@ -115,11 +153,24 @@ fun ForumScreen(
         containerColor = background,
         contentColor = background,
         floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate("${QNA.route}/create")}) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add"
-                )
+            AnimatedVisibility(
+                visible = !isScrolling.value,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                FloatingActionButton(
+                    onClick = { navController.navigate("${QNA.route}/create") },
+                    elevation = FloatingActionButtonDefaults.elevation(
+                        defaultElevation = 0.dp,
+                        pressedElevation = 0.dp,
+                        hoveredElevation = 0.dp
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add"
+                    )
+                }
             }
         }
     ) { paddingValue ->
@@ -131,6 +182,7 @@ fun ForumScreen(
                 LazyColumn(
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally,
+                    state = listState,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues = paddingValue)
@@ -146,6 +198,7 @@ fun ForumScreen(
                             },
                             text = forum.text,
                             tags = forum.tags.toSet(),
+                            commentCount = forumUiState.commentList.size,
                             voteClick = { forumViewModel.voteForum(index, currUser.value.email) } ,
                             onClick = {
                                 forumViewModel.goForumDetail(
@@ -165,6 +218,7 @@ fun ForumScreen(
                 LazyColumn(
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally,
+                    state = listState,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues = paddingValue)
@@ -181,6 +235,7 @@ fun ForumScreen(
                                 },
                                 text = forum.text,
                                 tags = forum.tags.toSet(),
+                                commentCount = forumUiState.commentList.size,
                                 voteClick = { forumViewModel.voteForum(index, currUser.value.email) } ,
                                 onClick = {
                                     forumViewModel.goForumDetail(
@@ -347,9 +402,15 @@ fun ForumCard(
     voteClick: () -> Unit,
     text: String,
     tags: Set<String>,
+    commentCount: Int,
     upvote: Int,
     isVoted: Boolean,
-    modifier: Modifier = Modifier ){
+    modifier: Modifier = Modifier
+) {
+    var userData = Realusers.firstOrNull{ author == it.email }
+    if (userData == null) {
+        userData = currUser.value
+    }
 
     val orderedTags = tags.sorted()
 
@@ -383,10 +444,22 @@ fun ForumCard(
             ) {
                 Text(text = timestamp(), color = subheadText)
                 Row(
-
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-//                    Text(text = "@")
-                    Text(text = author, color = subheadText)
+                    Image(
+                        painter = rememberAsyncImagePainter(userData!!.imageURL),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(25.dp)
+                            .clip(CircleShape)
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        text = userData!!.fullName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = subheadText
+                    )
                 }
             }
 
@@ -424,6 +497,8 @@ fun ForumCard(
                 color = subheadText
             )
 
+            Spacer(modifier = Modifier.height(2.dp))
+
             // Dashline
             val pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
             Canvas(
@@ -440,11 +515,25 @@ fun ForumCard(
             }
             // Vote
 
-            VoteButton(
-                upvote = upvote,
-                voteClick = voteClick,
-                isVoted = isVoted
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                ) {
+                    CommentCountDisplay(commentCount = commentCount)
+
+                    Spacer(modifier = Modifier.width(15.dp))
+                    
+                    VoteButton(
+                        upvote = upvote,
+                        voteClick = voteClick,
+                        isVoted = isVoted
+                    )
+                }
+            }
         }
     }
 }
@@ -469,60 +558,101 @@ fun ForumCard(
 //}
 
 @Composable
+fun CommentCountDisplay(
+    commentCount: Int
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(42.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.chaticon),
+                contentDescription = "Comment",
+                tint = subheadText,
+                modifier = Modifier
+                    .size(22.dp)
+                    .align(Alignment.Center)
+            )
+        }
+        Spacer(modifier = Modifier.width(2.dp))
+        Text(
+            text = commentCount.toString(),
+            color = subheadText,
+            style = TextStyle(
+                fontSize = 16.sp
+            )
+        )
+    }
+}
+
+@Composable
 fun VoteButton(upvote: Int, voteClick: () -> Unit, isVoted: Boolean) {
     Row(
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(upvote.toString(), Modifier.padding(end = 10.dp), color = headText)
         IconButton(
             onClick = voteClick,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(42.dp)
         ) {
             val icon = if (isVoted) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp
-            val tint = if (isVoted) Color(44, 145, 72, 255) else headText
-            Icon(icon, contentDescription = "Upvote", tint = tint)
+            val tint = if (isVoted) Color(44, 145, 72, 255) else subheadText
+            Icon(
+                icon,
+                contentDescription = "Upvote",
+                tint = tint,
+                modifier = Modifier
+                    .size(22.dp)
+            )
         }
+        Spacer(modifier = Modifier.width(2.dp))
+        Text(
+            text = upvote.toString(),
+            color = subheadText,
+            style = TextStyle(
+                fontSize = 16.sp
+            )
+        )
     }
 }
 
 
 //
-@Preview
-@Composable
-fun ForumCardPreview(){
-    Column() {
-        ForumCard(
-            title = "About Palindrome Algorithm",
-            timestamp = {"19 August 2020 19:20"},
-            author = "James Cameron",
-            text = "I still confused as hell about this programming algorithm I still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithm",
-            tags = setOf<String>("C", "Algorithm","Computer Science"),
-            onClick = {},
-            isVoted = true,
-            upvote = 1,
-            voteClick = {}
-            ,
-            modifier = Modifier
-                .fillMaxWidth())
-        ForumCard(
-            title = "About Palindrome Algorithm",
-            timestamp = {"19 August 2020 19:20"},
-            author = "James Cameron",
-            text = "I still confused as hell about this programming algorithm I still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithm",
-            tags = setOf<String>("C", "Algorithm","Computer Science"),
-            onClick = {},
-            isVoted = false,
-            upvote = 21,
-            voteClick = {}
-            ,
-            modifier = Modifier
-                .fillMaxWidth())
-    }
-
-}
+//@Preview
+//@Composable
+//fun ForumCardPreview(){
+//    Column() {
+//        ForumCard(
+//            title = "About Palindrome Algorithm",
+//            timestamp = {"19 August 2020 19:20"},
+//            author = "James Cameron",
+//            text = "I still confused as hell about this programming algorithm I still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithm",
+//            tags = setOf<String>("C", "Algorithm","Computer Science"),
+//            onClick = {},
+//            isVoted = true,
+//            upvote = 1,
+//            voteClick = {}
+//            ,
+//            modifier = Modifier
+//                .fillMaxWidth())
+//        ForumCard(
+//            title = "About Palindrome Algorithm",
+//            timestamp = {"19 August 2020 19:20"},
+//            author = "James Cameron",
+//            text = "I still confused as hell about this programming algorithm I still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithmI still confused as hell about this programming algorithm",
+//            tags = setOf<String>("C", "Algorithm","Computer Science"),
+//            onClick = {},
+//            isVoted = false,
+//            upvote = 21,
+//            voteClick = {}
+//            ,
+//            modifier = Modifier
+//                .fillMaxWidth())
+//    }
+//
+//}
 
 //@Preview
 //@Composable

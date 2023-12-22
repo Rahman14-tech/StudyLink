@@ -167,7 +167,7 @@ fun ForumScreen(
                         )
                     }
                 }
-            }else{
+            } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -450,7 +450,7 @@ fun ForumCard(
                 upvote = upvote,
                 voteClick = voteClick,
                 isVoted = isVoted
-                )
+            )
         }
     }
 }

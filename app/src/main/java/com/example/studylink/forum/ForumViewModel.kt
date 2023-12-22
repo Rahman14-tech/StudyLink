@@ -229,6 +229,9 @@ class ForumViewModel : ViewModel() {
         }
     }
 
+    fun goAllForum(navController: NavController) {
+        navController.popBackStack()
+    }
 
     fun goForumDetail(navController: NavController, forumDocID: String) {
         // Navigate to Forum Detail

@@ -106,7 +106,7 @@ fun BottomBar(navController: NavHostController) {
                         type = NavType.StringType
                     })){backStackEntry ->
 
-                    ForumDetailScreen(forumId = requireNotNull(backStackEntry.arguments?.getString("detail")))
+                    ForumDetailScreen(forumId = requireNotNull(backStackEntry.arguments?.getString("detail")), navController = navController)
                 }
                 composable("${QNA.route}/create"){
                     CreateForumScreen(navController = navController)

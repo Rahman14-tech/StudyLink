@@ -1,33 +1,57 @@
 package com.example.studylink.forum
 
+import android.annotation.SuppressLint
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.ThumbUpOffAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -37,38 +61,61 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
+import com.example.studylink.R
+import com.example.studylink.Realusers
 import com.example.studylink.currUser
+import com.example.studylink.defaultColor
+import com.example.studylink.dividerColor
+import com.example.studylink.headText
+import com.example.studylink.inRefresh
+import com.example.studylink.subheadText
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.Closeable
 import java.text.SimpleDateFormat
+import java.time.Duration
+import java.time.Instant
 import java.util.Date
 import java.util.Locale
 
 
+@SuppressLint("UnrememberedMutableState")
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ForumDetailScreen(
     forumId: String,
     forumViewModel: ForumViewModel = viewModel(),
+    navController: NavController
 ) {
     val forumUiState by forumViewModel.uiState.collectAsState()
     val forum: ForumModel = forumUiState.activeForum!!
     var isSheetExpanded by remember { mutableStateOf(false) }
     var commentText by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(true)}
+    var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(isLoading) {
         // Perform operations serially
@@ -93,36 +140,80 @@ fun ForumDetailScreen(
             }
         )
 
-        Scaffold(
-            floatingActionButton = {
-                FloatingActionButton(onClick = { isSheetExpanded = true }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add"
-                    )
+        val coroutineScope = rememberCoroutineScope()
+        val isScrolling = remember { mutableStateOf(false) }
+        val listState = rememberLazyListState()
+
+        LaunchedEffect(listState) {
+            snapshotFlow { listState.isScrollInProgress }.collect { scrollInProgress ->
+                if (scrollInProgress && !isScrolling.value) {
+                    isScrolling.value = true
+                } else if (!scrollInProgress && isScrolling.value) {
+                    coroutineScope.launch {
+                        delay(400) // delay before FAB appears again
+                        isScrolling.value = false
+                    }
                 }
             }
-        ){ paddingValue ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-//                .padding(16.dp)
-                    .padding(paddingValue)
-            ) {
-                item {
-                    // Forum Title
-                    ForumTitle(forum)
-//                    VoteButton(
+        }
+
+        Scaffold(
+            containerColor = defaultColor,
+            floatingActionButton = {
+                AnimatedVisibility(
+                    visible = !isScrolling.value,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    FloatingActionButton(
+                        onClick = { isSheetExpanded = true },
+                        elevation = FloatingActionButtonDefaults.elevation(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add"
+                        )
+                    }
+                }
+            }
+        ) { paddingValue ->
+            Column {
+                ForumDetailTopBar(
+                    onClickBack = {
+                        forumViewModel.goAllForum(navController)
+                    }
+                )
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+//                    .padding(16.dp)
+                        .padding(paddingValue),
+                    state = listState,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    item {
+                        ForumTitle(
+                            forum,
+                            forumUiState,
+                            onClickComment = {
+                                isSheetExpanded = true
+                            },
+                            onClickLike = {
+
+                            }
+                        )
+                        //                    VoteButton(
 //                        upvote = forum.upvote.size,
 //                        isVoted = forumViewModel.isVoteForumByUserId(0, currUser.value.email),
 //                        voteClick = { forumViewModel.voteForum(0, currUser.value.email) }
 //                    )
+                    }
+                    // Display comment here
+                    items(forumUiState.commentList) { item ->
+                        CommentItem(item)
+                        Divider(modifier = Modifier.fillMaxWidth(0.95f), color = dividerColor)
+                    }
                 }
-                // Display comment here
-                items(forumUiState.commentList) { item ->
-                    CommentItem(item)
-                }
-
             }
             if (isSheetExpanded) {
                 ForumSheet(
@@ -141,134 +232,360 @@ fun ForumDetailScreen(
 }
 
 @Composable
-fun ForumTitle(forum: ForumModel) {
-    Column(
-        modifier = Modifier
+fun ForumDetailTopBar(
+    modifier: Modifier = Modifier,
+    onClickBack: () -> Unit
+) {
+    Box(
+        modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .requiredHeight(height = 60.dp)
+            .background(color = defaultColor)
     ) {
-        // Display title
-        Text(
-            text = forum.title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        // Display author and timestamp in a Row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "By ${forum.authorId}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
-            )
-            Text(
-                text = forum.timestamp?.let {
-                    SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(it.seconds * 1000))
-                } ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
-            )
-        }
-
-        // Display text content
-        Text(
-            text = forum.text,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-
-        // Display tags if available
-        // Tags
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        Box(
             modifier = Modifier
-                .padding(bottom = 5.dp)
-        ){
-            items(forum.tags) { tag ->
-                Text(
+                .fillMaxSize()
+                .padding(start = 20.dp, end = 20.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxHeight(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.backbutton),
+                    contentDescription = "Back Button",
+                    tint = headText,
                     modifier = Modifier
-                        .clip(MaterialTheme.shapes.medium)
-                        .background(color = Color(0xFFFFC600))
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
-                        .align(alignment = Alignment.Start)
-                        .height(20.dp),
-                    text = tag,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.Black,
+                        .requiredWidth(width = 10.dp)
+                        .requiredHeight(height = 18.dp)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = {
+                                onClickBack.invoke()
+                            }
+                        )
                 )
+                Spacer(modifier = Modifier.width(15.dp))
+                Text(
+                    text = "Back",
+                    color = headText,
+                    style = TextStyle(
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Normal)
+                )
+                Text(text = inRefresh.value.toString(), color = Color.Transparent)
             }
         }
-
-        // Display upvote count
-        Text(
-            text = "Upvotes: ${forum.upvote}",
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CommentItem(comment: CommentModel) {
-    Card(
+fun ForumTitle(
+    forum: ForumModel,
+    forumUiState: ForumUiState,
+    onClickComment: () -> Unit,
+    onClickLike: () -> Unit
+) {
+    var userData = Realusers.firstOrNull{ forum.authorId == it.email }
+    if (userData == null) {
+        userData = currUser.value
+    }
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(8.dp)
+            .padding(bottom = 16.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(start = 16.dp, end = 16.dp)
         ) {
+            // Display title
             Text(
-                text = comment.text,
-                style = TextStyle(
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 14.sp,
-                    color = Color.Black
-                )
+                text = forum.title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = headText,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+
+            // Display author
             Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Upvotes: ${comment.upvote}",
-                    style = TextStyle(
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
+                Image(
+                    painter = rememberAsyncImagePainter(userData!!.imageURL),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(25.dp)
+                        .clip(CircleShape)
                 )
+                Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    text = "User ID: ${comment.userId}",
+                    text = userData!!.fullName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = subheadText
+                )
+            }
+
+            // Display text content
+            Text(
+                text = forum.text,
+                style = TextStyle(
+                    fontSize = 13.sp
+                ),
+                color = headText,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
+            // Display tags if available
+            // Tags
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .padding(bottom = 5.dp)
+            ) {
+                items(forum.tags) { tag ->
+                    Text(
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.medium)
+                            .background(color = Color(0xFFFFC600))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                            .align(alignment = Alignment.Start)
+                            .height(20.dp),
+                        text = tag,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = headText,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Row {
+                Text(
+                    text = forum.timestamp?.let { timestamp ->
+                        val date = timestamp.toDate()
+                        val formattedDate = SimpleDateFormat("HH:mm · MMM dd, yyyy", Locale.getDefault()).format(date)
+                        formattedDate
+                    } ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = subheadText
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(10.dp))
+        
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth(),
+            color = dividerColor
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = {
+                        onClickComment.invoke()
+                    },
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .size(36.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.chaticon),
+                        contentDescription = "Comment",
+                        tint = subheadText,
+                        modifier = Modifier
+                            .size(25.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(3.dp))
+                Text(
+                    text = forumUiState.commentList.size.toString(),
+                    color = subheadText,
                     style = TextStyle(
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 12.sp,
-                        color = Color.Gray
+                        fontSize = 15.sp
                     )
                 )
             }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = comment.timestamp?.let { timestamp ->
-                    val formattedDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                        .format(Date(timestamp.seconds * 1000))
-                    formattedDate
-                } ?: "",
-                style = TextStyle(
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 12.sp,
-                    color = Color.Gray
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = {
+                        onClickLike.invoke()
+                    },
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ThumbUpOffAlt,
+                        contentDescription = "Thumbs Up",
+                        tint = subheadText,
+                        modifier = Modifier
+                            .size(25.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(3.dp))
+                Text(
+                    text = forum.upvote.size.toString(),
+                    color = subheadText,
+                    style = TextStyle(
+                        fontSize = 15.sp
+                    )
                 )
-            )
+            }
+        }
+
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth(),
+            color = dividerColor
+        )
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun CommentItem(comment: CommentModel) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+    ) {
+        val userData = Realusers.firstOrNull{ comment.userId == it.email }
+
+        val now = Instant.now()
+        val commentTime = comment.timestamp?.toDate()?.toInstant()
+        val duration = Duration.between(commentTime, now)
+
+        val weeks = duration.toDays() / 7
+        val days = duration.toDays() % 7
+        val hours = duration.toHours() % 24
+        val minutes = duration.toMinutes() % 60
+        val seconds = duration.seconds % 60
+
+        val timeDifference = when {
+            weeks > 0 -> "${weeks}w"
+            days > 0 -> "${days}d"
+            hours > 0 -> "${hours}h"
+            minutes > 0 -> "${minutes}m"
+            else -> "${seconds}s"
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (userData != null) {
+                    Image(
+                        painter = rememberAsyncImagePainter(userData!!.imageURL),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .align(Alignment.Top)
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Column {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "${userData!!.fullName}",
+                                style = TextStyle(
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 16.sp,
+                                    color = headText
+                                )
+                            )
+                            Text(
+                                text = " · ",
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = subheadText
+                            )
+                            Text(
+                                text = timeDifference,
+//                                    text = comment.timestamp?.let { timestamp ->
+//                                        val formattedDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+//                                            .format(Date(timestamp.seconds * 1000))
+//                                        formattedDate
+//                                    } ?: "",
+                                style = TextStyle(
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = 14.sp,
+                                    color = subheadText
+                                )
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = comment.text,
+                            style = TextStyle(
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 14.sp,
+                                color = headText
+                            )
+                        )
+                    }
+                }
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+            ) {
+                IconButton(
+                    onClick = {
+                        //do upvotes
+                    },
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .size(28.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ThumbUp,
+                        contentDescription = "Thumbs Up",
+                        tint = subheadText,
+                        modifier = Modifier
+                            .size(18.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(2.dp))
+                Text(
+                    text = comment.upvote.toString(),
+                    style = TextStyle(
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 14.sp,
+                        color = subheadText
+                    )
+                )
+            }
         }
     }
 }

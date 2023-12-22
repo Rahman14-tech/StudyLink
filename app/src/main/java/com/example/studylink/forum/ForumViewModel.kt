@@ -57,6 +57,7 @@ data class ForumModel(
     val text: String = "",
     val upvote: List<String> = listOf(),
     val tags: List<String> = listOf(),
+    val commentCount: Int = 0,
 )
 data class ForumModelnoDocId(
     val authorId: String = "",
@@ -99,26 +100,45 @@ class ForumViewModel : ViewModel() {
 
         Log.d("GETALLFORUM", "GET ALL FORUM STARTED")
         forumRef.get().addOnSuccessListener { querySnapshot ->
+            val forumList = mutableListOf<ForumModel>()
+
             for (document in querySnapshot) {
-                val forum = document.toObject(ForumModel::class.java)
-                val forumWithID = forum.copy(documentId = document.id)
-                forumList.add(forumWithID)
-//                documentIdMap[document.id] = forum
-            }
-            _uiState.update { currentState ->
-                currentState.copy(
-                    forumList = forumList
-                )
-            }
-            Log.d("TEST", forumList.toString())
-            println("THIS IS THE FORUM LIST:: $forumList")
-            documentIdMap.forEach { (key, value) ->
-                Log.d("TESTMAP", "Key: $key, Value: $value")
+                val commentCollectionRef = forumRef.document(document.id).collection(commentCollectionPath)
+
+                commentCollectionRef.get().addOnSuccessListener { commentQuerySnapshot ->
+                    val commentSize = commentQuerySnapshot.size()
+                    Log.d("CommentQuerySnapshot", "${ commentQuerySnapshot.size() }")
+
+                    val forum = document.toObject(ForumModel::class.java)
+                    val forumWithID = forum.copy(
+                        documentId = document.id,
+                        commentCount = commentSize,
+                    )
+                    forumList.add(forumWithID)
+                    Log.d("CHECKFORUM", forumWithID.toString())
+                    for ( items in forumList ) {
+                        Log.d("CHECKISI", items.toString())
+                    }
+                    // Check if this is the last forum before updating the UI
+                    if (forumList.size == querySnapshot.size()) {
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                forumList = forumList
+                            )
+                        }
+                        Log.d("TEST", forumList.toString())
+                        println("THIS IS THE FORUM LIST:: $forumList")
+                    }
+                }.addOnFailureListener { exception ->
+                    // Handle the failure for getting comments
+                    Log.e("ForumViewModel", "Error getting comments", exception)
+                }
             }
         }.addOnFailureListener { exception ->
-            // Handle the failure
+            // Handle the failure for getting forums
             Log.e("ForumViewModel", "Error getting forums", exception)
         }
+
     }
 
 //    fun getAllForum() {

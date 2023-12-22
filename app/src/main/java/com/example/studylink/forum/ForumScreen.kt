@@ -198,7 +198,7 @@ fun ForumScreen(
                             },
                             text = forum.text,
                             tags = forum.tags.toSet(),
-                            commentCount = forumUiState.commentList.size,
+                            commentCount = forum.commentCount,
                             voteClick = { forumViewModel.voteForum(index, currUser.value.email) } ,
                             onClick = {
                                 forumViewModel.goForumDetail(
@@ -235,7 +235,7 @@ fun ForumScreen(
                                 },
                                 text = forum.text,
                                 tags = forum.tags.toSet(),
-                                commentCount = forumUiState.commentList.size,
+                                commentCount = forum.commentCount,
                                 voteClick = { forumViewModel.voteForum(index, currUser.value.email) } ,
                                 onClick = {
                                     forumViewModel.goForumDetail(

@@ -81,13 +81,14 @@ data class ForumUiState(
     val commentList: List<CommentModel> = listOf(),
 )
 
+const val forumCollectionPath = "ForumTest"
+const val commentCollectionPath = "CommentList"
 class ForumViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ForumUiState())
     val uiState: StateFlow<ForumUiState> = _uiState.asStateFlow()
     /*val ForumListSearch = _uiState.value.forumList.*/
 
-    private val forumCollectionPath = "ForumTest3"
-    private val commentCollectionPath = "CommentList"
+
     private val forumRef = FirebaseFirestore.getInstance().collection(forumCollectionPath)
 
     fun getAllForum() {

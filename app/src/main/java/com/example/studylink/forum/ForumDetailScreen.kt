@@ -121,10 +121,12 @@ fun ForumDetailScreen(
 
     LaunchedEffect(isLoading) {
         // Perform operations serially
+        delay(1000)
         forumViewModel.getForumDetail(forumId)
         forumViewModel.getForumCommentByForumID(forumId)
         // Update isLoading after both operations are completed
         isLoading = false
+        Log.d("TAMPILANFORUM", forum.toString())
     }
 
     if  (isLoading) {

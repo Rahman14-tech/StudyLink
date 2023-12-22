@@ -71,7 +71,7 @@ data class CommentModel(
     val documentId: String = "",
     val text: String = "",
     val timestamp: Timestamp? = null,
-    val upvote: Int = 0,
+    val upvote: List<String> = listOf(),
     val userId: String = "",
 )
 
@@ -86,7 +86,7 @@ class ForumViewModel : ViewModel() {
     val uiState: StateFlow<ForumUiState> = _uiState.asStateFlow()
     /*val ForumListSearch = _uiState.value.forumList.*/
 
-    private val forumCollectionPath = "ForumTest"
+    private val forumCollectionPath = "ForumTest3"
     private val commentCollectionPath = "CommentList"
     private val forumRef = FirebaseFirestore.getInstance().collection(forumCollectionPath)
 
@@ -208,6 +208,58 @@ class ForumViewModel : ViewModel() {
         return false
     }
 
+    // CommentList
+    fun voteComment(index: Int, userId: String, forDocID: String) {
+        val comment = uiState.value.commentList[index]
+        val docComment = forumRef.document(forDocID).collection(commentCollectionPath).document(comment.documentId)
+
+        val newUpvoteList = comment.upvote.toMutableList()
+        // Check if userExists
+        val userExists = userId in newUpvoteList
+        if (!userExists) {
+            newUpvoteList.add(userId)
+            // Send to firebase
+            docComment.update("upvote", FieldValue.arrayUnion(userId))
+                .addOnSuccessListener {
+                    Log.d("UPVOTE", "vote ${comment.documentId} user ${userId} success")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("UPVOTE", "vote ${comment.documentId} user ${userId} failed: $e")
+                }
+        } else {
+            newUpvoteList.remove(userId)
+            docComment.update("upvote", FieldValue.arrayRemove(userId))
+                .addOnSuccessListener {
+                    // Update successful
+                    Log.d("UPVOTE", "delete vote ${comment.documentId} user ${userId} success")
+                }
+                .addOnFailureListener { e ->
+                    // Handle errors here
+                    Log.e("UPVOTE", "delete vote ${comment.documentId} user ${userId} failed: $e")
+                }
+        }
+
+        // Updated Comment
+        val updatedComment = comment.copy(upvote = newUpvoteList.toList())
+
+        _uiState.update {currentState ->
+            val newCommentList = currentState.commentList.toMutableList()
+            newCommentList[index] = updatedComment
+            currentState.copy(
+                commentList = newCommentList.toImmutableList()
+            )
+        }
+    }
+
+    fun isVoteCommentByUserId(index: Int, userId: String): Boolean {
+        val currComment = uiState.value.commentList[index]
+        // Check if userExists
+        val userExists = userId in currComment.upvote
+
+        if(userExists) return true
+        return false
+    }
+
 
 
     fun getTimeFromNow(timestamp: Date): String {
@@ -304,7 +356,7 @@ class ForumViewModel : ViewModel() {
         val commentValue = hashMapOf(
             "text" to Input,
             "timestamp" to  FieldValue.serverTimestamp(),
-            "upvote" to 0,
+            "upvote" to listOf<CommentModel>(),
             "userId" to currUser.value.email
         )
         forumRef.document(activeForumDocumentId).collection(commentCollectionPath).add(

@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +41,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.ThumbUpOffAlt
+import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -209,8 +211,12 @@ fun ForumDetailScreen(
 //                    )
                     }
                     // Display comment here
-                    items(forumUiState.commentList) { item ->
-                        CommentItem(item)
+                    itemsIndexed(forumUiState.commentList) { index, item ->
+                        CommentItem(
+                            comment = item,
+                            onVoteClick = { forumViewModel.voteComment(index, currUser.value.email , forum.documentId) },
+                            isVoted = forumViewModel.isVoteCommentByUserId(index,currUser.value.email ),
+                            upvote = item.upvote.size)
                         Divider(modifier = Modifier.fillMaxWidth(0.95f), color = dividerColor)
                     }
                 }
@@ -464,7 +470,11 @@ fun ForumTitle(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CommentItem(comment: CommentModel) {
+fun CommentItem(
+    comment: CommentModel,
+    onVoteClick: () -> Unit,
+    isVoted: Boolean,
+    upvote: Int) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -561,24 +571,24 @@ fun CommentItem(comment: CommentModel) {
                     .align(Alignment.CenterEnd)
             ) {
                 IconButton(
-                    onClick = {
-                        //do upvotes
-                    },
+                    onClick = onVoteClick ,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .size(28.dp)
                 ) {
+                    val icon = if (isVoted) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp
+                    val tint = if (isVoted) Color(44, 145, 72, 255) else headText
                     Icon(
-                        imageVector = Icons.Default.ThumbUp,
+                        imageVector = icon,
                         contentDescription = "Thumbs Up",
-                        tint = subheadText,
+                        tint = tint,
                         modifier = Modifier
                             .size(18.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(2.dp))
                 Text(
-                    text = comment.upvote.toString(),
+                    text = upvote.toString(),
                     style = TextStyle(
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp,

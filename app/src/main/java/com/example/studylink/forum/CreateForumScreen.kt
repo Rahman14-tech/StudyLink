@@ -270,7 +270,7 @@ fun PreviewCreateForum(){
 }
 
 private fun addForumToFirebase(forumModel: ForumModelnoDocId, context: Context, navController: NavController) {
-    val forumRef = FirebaseFirestore.getInstance().collection("ForumTest")
+    val forumRef = FirebaseFirestore.getInstance().collection("ForumTest3")
     forumRef
         .add(forumModel)
         .addOnSuccessListener { documentReference ->

@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -62,6 +63,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -76,11 +78,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
 import com.example.studylink.BottomBar
 import com.example.studylink.BottomContent
 import com.example.studylink.CustomTextField
 import com.example.studylink.QNA
 import com.example.studylink.R
+import com.example.studylink.Realusers
 import com.example.studylink.background
 import com.example.studylink.cardsColor
 import com.example.studylink.coloringSchema
@@ -359,7 +363,12 @@ fun ForumCard(
     commentCount: Int,
     upvote: Int,
     isVoted: Boolean,
-    modifier: Modifier = Modifier ){
+    modifier: Modifier = Modifier
+) {
+    var userData = Realusers.firstOrNull{ author == it.email }
+    if (userData == null) {
+        userData = currUser.value
+    }
 
     val orderedTags = tags.sorted()
 
@@ -393,10 +402,22 @@ fun ForumCard(
             ) {
                 Text(text = timestamp(), color = subheadText)
                 Row(
-
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-//                    Text(text = "@")
-                    Text(text = author, color = subheadText)
+                    Image(
+                        painter = rememberAsyncImagePainter(userData!!.imageURL),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(25.dp)
+                            .clip(CircleShape)
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        text = userData!!.fullName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = subheadText
+                    )
                 }
             }
 
@@ -433,6 +454,8 @@ fun ForumCard(
                 overflow = TextOverflow.Ellipsis,
                 color = subheadText
             )
+
+            Spacer(modifier = Modifier.height(2.dp))
 
             // Dashline
             val pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)

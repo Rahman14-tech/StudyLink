@@ -575,19 +575,23 @@ fun GroupChatSystem(navController: NavHostController, GroupChatId: String){
             Row(
                 modifier = Modifier
                     .horizontalScroll(rememberScrollState())
-                    .padding(bottom = 5.dp)
+                    .padding(start = 5.dp, end = 5.dp)
             ) {
                 theSmartReply.forEach{
                     println(" $it")
-                    Card(modifier = Modifier
-                        .padding(2.dp), onClick = {inputText.value = it}) {
-                        Column(modifier = Modifier.padding(5.dp)) {
-                            Text(text = it, fontSize = 20.sp)
-                        }
-
+                    Card(
+                        modifier = Modifier
+                            .padding(2.dp),
+                        onClick = {inputText.value = it}
+                    ) {
+                        Text(
+                            text = it,
+                            fontSize = 16.sp,
+                            modifier = Modifier
+                                .padding(5.dp)
+                        )
                     }
                 }
-
             }
             Box(
                 modifier = Modifier

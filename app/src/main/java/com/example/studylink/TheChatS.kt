@@ -966,7 +966,7 @@ fun ChatSystem(navController: NavHostController, ChatId: String) {
                 Row(
                     modifier = Modifier
                         .horizontalScroll(rememberScrollState())
-                        .padding(start = 5.dp, bottom = 5.dp, end = 5.dp)
+                        .padding(start = 5.dp, end = 5.dp)
                 ) {
                     theSmartReply.forEach{
                         println(" $it")
@@ -981,10 +981,8 @@ fun ChatSystem(navController: NavHostController, ChatId: String) {
                                 modifier = Modifier
                                     .padding(5.dp)
                             )
-
                         }
                     }
-
                 }
                 Box(
                     modifier = Modifier

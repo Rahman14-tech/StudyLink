@@ -2,6 +2,9 @@ package com.example.studylink.forum
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,6 +31,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,6 +47,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -55,8 +60,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -96,6 +103,9 @@ import com.example.studylink.inRefresh
 import com.example.studylink.placeholderColor
 import com.example.studylink.subheadText
 import com.google.common.io.Files.append
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 var inputText = mutableStateOf("")
 @Composable
 fun ForumScreen(
@@ -120,17 +130,47 @@ fun ForumScreen(
         initialLoadFinished = false
     }
 
+    val coroutineScope = rememberCoroutineScope()
+    val isScrolling = remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }.collect { scrollInProgress ->
+            if (scrollInProgress && !isScrolling.value) {
+                isScrolling.value = true
+            } else if (!scrollInProgress && isScrolling.value) {
+                coroutineScope.launch {
+                    delay(300)
+                    isScrolling.value = false
+                }
+            }
+        }
+    }
+
     Scaffold(
         modifier = Modifier
             .background(background),
         containerColor = background,
         contentColor = background,
         floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate("${QNA.route}/create")}) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add"
-                )
+            AnimatedVisibility(
+                visible = !isScrolling.value,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                FloatingActionButton(
+                    onClick = { navController.navigate("${QNA.route}/create") },
+                    elevation = FloatingActionButtonDefaults.elevation(
+                        defaultElevation = 0.dp,
+                        pressedElevation = 0.dp,
+                        hoveredElevation = 0.dp
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add"
+                    )
+                }
             }
         }
     ) { paddingValue ->
@@ -142,6 +182,7 @@ fun ForumScreen(
                 LazyColumn(
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally,
+                    state = listState,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues = paddingValue)
@@ -177,6 +218,7 @@ fun ForumScreen(
                 LazyColumn(
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally,
+                    state = listState,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues = paddingValue)

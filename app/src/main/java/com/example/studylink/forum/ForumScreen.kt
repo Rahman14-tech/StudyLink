@@ -1,6 +1,7 @@
 package com.example.studylink.forum
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -107,6 +108,11 @@ fun ForumScreen(
             forumViewModel.getAllForum()
             initialLoadFinished = true
         }
+        Log.d("LE_FORUMSCREEN", "Launched Effect Forum Screen Dijalankan")
+    }
+
+    val changeIsLoading: () -> Unit = {
+        initialLoadFinished = false
     }
 
     Scaffold(

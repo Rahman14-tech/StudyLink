@@ -644,9 +644,7 @@ fun ForumSheet(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = {
-                    onSendComment
-                },
+                onClick = onSendComment,
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text("Send Comment")

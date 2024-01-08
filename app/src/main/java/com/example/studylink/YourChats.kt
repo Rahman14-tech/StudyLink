@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.firestore.ktx.toObject
 var searchYourChat:MutableState<String> =  mutableStateOf("")
@@ -115,15 +116,22 @@ fun YourChatsCardPersonal(datum: YourChatsType, navController: NavHostController
                         .size(60.dp)
                         .background(Color(0xFFFFC600))
                 ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(tempPartnerProfile!!.imageURL),
-                        contentScale = ContentScale.Crop,
-                        contentDescription = "Gambar Wong",
+                    AsyncImage(model = tempPartnerProfile!!.imageURL, contentDescription = null,
                         modifier = Modifier
                             .fillMaxSize()
                             .clip(CircleShape)
-                            .align(Alignment.Center)
+                            .align(Alignment.Center),
+                        contentScale = ContentScale.Crop
                     )
+//                    Image(
+//                        painter = rememberAsyncImagePainter(tempPartnerProfile!!.imageURL),
+//                        contentScale = ContentScale.Crop,
+//                        contentDescription = "Gambar Wong",
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .clip(CircleShape)
+//                            .align(Alignment.Center)
+//                    )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(
@@ -196,15 +204,22 @@ fun YourChatsCardPersonalSearched(datum: YourChatsType, navController: NavHostCo
                             .size(60.dp)
                             .background(Color(0xFFFFC600))
                     ) {
-                        Image(
-                            painter = rememberAsyncImagePainter(tempPartnerProfile!!.imageURL),
-                            contentScale = ContentScale.Crop,
-                            contentDescription = "Gambar Wong",
+                        AsyncImage(model = tempPartnerProfile!!.imageURL, contentDescription = null,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clip(CircleShape)
-                                .align(Alignment.Center)
+                                .align(Alignment.Center),
+                            contentScale = ContentScale.Crop
                         )
+//                        Image(
+//                            painter = rememberAsyncImagePainter(tempPartnerProfile!!.imageURL),
+//                            contentScale = ContentScale.Crop,
+//                            contentDescription = "Gambar Wong",
+//                            modifier = Modifier
+//                                .fillMaxSize()
+//                                .clip(CircleShape)
+//                                .align(Alignment.Center)
+//                        )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Column(
@@ -448,7 +463,7 @@ fun YourChatScreen(navController: NavHostController) {
                         modifier = Modifier
                             .background(defaultColor)
                     ) {
-                        itemsIndexed(tempTheChat) { _, datum ->
+                        itemsIndexed(items = tempTheChat, key = { _, datum -> datum.id}) { _, datum ->
                             YourChatsCardPersonalSearched(datum, navController)
                         }
                     }
@@ -457,7 +472,7 @@ fun YourChatScreen(navController: NavHostController) {
                         modifier = Modifier
                             .background(defaultColor)
                     ) {
-                        itemsIndexed(tempTheChat) { _, datum ->
+                        itemsIndexed(items = tempTheChat, key = { _, datum -> datum.id}) { _, datum ->
                             YourChatsCardPersonal(datum, navController)
                         }
                     }
@@ -469,7 +484,7 @@ fun YourChatScreen(navController: NavHostController) {
                         modifier = Modifier
                             .background(defaultColor)
                     ) {
-                        itemsIndexed(groupChatsDashboard) { _, datum ->
+                        itemsIndexed(items = groupChatsDashboard, key = { _, datum -> datum.id}) { _, datum ->
                             YourChatsCardGroupSearched(datum, navController)
                         }
                     }
@@ -479,7 +494,7 @@ fun YourChatScreen(navController: NavHostController) {
                         modifier = Modifier
                             .background(defaultColor)
                     ) {
-                        itemsIndexed(groupChatsDashboard) { _, datum ->
+                        itemsIndexed(items = groupChatsDashboard, key = { _, datum -> datum.id}) { _, datum ->
                             YourChatsCardGroup(datum, navController)
                         }
                     }

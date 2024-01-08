@@ -185,10 +185,10 @@ fun ForumScreen(
                     state = listState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues = paddingValue)
+                        .padding(paddingValues = paddingValue),
                 ) {
                     // Display data forum
-                    itemsIndexed(forumUiState.forumList) { index, forum ->
+                    itemsIndexed(items = forumUiState.forumList, key = {index: Int, item: ForumModel ->  item.documentId}) { index, forum ->
                         ForumCard(
                             title = forum.title,
                             author = forum.authorId,
@@ -224,7 +224,7 @@ fun ForumScreen(
                         .padding(paddingValues = paddingValue)
                 ) {
                     // Display data forum
-                    itemsIndexed(forumUiState.forumList) { index, forum ->
+                    itemsIndexed(items = forumUiState.forumList, key = {index: Int, item: ForumModel ->  item.documentId}) { index, forum ->
                         if(forum.title.lowercase().contains(inputText.value.lowercase())){
                             ForumCard(
                                 title = forum.title,

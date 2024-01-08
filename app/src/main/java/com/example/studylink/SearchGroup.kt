@@ -660,7 +660,7 @@ fun testViewGroup(navController: NavHostController) {
                     ) {
                         if (inputTextDashGroup.value == "") {
                             if (selectedOption.value == "All Posts") {
-                                items(groupChatsDashboard) { it ->
+                                items(items = groupChatsDashboard, key = {it.id}) { it ->
                                     groupcard(
                                         people = it.members,
                                         groupName = it.groupName,
@@ -691,7 +691,7 @@ fun testViewGroup(navController: NavHostController) {
                                     )
                                 }
                             } else {
-                                items(groupChatsDashboard) {
+                                items(items = groupChatsDashboard, key = {it.id}) {
                                     if (it.groupFocus == selectedOption.value) {
                                         groupcard(
                                             people = it.members,
@@ -726,7 +726,7 @@ fun testViewGroup(navController: NavHostController) {
                             }
                         } else if (inputTextDashGroup.value != "") {
                             if (selectedOption.value == "All Posts") {
-                                items(groupChatsDashboard) {
+                                items(items = groupChatsDashboard, key = {it.id}) {
                                     if (it.groupName.lowercase()
                                             .contains(inputTextDashGroup.value.lowercase()) || it.id.lowercase()
                                             .contains(inputTextDashGroup.value.lowercase())
@@ -761,7 +761,7 @@ fun testViewGroup(navController: NavHostController) {
                                     }
                                 }
                             } else {
-                                items(groupChatsDashboard) {
+                                items(items = groupChatsDashboard, key = {it.id}) {
                                     if (it.groupFocus == selectedOption.value) {
                                         if (it.groupName.lowercase()
                                                 .contains(inputTextDashGroup.value.lowercase()) || it.id.lowercase()

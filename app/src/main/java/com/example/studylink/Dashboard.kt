@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.alexstyl.swipeablecard.Direction
 import com.alexstyl.swipeablecard.ExperimentalSwipeableCardApi
@@ -356,15 +357,22 @@ fun UserCard (modifier: Modifier = Modifier, prof: ProfileFirestore, navControll
                         .fillMaxWidth()
                 ) {
                     Column {
-                        Image(
-                            painter = rememberAsyncImagePainter(prof.imageURL),
-                            contentDescription = prof.fullName,
+                        AsyncImage(model = prof.imageURL, contentDescription = null,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight(0.7f),
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.7f),
                             alignment = Alignment.Center,
-                            ContentScale.Crop
-                        )
+                            contentScale = ContentScale.Crop
+                            )
+//                        Image(
+//                            painter = rememberAsyncImagePainter(prof.imageURL),
+//                            contentDescription = prof.fullName,
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .fillMaxHeight(0.7f),
+//                            alignment = Alignment.Center,
+//                            ContentScale.Crop
+//                        )
                         Text(
                             text = prof.fullName,
                             color = headText,
